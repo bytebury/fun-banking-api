@@ -1,0 +1,25 @@
+# Ignore compiled binary files
+*.exe
+*.out
+*.app
+*.o
+
+# Ignore any Go binary
+/bin/
+/pkg/
+
+# Ignore all files in the vendor directory
+/vendor/
+
+# Ignore any logs
+*.log
+
+# Ignore macOS system files
+.DS_Store
+
+# Ignore configuration files
+*.env
+
+# Ignore Go module cache and dependencies
+/go.sum
+/go.mod
