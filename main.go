@@ -40,6 +40,8 @@ func runMigrations() {
 	database.DB.AutoMigrate(&models.User{})
 	database.DB.AutoMigrate(&models.Bank{})
 	database.DB.AutoMigrate(&models.Customer{})
+	database.DB.AutoMigrate(&models.Account{})
+	database.DB.AutoMigrate(&models.MoneyTransfer{})
 }
 
 func setupConfigs() {
