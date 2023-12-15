@@ -6,6 +6,7 @@ type User struct {
 	Email     string `json:"email" gorm:"unique;not null"`
 	FirstName string `json:"first_name" gorm:"not null;size:15"`
 	LastName  string `json:"last_name" gorm:"not null;size:20"`
+	Avatar    string `json:"avatar" gorm:"not null;default:https://www.gravatar.com/avatar/2533c61da0bd2b79b63fd599cd045a31?default=https%3A%2F%2Fcloud.digitalocean.com%2Favatars%2Fdefault30.png&secure=true"`
 	Password  string `json:"-"`
 }
 
@@ -15,6 +16,7 @@ type UserRequest struct {
 	FirstName string `json:"first_name"`
 	LastName  string `json:"last_name"`
 	Password  string `json:"password"`
+	Avatar    string `json:"avatar"`
 }
 
 type LoginRequest struct {

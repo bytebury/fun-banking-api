@@ -1,7 +1,7 @@
 package config
 
 const (
-	AppName    = "Golfer"
+	AppName    = "Fun Banking"
 	AppVersion = "1.0.0"
 )
 
