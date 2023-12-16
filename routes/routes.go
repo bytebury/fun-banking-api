@@ -11,12 +11,14 @@ import (
 )
 
 var userService services.UserService
+var bankService services.BankService
 var jwtService services.JwtService
 var passwordService services.PasswordService
 
 func setupServices() {
 	jwtService = services.JwtService{}
 	userService = *services.NewUserService(*repositories.NewUserRepository(), jwtService)
+	bankService = *services.NewBankService(*repositories.NewBankRepository())
 	passwordService = *services.NewPasswordService(userService, jwtService, *mailers.NewPasswordResetMailer())
 }
 
@@ -30,6 +32,7 @@ func SetupRoutes(router *gin.Engine) {
 	setupAuthRoutes(router)
 	setupUserRoutes(router)
 	setupPasswordRoutes(router)
+	setupBankRoutes(router)
 }
 
 /**
@@ -48,6 +51,19 @@ func setupUserRoutes(router *gin.Engine) {
 		GET(":id", controller.FindByID).
 		PUT(":id", middleware.AuthMiddleware(), controller.Update).
 		POST("", controller.Create).
+		DELETE(":id", middleware.AuthMiddleware(), controller.Delete)
+}
+
+/**
+ * Sets up the bank routes at `/banks`.
+ */
+func setupBankRoutes(router *gin.Engine) {
+	controller := controllers.NewBankController(bankService)
+	router.Group("/banks").
+		GET(":id", controller.FindByID).
+		GET("", middleware.AuthMiddleware(), controller.Search).
+		PUT(":id", middleware.AuthMiddleware(), controller.Update).
+		POST("", middleware.AuthMiddleware(), controller.Create).
 		DELETE(":id", middleware.AuthMiddleware(), controller.Delete)
 }
 
