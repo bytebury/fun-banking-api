@@ -19,6 +19,19 @@ func NewUserController(user services.UserService) *UserController {
 	}
 }
 
+func (controller UserController) FindCurrentUser(c *gin.Context) {
+	userID := c.MustGet("user_id").(string)
+	var user models.User
+	err := controller.user.FindByID(userID, &user)
+
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"message": "User not found"})
+		return
+	}
+
+	c.JSON(http.StatusOK, user)
+}
+
 func (handler UserController) FindByID(c *gin.Context) {
 	userID := c.Param("id")
 	var user models.User

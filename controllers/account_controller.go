@@ -9,11 +9,15 @@ import (
 )
 
 type AccountController struct {
-	service services.AccountService
+	service              services.AccountService
+	moneyTransferService services.MoneyTransferService
 }
 
-func NewAccountController(account services.AccountService) *AccountController {
-	return &AccountController{account}
+func NewAccountController(
+	account services.AccountService,
+	moneyTransferService services.MoneyTransferService,
+) *AccountController {
+	return &AccountController{account, moneyTransferService}
 }
 
 func (controller AccountController) FindByID(c *gin.Context) {
@@ -27,4 +31,21 @@ func (controller AccountController) FindByID(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, account)
+}
+
+func (controller AccountController) FindMoneyTransfers(c *gin.Context) {
+	accountID := c.Param("id")
+	var moneyTransfers []models.MoneyTransfer
+	err := controller.moneyTransferService.FindByAccount(accountID, &moneyTransfers)
+
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"message": "Account not found"})
+		return
+	}
+
+	if moneyTransfers == nil {
+		moneyTransfers = make([]models.MoneyTransfer, 0)
+	}
+
+	c.JSON(http.StatusOK, moneyTransfers)
 }

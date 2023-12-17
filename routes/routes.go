@@ -14,6 +14,7 @@ var userService services.UserService
 var bankService services.BankService
 var customerService services.CustomerService
 var accountService services.AccountService
+var moneyTransferService services.MoneyTransferService
 var jwtService services.JwtService
 var passwordService services.PasswordService
 
@@ -23,6 +24,7 @@ func setupServices() {
 	bankService = *services.NewBankService(*repositories.NewBankRepository())
 	customerService = *services.NewCustomerService(*repositories.NewCustomerRepository())
 	accountService = *services.NewAccountService(*repositories.NewAccountRepository())
+	moneyTransferService = *services.NewMoneyTransferService(*repositories.NewMoneyTransferRepository(), accountService)
 	passwordService = *services.NewPasswordService(userService, jwtService, *mailers.NewPasswordResetMailer())
 }
 
@@ -38,6 +40,8 @@ func SetupRoutes(router *gin.Engine) {
 	setupPasswordRoutes(router)
 	setupBankRoutes(router)
 	setupCustomerRoutes(router)
+	setupAccountRoutes(router)
+	setupMoneyTransferRoutes(router)
 }
 
 /**
@@ -53,7 +57,8 @@ func setupHealthCheckRoutes(router *gin.Engine) {
 func setupUserRoutes(router *gin.Engine) {
 	controller := controllers.NewUserController(userService)
 	router.Group("/users").
-		GET(":id", controller.FindByID).
+		GET("", middleware.AuthMiddleware(), controller.FindCurrentUser).
+		GET(":id", middleware.AuthMiddleware(), controller.FindByID).
 		PUT(":id", middleware.AuthMiddleware(), controller.Update).
 		POST("", controller.Create).
 		DELETE(":id", middleware.AuthMiddleware(), controller.Delete)
@@ -66,8 +71,8 @@ func setupBankRoutes(router *gin.Engine) {
 	controller := controllers.NewBankController(bankService)
 	router.Group("/banks").
 		GET("", middleware.AuthMiddleware(), controller.FindBanksByUserID).
-		GET(":id", controller.FindByID).
-		GET(":id/customers", controller.FindCustomers).
+		GET(":id", middleware.AuthMiddleware(), controller.FindByID).
+		GET(":id/customers", middleware.AuthMiddleware(), controller.FindCustomers).
 		PUT(":id", middleware.AuthMiddleware(), controller.Update).
 		POST("", middleware.AuthMiddleware(), controller.Create).
 		DELETE(":id", middleware.AuthMiddleware(), controller.Delete)
@@ -79,11 +84,29 @@ func setupBankRoutes(router *gin.Engine) {
 func setupCustomerRoutes(router *gin.Engine) {
 	controller := controllers.NewCustomerController(customerService, bankService, accountService)
 	router.Group("/customers").
-		GET(":id", controller.FindByID).
-		GET(":id/accounts", controller.FindAllAccounts).
+		GET(":id", middleware.AuthMiddleware(), controller.FindByID).
+		GET(":id/accounts", middleware.AuthMiddleware(), controller.FindAllAccounts).
 		PUT(":id", middleware.AuthMiddleware(), controller.Update).
 		POST("", middleware.AuthMiddleware(), controller.Create).
 		DELETE(":id", middleware.AuthMiddleware(), controller.Delete)
+}
+
+/**
+ * Sets up the accounts routes at `/accounts`.
+ */
+func setupAccountRoutes(router *gin.Engine) {
+	controller := controllers.NewAccountController(accountService, moneyTransferService)
+	router.Group("/accounts").
+		GET(":id", middleware.AuthMiddleware(), controller.FindByID).
+		GET(":id/money-transfers", middleware.AuthMiddleware(), controller.FindMoneyTransfers)
+}
+
+func setupMoneyTransferRoutes(router *gin.Engine) {
+	controller := controllers.NewMoneyTransferController(moneyTransferService, accountService)
+	router.Group("/money-transfers").
+		POST("", controller.Create).
+		PUT(":id/approve", middleware.AuthMiddleware(), controller.Approve).
+		PUT(":id/decline", middleware.AuthMiddleware(), controller.Decline)
 }
 
 /**
