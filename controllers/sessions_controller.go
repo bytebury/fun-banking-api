@@ -29,7 +29,7 @@ func (controller *SessionsController) Login(c *gin.Context) {
 	token, user, err := controller.userService.Login(request)
 
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"message": "An error occurred, please try again."})
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "Invalid credentials"})
 		return
 	}
 
