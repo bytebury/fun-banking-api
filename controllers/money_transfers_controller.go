@@ -52,6 +52,7 @@ func (controller MoneyTransferController) Create(c *gin.Context) {
 	c.JSON(http.StatusCreated, moneyTransfer)
 }
 
+// TODO: CANNOT APPROVE TRANSACTIONS UNLESS IT IS YOUR BANK
 func (controller MoneyTransferController) Approve(c *gin.Context) {
 	userID := c.MustGet("user_id").(string)
 	moneyTransferID := c.Param("id")
@@ -66,6 +67,7 @@ func (controller MoneyTransferController) Approve(c *gin.Context) {
 	c.JSON(http.StatusOK, transfer)
 }
 
+// TODO: CANNOT DECLINE TRANSACTIONS UNLESS IT IS YOUR BANK
 func (controller MoneyTransferController) Decline(c *gin.Context) {
 	userID := c.MustGet("user_id").(string)
 	moneyTransferID := c.Param("id")
@@ -78,5 +80,4 @@ func (controller MoneyTransferController) Decline(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, transfer)
-
 }

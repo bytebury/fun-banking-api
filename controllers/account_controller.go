@@ -8,6 +8,8 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// TODO: SHOULD ONLY SEE ACCOUNTS THAT ARE A PART OF BANKS THAT YOU OWN!
+
 type AccountController struct {
 	service              services.AccountService
 	moneyTransferService services.MoneyTransferService

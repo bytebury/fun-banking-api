@@ -18,6 +18,8 @@ func NewBankController(bank services.BankService) *BankController {
 	return &BankController{bank}
 }
 
+// TODO: YOU CAN'T VIEW OTHER PEOPLE'S BANKS!
+
 func (controller BankController) FindByID(c *gin.Context) {
 	bankID := c.Param("id")
 	var bank models.Bank

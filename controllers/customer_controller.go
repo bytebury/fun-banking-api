@@ -24,6 +24,7 @@ func NewCustomerController(
 	return &CustomerController{customer, bankService, accountService}
 }
 
+// TODO: YOU SHOULDN'T BE ABLE TO LOOK UP CUSTOMERS IF THEY AREN'T IN A BANK YOU OWN!
 func (controller CustomerController) FindByID(c *gin.Context) {
 	customerID := c.Param("id")
 	var customer models.Customer
