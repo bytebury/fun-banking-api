@@ -31,13 +31,18 @@ func (controller BankController) FindByID(c *gin.Context) {
 	c.JSON(http.StatusOK, bank)
 }
 
-func (controller BankController) Search(c *gin.Context) {
+func (controller BankController) FindBanksByUserID(c *gin.Context) {
 	var banks []models.Bank
-	err := controller.bank.Search(c, &banks)
+	userID := c.MustGet("user_id").(string)
+	err := controller.bank.FindBanksByUserID(userID, &banks)
 
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"message": "Something went wrong"})
+		c.JSON(http.StatusNotFound, gin.H{"message": "No banks found"})
 		return
+	}
+
+	if banks == nil {
+		banks = make([]models.Bank, 0)
 	}
 
 	c.JSON(http.StatusOK, banks)
@@ -47,6 +52,11 @@ func (controller BankController) Create(c *gin.Context) {
 	var bank models.Bank
 
 	if err := c.ShouldBindJSON(&bank); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "Bad request"})
+		return
+	}
+
+	if bank.Name == "" || bank.Slug == "" || bank.Description == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"message": "Bad request"})
 		return
 	}
@@ -132,6 +142,24 @@ func (controller BankController) Delete(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusNoContent, nil)
+}
+
+func (controller BankController) FindCustomers(c *gin.Context) {
+	bankID := c.Param("id")
+	var customers []models.Customer
+
+	err := controller.bank.FindCustomers(bankID, &customers)
+
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"message": "Error retrieving customers"})
+		return
+	}
+
+	if customers == nil {
+		customers = make([]models.Customer, 0)
+	}
+
+	c.JSON(http.StatusOK, customers)
 }
 
 /**

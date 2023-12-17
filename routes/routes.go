@@ -12,6 +12,8 @@ import (
 
 var userService services.UserService
 var bankService services.BankService
+var customerService services.CustomerService
+var accountService services.AccountService
 var jwtService services.JwtService
 var passwordService services.PasswordService
 
@@ -19,6 +21,8 @@ func setupServices() {
 	jwtService = services.JwtService{}
 	userService = *services.NewUserService(*repositories.NewUserRepository(), jwtService)
 	bankService = *services.NewBankService(*repositories.NewBankRepository())
+	customerService = *services.NewCustomerService(*repositories.NewCustomerRepository())
+	accountService = *services.NewAccountService(*repositories.NewAccountRepository())
 	passwordService = *services.NewPasswordService(userService, jwtService, *mailers.NewPasswordResetMailer())
 }
 
@@ -33,6 +37,7 @@ func SetupRoutes(router *gin.Engine) {
 	setupUserRoutes(router)
 	setupPasswordRoutes(router)
 	setupBankRoutes(router)
+	setupCustomerRoutes(router)
 }
 
 /**
@@ -60,8 +65,22 @@ func setupUserRoutes(router *gin.Engine) {
 func setupBankRoutes(router *gin.Engine) {
 	controller := controllers.NewBankController(bankService)
 	router.Group("/banks").
+		GET("", middleware.AuthMiddleware(), controller.FindBanksByUserID).
 		GET(":id", controller.FindByID).
-		GET("", middleware.AuthMiddleware(), controller.Search).
+		GET(":id/customers", controller.FindCustomers).
+		PUT(":id", middleware.AuthMiddleware(), controller.Update).
+		POST("", middleware.AuthMiddleware(), controller.Create).
+		DELETE(":id", middleware.AuthMiddleware(), controller.Delete)
+}
+
+/**
+ * Sets up the customer routes at `/customers`.
+ */
+func setupCustomerRoutes(router *gin.Engine) {
+	controller := controllers.NewCustomerController(customerService, bankService, accountService)
+	router.Group("/customers").
+		GET(":id", controller.FindByID).
+		GET(":id/accounts", controller.FindAllAccounts).
 		PUT(":id", middleware.AuthMiddleware(), controller.Update).
 		POST("", middleware.AuthMiddleware(), controller.Create).
 		DELETE(":id", middleware.AuthMiddleware(), controller.Delete)

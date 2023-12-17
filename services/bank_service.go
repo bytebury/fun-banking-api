@@ -3,8 +3,7 @@ package services
 import (
 	"golfer/models"
 	"golfer/repositories"
-
-	"github.com/gin-gonic/gin"
+	"strings"
 )
 
 type BankService struct {
@@ -18,6 +17,7 @@ func NewBankService(bankRepository repositories.BankRepository) *BankService {
 }
 
 func (service BankService) Create(request *models.Bank) error {
+	request.Slug = strings.ToLower(request.Slug)
 	return service.bankRepository.Create(request)
 }
 
@@ -25,8 +25,12 @@ func (service BankService) FindByID(bankID string, bank *models.Bank) error {
 	return service.bankRepository.FindByID(bankID, bank)
 }
 
-func (service BankService) Search(c *gin.Context, banks *[]models.Bank) error {
-	return service.bankRepository.Search(c, banks)
+func (service BankService) FindBanksByUserID(userID string, banks *[]models.Bank) error {
+	return service.bankRepository.FindBanksByUserID(userID, banks)
+}
+
+func (service BankService) FindCustomers(bankID string, customers *[]models.Customer) error {
+	return service.bankRepository.FindCustomers(bankID, customers)
 }
 
 func (service BankService) Update(bankID string, request *models.Bank) (models.Bank, error) {
@@ -37,7 +41,7 @@ func (service BankService) Update(bankID string, request *models.Bank) (models.B
 	}
 
 	if request.Slug != "" {
-		bank.Slug = request.Slug
+		bank.Slug = strings.ToLower(request.Slug)
 	}
 
 	if request.Name != "" {
