@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"fmt"
 	"golfer/models"
 	"golfer/services"
 	"net/http"
@@ -84,7 +85,7 @@ func (controller CustomerController) Create(c *gin.Context) {
 	}
 
 	err = controller.accountService.Create(&models.Account{
-		Name:       "Checkings",
+		Name:       fmt.Sprintf("%s's checkings", strings.ToLower(customer.FirstName)),
 		Balance:    float64(0),
 		CustomerID: customer.ID,
 	})
