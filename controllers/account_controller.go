@@ -38,7 +38,7 @@ func (controller AccountController) FindByID(c *gin.Context) {
 func (controller AccountController) FindMoneyTransfers(c *gin.Context) {
 	accountID := c.Param("id")
 	var moneyTransfers []models.MoneyTransfer
-	err := controller.moneyTransferService.FindByAccount(accountID, &moneyTransfers)
+	err := controller.moneyTransferService.FindByAccount(accountID, &moneyTransfers, c)
 
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"message": "Account not found"})

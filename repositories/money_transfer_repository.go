@@ -4,6 +4,7 @@ import (
 	"golfer/database"
 	"golfer/models"
 
+	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 )
 
@@ -25,8 +26,17 @@ func (repository MoneyTransferRepository) FindByID(moneyTransferID string, money
 	return repository.db.Preload("Account").First(&moneyTransfer, moneyTransferID).Error
 }
 
-func (repository MoneyTransferRepository) FindByAccount(accountID string, moneyTransfers *[]models.MoneyTransfer) error {
-	return repository.db.Preload("User").Find(&moneyTransfers, "account_id = ?", accountID).Error
+func (repository MoneyTransferRepository) FindByAccount(accountID string, moneyTransfers *[]models.MoneyTransfer, c *gin.Context) error {
+	statuses := c.QueryArray("status")
+
+	query := repository.db.Preload("User")
+	query = query.Where("account_id = ?", accountID)
+
+	if len(statuses) > 0 {
+		query = query.Where("status IN ?", statuses)
+	}
+
+	return query.Order("updated_at DESC").Find(&moneyTransfers).Error
 }
 
 func (repository MoneyTransferRepository) Update(moneyTransfer *models.MoneyTransfer) error {

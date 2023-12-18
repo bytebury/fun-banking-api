@@ -4,6 +4,8 @@ import (
 	"golfer/models"
 	"golfer/repositories"
 	"strconv"
+
+	"github.com/gin-gonic/gin"
 )
 
 type MoneyTransferService struct {
@@ -29,8 +31,8 @@ func (service MoneyTransferService) FindByID(moneyTransferID string, moneyTransf
 	return service.repository.FindByID(moneyTransferID, moneyTransfer)
 }
 
-func (service MoneyTransferService) FindByAccount(accountID string, moneyTransfers *[]models.MoneyTransfer) error {
-	return service.repository.FindByAccount(accountID, moneyTransfers)
+func (service MoneyTransferService) FindByAccount(accountID string, moneyTransfers *[]models.MoneyTransfer, c *gin.Context) error {
+	return service.repository.FindByAccount(accountID, moneyTransfers, c)
 }
 
 func (service MoneyTransferService) Approve(moneyTransferID, userID string) (models.MoneyTransfer, error) {
@@ -44,6 +46,7 @@ func (service MoneyTransferService) Approve(moneyTransferID, userID string) (mod
 
 	moneyTransfer.Status = "approved"
 	moneyTransfer.UserID = currentUserID
+	moneyTransfer.CurrentBalance = moneyTransfer.Account.Balance + float64(moneyTransfer.Amount)
 
 	if err := service.repository.Update(&moneyTransfer); err != nil {
 		return moneyTransfer, err
@@ -51,7 +54,7 @@ func (service MoneyTransferService) Approve(moneyTransferID, userID string) (mod
 
 	service.accountService.UpdateBalance(
 		strconv.Itoa((int(moneyTransfer.AccountID))),
-		moneyTransfer.Account.Balance+float64(moneyTransfer.Amount))
+		moneyTransfer.CurrentBalance)
 
 	return moneyTransfer, nil
 }
