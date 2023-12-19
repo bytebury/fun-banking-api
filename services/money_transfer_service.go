@@ -11,20 +11,35 @@ import (
 type MoneyTransferService struct {
 	repository     repositories.MoneyTransferRepository
 	accountService AccountService
+	userService    UserService
 }
 
 func NewMoneyTransferService(
 	repository repositories.MoneyTransferRepository,
 	accountService AccountService,
+	userService UserService,
 ) *MoneyTransferService {
 	return &MoneyTransferService{
 		repository,
 		accountService,
+		userService,
 	}
 }
 
-func (service MoneyTransferService) Create(request *models.MoneyTransfer) error {
-	return service.repository.Create(request)
+func (service MoneyTransferService) Create(request *models.MoneyTransfer, userID string) error {
+	if err := service.repository.Create(request); err != nil {
+		return err
+	}
+
+	accountID := strconv.Itoa(int(request.AccountID))
+	requestID := strconv.Itoa(int(request.ID))
+
+	if !service.isBankStaff(accountID, userID) {
+		return nil
+	}
+
+	_, err := service.Approve(requestID, userID)
+	return err
 }
 
 func (service MoneyTransferService) FindByID(moneyTransferID string, moneyTransfer *models.MoneyTransfer) error {
@@ -76,6 +91,21 @@ func (service MoneyTransferService) Decline(moneyTransferID, userID string) (mod
 	}
 
 	return moneyTransfer, nil
+}
+
+func (service MoneyTransferService) isBankStaff(accountId, userId string) bool {
+	var user models.User
+
+	if err := service.userService.FindByID(userId, &user); err != nil {
+		return false
+	}
+
+	var account models.Account
+	if err := service.accountService.FindByID(accountId, &account); err != nil {
+		return false
+	}
+
+	return account.Customer.Bank.UserID == user.ID
 }
 
 func stringToUintPtr(s string) (*uint, error) {

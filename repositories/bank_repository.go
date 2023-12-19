@@ -30,7 +30,7 @@ func (repository BankRepository) FindByID(bankID string, bank *models.Bank) erro
 }
 
 func (repository BankRepository) FindCustomers(bankID string, customers *[]models.Customer) error {
-	return repository.db.Preload("Accounts").Find(&customers, "bank_id = ?", bankID).Error
+	return repository.db.Preload("Accounts").Order("last_name ASC, first_name ASC").Find(&customers, "bank_id = ?", bankID).Error
 }
 
 func (repository BankRepository) Update(bank *models.Bank) error {

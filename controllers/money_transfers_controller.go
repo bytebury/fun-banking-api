@@ -23,6 +23,7 @@ func NewMoneyTransferController(
 
 func (controller MoneyTransferController) Create(c *gin.Context) {
 	var moneyTransfer models.MoneyTransfer
+	userID := c.GetString("user_id")
 
 	if err := c.ShouldBindJSON(&moneyTransfer); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"message": "Bad request"})
@@ -42,7 +43,7 @@ func (controller MoneyTransferController) Create(c *gin.Context) {
 
 	moneyTransfer.CurrentBalance = account.Balance
 
-	err := controller.service.Create(&moneyTransfer)
+	err := controller.service.Create(&moneyTransfer, userID)
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": "Something went wrong creating your transfer"})

@@ -24,7 +24,7 @@ func setupServices() {
 	bankService = *services.NewBankService(*repositories.NewBankRepository())
 	customerService = *services.NewCustomerService(*repositories.NewCustomerRepository())
 	accountService = *services.NewAccountService(*repositories.NewAccountRepository())
-	moneyTransferService = *services.NewMoneyTransferService(*repositories.NewMoneyTransferRepository(), accountService)
+	moneyTransferService = *services.NewMoneyTransferService(*repositories.NewMoneyTransferRepository(), accountService, userService)
 	passwordService = *services.NewPasswordService(userService, jwtService, *mailers.NewPasswordResetMailer())
 }
 
@@ -57,11 +57,11 @@ func setupHealthCheckRoutes(router *gin.Engine) {
 func setupUserRoutes(router *gin.Engine) {
 	controller := controllers.NewUserController(userService)
 	router.Group("/users").
-		GET("", middleware.AuthMiddleware(), controller.FindCurrentUser).
-		GET(":id", middleware.AuthMiddleware(), controller.FindByID).
-		PUT(":id", middleware.AuthMiddleware(), controller.Update).
+		GET("", middleware.Auth(), controller.FindCurrentUser).
+		GET(":id", middleware.Auth(), controller.FindByID).
+		PUT(":id", middleware.Auth(), controller.Update).
 		POST("", controller.Create).
-		DELETE(":id", middleware.AuthMiddleware(), controller.Delete)
+		DELETE(":id", middleware.Auth(), controller.Delete)
 }
 
 /**
@@ -70,12 +70,12 @@ func setupUserRoutes(router *gin.Engine) {
 func setupBankRoutes(router *gin.Engine) {
 	controller := controllers.NewBankController(bankService)
 	router.Group("/banks").
-		GET("", middleware.AuthMiddleware(), controller.FindBanksByUserID).
-		GET(":id", middleware.AuthMiddleware(), controller.FindByID).
-		GET(":id/customers", middleware.AuthMiddleware(), controller.FindCustomers).
-		PUT(":id", middleware.AuthMiddleware(), controller.Update).
-		POST("", middleware.AuthMiddleware(), controller.Create).
-		DELETE(":id", middleware.AuthMiddleware(), controller.Delete)
+		GET("", middleware.Auth(), controller.FindBanksByUserID).
+		GET(":id", middleware.Auth(), controller.FindByID).
+		GET(":id/customers", middleware.Auth(), controller.FindCustomers).
+		PUT(":id", middleware.Auth(), controller.Update).
+		POST("", middleware.Auth(), controller.Create).
+		DELETE(":id", middleware.Auth(), controller.Delete)
 }
 
 /**
@@ -84,11 +84,11 @@ func setupBankRoutes(router *gin.Engine) {
 func setupCustomerRoutes(router *gin.Engine) {
 	controller := controllers.NewCustomerController(customerService, bankService, accountService)
 	router.Group("/customers").
-		GET(":id", middleware.AuthMiddleware(), controller.FindByID).
-		GET(":id/accounts", middleware.AuthMiddleware(), controller.FindAllAccounts).
-		PUT(":id", middleware.AuthMiddleware(), controller.Update).
-		POST("", middleware.AuthMiddleware(), controller.Create).
-		DELETE(":id", middleware.AuthMiddleware(), controller.Delete)
+		GET(":id", middleware.Auth(), controller.FindByID).
+		GET(":id/accounts", middleware.Auth(), controller.FindAllAccounts).
+		PUT(":id", middleware.Auth(), controller.Update).
+		POST("", middleware.Auth(), controller.Create).
+		DELETE(":id", middleware.Auth(), controller.Delete)
 }
 
 /**
@@ -97,16 +97,16 @@ func setupCustomerRoutes(router *gin.Engine) {
 func setupAccountRoutes(router *gin.Engine) {
 	controller := controllers.NewAccountController(accountService, moneyTransferService)
 	router.Group("/accounts").
-		GET(":id", middleware.AuthMiddleware(), controller.FindByID).
-		GET(":id/money-transfers", middleware.AuthMiddleware(), controller.FindMoneyTransfers)
+		GET(":id", middleware.Auth(), controller.FindByID).
+		GET(":id/money-transfers", middleware.Auth(), controller.FindMoneyTransfers)
 }
 
 func setupMoneyTransferRoutes(router *gin.Engine) {
 	controller := controllers.NewMoneyTransferController(moneyTransferService, accountService)
 	router.Group("/money-transfers").
-		POST("", controller.Create).
-		PUT(":id/approve", middleware.AuthMiddleware(), controller.Approve).
-		PUT(":id/decline", middleware.AuthMiddleware(), controller.Decline)
+		POST("", middleware.Audit(), controller.Create).
+		PUT(":id/approve", middleware.Auth(), controller.Approve).
+		PUT(":id/decline", middleware.Auth(), controller.Decline)
 }
 
 /**
