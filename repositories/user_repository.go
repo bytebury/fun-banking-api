@@ -29,6 +29,10 @@ func (repository UserRepository) FindByEmail(email string, user *models.User) er
 	return repository.db.First(&user, "email = ?", email).Error
 }
 
+func (repository UserRepository) FindByUsername(username string, user *models.User) error {
+	return repository.db.First(&user, "username = ?", username).Error
+}
+
 func (repository UserRepository) Update(user *models.User) error {
 	return repository.db.Save(&user).Error
 }

@@ -58,7 +58,7 @@ func setupUserRoutes(router *gin.Engine) {
 	controller := controllers.NewUserController(userService)
 	router.Group("/users").
 		GET("", middleware.Auth(), controller.FindCurrentUser).
-		GET(":id", middleware.Auth(), controller.FindByID).
+		GET(":username", middleware.Auth(), controller.FindByUsername).
 		PUT(":id", middleware.Auth(), controller.Update).
 		POST("", controller.Create).
 		DELETE(":id", middleware.Auth(), controller.Delete)

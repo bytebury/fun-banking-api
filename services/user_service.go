@@ -47,6 +47,10 @@ func (service UserService) FindByEmail(email string, user *models.User) error {
 	return service.userRepository.FindByEmail(strings.ToLower(email), user)
 }
 
+func (service UserService) FindByUsername(username string, user *models.User) error {
+	return service.userRepository.FindByUsername(strings.ToLower(username), user)
+}
+
 func (service UserService) Update(userID string, request *models.UserRequest) (models.User, error) {
 	var user models.User
 

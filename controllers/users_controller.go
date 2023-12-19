@@ -34,10 +34,21 @@ func (controller UserController) FindCurrentUser(c *gin.Context) {
 
 func (handler UserController) FindByID(c *gin.Context) {
 	userID := c.Param("id")
-	var user models.User
-	err := handler.user.FindByID(userID, &user)
 
-	if err != nil {
+	var user models.User
+	if err := handler.user.FindByID(userID, &user); err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"message": "User not found"})
+		return
+	}
+
+	c.JSON(http.StatusOK, user)
+}
+
+func (handler UserController) FindByUsername(c *gin.Context) {
+	username := c.Param("username")
+
+	var user models.User
+	if err := handler.user.FindByUsername(username, &user); err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"message": "User not found"})
 		return
 	}
