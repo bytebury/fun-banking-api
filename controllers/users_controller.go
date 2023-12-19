@@ -50,7 +50,7 @@ func (handler UserController) Update(c *gin.Context) {
 	userID := c.Param("id")
 
 	if !handler.canModify(c) {
-		c.JSON(http.StatusForbidden, gin.H{"message": "You don't have access to that resource"})
+		c.JSON(http.StatusForbidden, gin.H{"message": "You don't have access to that"})
 		return
 	}
 
@@ -116,7 +116,7 @@ func (handler UserController) Delete(c *gin.Context) {
 	userID := c.Param("id")
 
 	if !handler.canModify(c) {
-		c.JSON(http.StatusForbidden, gin.H{"message": "You don't have access to that resource"})
+		c.JSON(http.StatusForbidden, gin.H{"message": "You don't have access to that"})
 		return
 	}
 
@@ -137,6 +137,5 @@ func (handler UserController) Delete(c *gin.Context) {
 func (handler UserController) canModify(c *gin.Context) bool {
 	userID := c.Param("id")
 	currentUserID := c.MustGet("user_id").(string)
-
 	return userID == currentUserID
 }

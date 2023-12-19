@@ -18,15 +18,17 @@ func NewBankController(bank services.BankService) *BankController {
 	return &BankController{bank}
 }
 
-// TODO: YOU CAN'T VIEW OTHER PEOPLE'S BANKS!
-
 func (controller BankController) FindByID(c *gin.Context) {
 	bankID := c.Param("id")
-	var bank models.Bank
-	err := controller.bank.FindByID(bankID, &bank)
 
-	if err != nil {
+	var bank models.Bank
+	if err := controller.bank.FindByID(bankID, &bank); err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"message": "Bank not found"})
+		return
+	}
+
+	if !controller.isBankOwner(c) {
+		c.JSON(http.StatusForbidden, gin.H{"message": "You don't have access to that"})
 		return
 	}
 
@@ -98,8 +100,8 @@ func (controller BankController) Update(c *gin.Context) {
 	var request models.Bank
 	bankID := c.Param("id")
 
-	if !controller.canModify(c) {
-		c.JSON(http.StatusForbidden, gin.H{"message": "You don't have access to that resource"})
+	if !controller.isBankOwner(c) {
+		c.JSON(http.StatusForbidden, gin.H{"message": "You don't have access to that"})
 		return
 	}
 
@@ -133,8 +135,8 @@ func (controller BankController) Update(c *gin.Context) {
 func (controller BankController) Delete(c *gin.Context) {
 	bankID := c.Param("id")
 
-	if !controller.canModify(c) {
-		c.JSON(http.StatusForbidden, gin.H{"message": "You don't have access to that resource"})
+	if !controller.isBankOwner(c) {
+		c.JSON(http.StatusForbidden, gin.H{"message": "You don't have access to that"})
 		return
 	}
 
@@ -167,17 +169,16 @@ func (controller BankController) FindCustomers(c *gin.Context) {
 /**
  * Determines if the current user can modify the given bank in context.
  */
-func (controller BankController) canModify(c *gin.Context) bool {
+func (controller BankController) isBankOwner(c *gin.Context) bool {
 	bankID := c.Param("id")
+	currentUserID := c.MustGet("user_id").(string)
+
 	var bank models.Bank
-
-	err := controller.bank.FindByID(bankID, &bank)
-
-	if err != nil {
+	if err := controller.bank.FindByID(bankID, &bank); err != nil {
 		return false
 	}
 
-	ownerId := strconv.Itoa(int(bank.User.ID))
-	currentUserID := c.MustGet("user_id").(string)
-	return ownerId == currentUserID
+	ownerID := strconv.Itoa(int(bank.User.ID))
+
+	return ownerID == currentUserID
 }

@@ -22,7 +22,7 @@ func (repository CustomerRepository) Create(customer *models.Customer) error {
 }
 
 func (repository CustomerRepository) FindByID(customerID string, customer *models.Customer) error {
-	return repository.db.Preload("Bank").First(&customer, customerID).Error
+	return repository.db.Preload("Bank").Preload("Bank.User").First(&customer, customerID).Error
 }
 
 func (repository CustomerRepository) Update(customer *models.Customer) error {

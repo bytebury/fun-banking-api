@@ -53,10 +53,14 @@ func (controller MoneyTransferController) Create(c *gin.Context) {
 	c.JSON(http.StatusCreated, moneyTransfer)
 }
 
-// TODO: CANNOT APPROVE TRANSACTIONS UNLESS IT IS YOUR BANK
 func (controller MoneyTransferController) Approve(c *gin.Context) {
 	userID := c.MustGet("user_id").(string)
 	moneyTransferID := c.Param("id")
+
+	if !controller.isBankStaff(moneyTransferID, c) {
+		c.JSON(http.StatusForbidden, gin.H{"message": "You don't have access to that"})
+		return
+	}
 
 	transfer, err := controller.service.Approve(moneyTransferID, userID)
 
@@ -68,10 +72,14 @@ func (controller MoneyTransferController) Approve(c *gin.Context) {
 	c.JSON(http.StatusOK, transfer)
 }
 
-// TODO: CANNOT DECLINE TRANSACTIONS UNLESS IT IS YOUR BANK
 func (controller MoneyTransferController) Decline(c *gin.Context) {
 	userID := c.MustGet("user_id").(string)
 	moneyTransferID := c.Param("id")
+
+	if !controller.isBankStaff(moneyTransferID, c) {
+		c.JSON(http.StatusForbidden, gin.H{"message": "You don't have access to that"})
+		return
+	}
 
 	transfer, err := controller.service.Decline(moneyTransferID, userID)
 
@@ -81,4 +89,15 @@ func (controller MoneyTransferController) Decline(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, transfer)
+}
+
+func (controller MoneyTransferController) isBankStaff(transferID string, c *gin.Context) bool {
+	userID := c.MustGet("user_id").(string)
+
+	var transfer models.MoneyTransfer
+	if err := controller.service.FindByID(transferID, &transfer); err != nil {
+		return false
+	}
+
+	return strconv.Itoa(int(transfer.Account.Customer.Bank.UserID)) == userID
 }

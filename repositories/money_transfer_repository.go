@@ -23,7 +23,7 @@ func (repository MoneyTransferRepository) Create(moneyTransfer *models.MoneyTran
 }
 
 func (repository MoneyTransferRepository) FindByID(moneyTransferID string, moneyTransfer *models.MoneyTransfer) error {
-	return repository.db.Preload("Account").First(&moneyTransfer, moneyTransferID).Error
+	return repository.db.Preload("Account").Preload("Account.Customer").Preload("Account.Customer.Bank").First(&moneyTransfer, moneyTransferID).Error
 }
 
 func (repository MoneyTransferRepository) FindByAccount(accountID string, moneyTransfers *[]models.MoneyTransfer, c *gin.Context) error {

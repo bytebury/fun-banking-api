@@ -65,7 +65,7 @@ func (controller CustomerController) Create(c *gin.Context) {
 		return
 	}
 
-	if !controller.canCreate(customer.BankID, c) {
+	if !controller.isBankStaff(customer, c) {
 		c.JSON(http.StatusForbidden, gin.H{"message": "You don't have access to that resource"})
 		return
 	}
@@ -102,13 +102,19 @@ func (controller CustomerController) Update(c *gin.Context) {
 	var request models.Customer
 	customerID := c.Param("id")
 
-	if !controller.canModify(c) {
-		c.JSON(http.StatusForbidden, gin.H{"message": "You don't have access to that resource"})
+	if err := c.ShouldBindJSON(&request); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "Bad request"})
 		return
 	}
 
-	if err := c.ShouldBindJSON(&request); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"message": "Bad request"})
+	var customer models.Customer
+	if err := controller.service.FindByID(customerID, &customer); err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"message": "Customer does not exist"})
+		return
+	}
+
+	if !controller.isBankStaff(customer, c) {
+		c.JSON(http.StatusForbidden, gin.H{"message": "You don't have access to that resource"})
 		return
 	}
 
@@ -137,7 +143,13 @@ func (controller CustomerController) Update(c *gin.Context) {
 func (controller CustomerController) Delete(c *gin.Context) {
 	customerID := c.Param("id")
 
-	if !controller.canModify(c) {
+	var customer models.Customer
+	if err := controller.service.FindByID(customerID, &customer); err != nil {
+		c.JSON(http.StatusForbidden, gin.H{"message": "That customer doesn't exist"})
+		return
+	}
+
+	if !controller.isBankStaff(customer, c) {
 		c.JSON(http.StatusForbidden, gin.H{"message": "You don't have access to that resource"})
 		return
 	}
@@ -150,34 +162,15 @@ func (controller CustomerController) Delete(c *gin.Context) {
 	c.JSON(http.StatusNoContent, nil)
 }
 
-/**
- * Determines if the current user can modify the given customer in context.
- */
-func (controller CustomerController) canModify(c *gin.Context) bool {
-	customerID := c.Param("id")
-	var customer models.Customer
-
-	err := controller.service.FindByID(customerID, &customer)
-
-	if err != nil {
-		return false
-	}
-
-	ownerId := strconv.Itoa(int(customer.Bank.UserID))
-	currentUserID := c.MustGet("user_id").(string)
-	return ownerId == currentUserID
-}
-
-func (controller CustomerController) canCreate(bankID uint, c *gin.Context) bool {
-	var bank models.Bank
-
-	if err := controller.bankService.FindByID(strconv.Itoa(int(bankID)), &bank); err != nil {
-		return false
-	}
-
+func (controller CustomerController) isBankStaff(customer models.Customer, c *gin.Context) bool {
 	userID, err := strconv.Atoi(c.MustGet("user_id").(string))
 
 	if err != nil {
+		return false
+	}
+
+	var bank models.Bank
+	if err := controller.bankService.FindByID(strconv.Itoa(int(customer.BankID)), &bank); err != nil {
 		return false
 	}
 
