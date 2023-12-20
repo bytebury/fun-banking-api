@@ -18,6 +18,7 @@ var moneyTransferService services.MoneyTransferService
 var healthService services.HealthService
 var jwtService services.JwtService
 var passwordService services.PasswordService
+var announcementService services.AnnouncementService
 
 func setupServices() {
 	jwtService = services.JwtService{}
@@ -28,6 +29,7 @@ func setupServices() {
 	moneyTransferService = *services.NewMoneyTransferService(*repositories.NewMoneyTransferRepository(), accountService, userService)
 	passwordService = *services.NewPasswordService(userService, jwtService, *mailers.NewPasswordResetMailer())
 	healthService = *services.NewHealthService(*repositories.NewHealthRepository())
+	announcementService = *services.NewAnnouncementService(*repositories.NewAnnouncementRepository())
 }
 
 /**
@@ -44,6 +46,7 @@ func SetupRoutes(router *gin.Engine) {
 	setupCustomerRoutes(router)
 	setupAccountRoutes(router)
 	setupMoneyTransferRoutes(router)
+	setupAnnouncementRoutes(router)
 }
 
 /**
@@ -52,6 +55,17 @@ func SetupRoutes(router *gin.Engine) {
 func setupHealthCheckRoutes(router *gin.Engine) {
 	controller := controllers.NewHealthController(healthService)
 	router.GET("/health", controller.GetHealthCheck)
+}
+
+func setupAnnouncementRoutes(router *gin.Engine) {
+	userRepository := repositories.NewUserRepository()
+	controller := controllers.NewAnnouncementController(announcementService)
+	router.Group("/announcements").
+		GET("", controller.Find).
+		GET(":id", controller.FindByID).
+		PUT(":id", middleware.Admin(*userRepository), controller.Update).
+		POST("", middleware.Admin(*userRepository), controller.Create).
+		DELETE(":id", middleware.Admin(*userRepository), controller.Delete)
 }
 
 /**
