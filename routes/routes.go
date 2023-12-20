@@ -15,6 +15,7 @@ var bankService services.BankService
 var customerService services.CustomerService
 var accountService services.AccountService
 var moneyTransferService services.MoneyTransferService
+var healthService services.HealthService
 var jwtService services.JwtService
 var passwordService services.PasswordService
 
@@ -26,6 +27,7 @@ func setupServices() {
 	accountService = *services.NewAccountService(*repositories.NewAccountRepository())
 	moneyTransferService = *services.NewMoneyTransferService(*repositories.NewMoneyTransferRepository(), accountService, userService)
 	passwordService = *services.NewPasswordService(userService, jwtService, *mailers.NewPasswordResetMailer())
+	healthService = *services.NewHealthService(*repositories.NewHealthRepository())
 }
 
 /**
@@ -48,7 +50,8 @@ func SetupRoutes(router *gin.Engine) {
  * Setups the health check route found at `/health`.
  */
 func setupHealthCheckRoutes(router *gin.Engine) {
-	router.GET("/health", controllers.GetHealthCheckController)
+	controller := controllers.NewHealthController(healthService)
+	router.GET("/health", controller.GetHealthCheck)
 }
 
 /**
