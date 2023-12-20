@@ -80,6 +80,10 @@ func (service UserService) Update(userID string, request *models.UserRequest) (m
 		user.About = request.About
 	}
 
+	if request.Avatar != "" {
+		user.Avatar = request.Avatar
+	}
+
 	if err := service.userRepository.Update(&user); err != nil {
 		return user, err
 	}
