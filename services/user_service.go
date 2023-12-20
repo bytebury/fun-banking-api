@@ -76,6 +76,10 @@ func (service UserService) Update(userID string, request *models.UserRequest) (m
 		user.LastName = request.LastName
 	}
 
+	if request.About != "" {
+		user.About = request.About
+	}
+
 	if err := service.userRepository.Update(&user); err != nil {
 		return user, err
 	}

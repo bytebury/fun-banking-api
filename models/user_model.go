@@ -19,6 +19,7 @@ type UserRequest struct {
 	LastName  string `json:"last_name"`
 	Password  string `json:"password"`
 	Avatar    string `json:"avatar"`
+	About     string `json:"about"`
 }
 
 type LoginRequest struct {
