@@ -69,7 +69,20 @@ func (controller AnnouncementController) FindByID(c *gin.Context) {
 }
 
 func (controller AnnouncementController) Update(c *gin.Context) {
-	c.JSON(http.StatusOK, gin.H{"message": "This is coming soon."})
+	announcementID := c.Param("id")
+
+	var updateAnnouncementRequest models.UpdateAnnouncementRequest
+	if err := c.ShouldBindJSON(&updateAnnouncementRequest); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "Bad request"})
+		return
+	}
+
+	if err := controller.announcementService.Update(announcementID, &updateAnnouncementRequest, c); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "Unable to update the announcemnet"})
+		return
+	}
+
+	c.JSON(http.StatusAccepted, gin.H{"message": "User updated"})
 }
 
 func (controller AnnouncementController) Delete(c *gin.Context) {
