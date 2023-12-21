@@ -52,6 +52,7 @@ func Audit() gin.HandlerFunc {
 
 		if tokenString == "" {
 			c.Next()
+			return
 		}
 
 		token, err := jwt.ParseWithClaims(tokenString, &services.UserClaims{}, func(token *jwt.Token) (interface{}, error) {

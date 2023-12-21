@@ -105,7 +105,8 @@ func setupCustomerRoutes(router *gin.Engine) {
 	controller := controllers.NewCustomerController(customerService, bankService, accountService)
 	router.Group("/customers").
 		GET(":id", middleware.Auth(), controller.FindByID).
-		GET(":id/accounts", middleware.Auth(), controller.FindAllAccounts).
+		// TODO: This needs to be audit once we do customer tokens!
+		GET(":id/accounts", middleware.Audit(), controller.FindAllAccounts).
 		PUT(":id", middleware.Auth(), controller.Update).
 		POST("", middleware.Auth(), controller.Create).
 		POST("signin", controller.Login).
@@ -116,10 +117,12 @@ func setupCustomerRoutes(router *gin.Engine) {
  * Sets up the accounts routes at `/accounts`.
  */
 func setupAccountRoutes(router *gin.Engine) {
+	// TODO: Need to lock this down once we do tokens for customers
+	//       E.g. it's Audit right now, we'll need it to be Auth
 	controller := controllers.NewAccountController(accountService, moneyTransferService)
 	router.Group("/accounts").
-		GET(":id", middleware.Auth(), controller.FindByID).
-		GET(":id/money-transfers", middleware.Auth(), controller.FindMoneyTransfers)
+		GET(":id", middleware.Audit(), controller.FindByID).
+		GET(":id/money-transfers", middleware.Audit(), controller.FindMoneyTransfers)
 }
 
 func setupMoneyTransferRoutes(router *gin.Engine) {

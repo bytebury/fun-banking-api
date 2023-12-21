@@ -22,7 +22,7 @@ func (repository UserRepository) Create(user *models.User) error {
 }
 
 func (repository UserRepository) FindByID(userID string, user *models.User) error {
-	return repository.db.First(&user, userID).Error
+	return repository.db.First(&user, "id = ?", userID).Error
 }
 
 func (repository UserRepository) FindByEmail(email string, user *models.User) error {

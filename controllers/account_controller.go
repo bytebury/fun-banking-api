@@ -30,10 +30,11 @@ func (controller AccountController) FindByID(c *gin.Context) {
 		return
 	}
 
-	if !controller.isBankStaff(account, c) {
-		c.JSON(http.StatusForbidden, gin.H{"message": "You don't have access to that resource"})
-		return
-	}
+	// TODO: Only that specific customer or bank staff can look accounts up.
+	// if !controller.isBankStaff(account, c) {
+	// 	c.JSON(http.StatusForbidden, gin.H{"message": "You don't have access to that resource"})
+	// 	return
+	// }
 
 	c.JSON(http.StatusOK, account)
 }
@@ -47,10 +48,11 @@ func (controller AccountController) FindMoneyTransfers(c *gin.Context) {
 		return
 	}
 
-	if !controller.isBankStaff(account, c) {
-		c.JSON(http.StatusForbidden, gin.H{"message": "You don't have access to that resource"})
-		return
-	}
+	// TODO: Only that specific customer or bank staff can look accounts up.
+	// if !controller.isBankStaff(account, c) {
+	// 	c.JSON(http.StatusForbidden, gin.H{"message": "You don't have access to that resource"})
+	// 	return
+	// }
 
 	var moneyTransfers []models.MoneyTransfer
 	if err := controller.moneyTransferService.FindByAccount(accountID, &moneyTransfers, c); err != nil {
@@ -66,6 +68,6 @@ func (controller AccountController) FindMoneyTransfers(c *gin.Context) {
 }
 
 func (controller AccountController) isBankStaff(account models.Account, c *gin.Context) bool {
-	userID := c.MustGet("user_id").(string)
+	userID := c.GetString("user_id")
 	return strconv.Itoa(int(account.Customer.Bank.UserID)) == userID
 }
