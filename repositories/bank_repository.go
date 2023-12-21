@@ -29,6 +29,14 @@ func (repository BankRepository) FindByID(bankID string, bank *models.Bank) erro
 	return repository.db.Preload("User").First(&bank, bankID).Error
 }
 
+func (repository BankRepository) FindByUsernameAndSlug(username, slug string, bank *models.Bank) error {
+	var user models.User
+	if err := repository.db.First(&user, "username = ?", username).Error; err != nil {
+		return err
+	}
+	return repository.db.First(&bank, "user_id = ? AND slug = ?", user.ID, slug).Error
+}
+
 func (repository BankRepository) FindCustomers(bankID string, customers *[]models.Customer) error {
 	return repository.db.Preload("Accounts").Order("last_name ASC, first_name ASC").Find(&customers, "bank_id = ?", bankID).Error
 }

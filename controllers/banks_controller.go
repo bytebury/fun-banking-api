@@ -52,6 +52,25 @@ func (controller BankController) FindBanksByUserID(c *gin.Context) {
 	c.JSON(http.StatusOK, banks)
 }
 
+func (controller BankController) FindByUsernameAndSlug(c *gin.Context) {
+	var bank models.Bank
+
+	username := c.Param("username")
+	slug := c.Param("slug")
+
+	if err := controller.bank.FindByUsernameAndSlug(username, slug, &bank); err != nil {
+		if strings.Contains(err.Error(), "record not found") {
+			c.JSON(http.StatusNotFound, gin.H{"message": "Unable to retrieve that bank"})
+			return
+		}
+
+		c.JSON(http.StatusBadRequest, gin.H{"message": "Unable to retrieve that bank"})
+		return
+	}
+
+	c.JSON(http.StatusOK, bank)
+}
+
 func (controller BankController) Create(c *gin.Context) {
 	var bank models.Bank
 

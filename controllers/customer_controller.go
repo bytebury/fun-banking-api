@@ -162,6 +162,23 @@ func (controller CustomerController) Delete(c *gin.Context) {
 	c.JSON(http.StatusNoContent, nil)
 }
 
+func (controller CustomerController) Login(c *gin.Context) {
+	var signInRequest models.CustomerSignInRequest
+
+	if err := c.ShouldBindJSON(&signInRequest); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "Bad request"})
+		return
+	}
+
+	var customer models.Customer
+	if err := controller.service.Login(signInRequest.BankID, signInRequest.PIN, &customer); err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"message": "Invalid login"})
+		return
+	}
+
+	c.JSON(http.StatusOK, customer)
+}
+
 func (controller CustomerController) isBankStaff(customer models.Customer, c *gin.Context) bool {
 	userID, err := strconv.Atoi(c.MustGet("user_id").(string))
 

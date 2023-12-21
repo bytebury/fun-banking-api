@@ -32,3 +32,7 @@ func (repository CustomerRepository) Update(customer *models.Customer) error {
 func (repository CustomerRepository) Delete(customerID string) error {
 	return repository.db.Delete(&models.Customer{}, "id = ?", customerID).Error
 }
+
+func (repository CustomerRepository) FindByBankAndPIN(bankID string, pin string, customer *models.Customer) error {
+	return repository.db.Preload("Accounts").First(&customer, "bank_id = ? AND pin = ?", bankID, pin).Error
+}

@@ -9,3 +9,8 @@ type Customer struct {
 	Bank      Bank      `json:"-" gorm:"foreignKey:BankID;constraint:OnDelete:CASCADE;"`
 	Accounts  []Account `json:"accounts"`
 }
+
+type CustomerSignInRequest struct {
+	BankID string `json:"bank_id"`
+	PIN    string `json:"pin"`
+}

@@ -55,3 +55,7 @@ func (service CustomerService) Update(customerID string, request *models.Custome
 func (service CustomerService) Delete(customerID string) error {
 	return service.repository.Delete(customerID)
 }
+
+func (service CustomerService) Login(bankID string, pin string, customer *models.Customer) error {
+	return service.repository.FindByBankAndPIN(bankID, pin, customer)
+}

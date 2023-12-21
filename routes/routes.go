@@ -47,6 +47,9 @@ func SetupRoutes(router *gin.Engine) {
 	setupAccountRoutes(router)
 	setupMoneyTransferRoutes(router)
 	setupAnnouncementRoutes(router)
+
+	bankController := controllers.NewBankController(bankService)
+	router.GET(":username/:slug", bankController.FindByUsernameAndSlug)
 }
 
 /**
@@ -105,6 +108,7 @@ func setupCustomerRoutes(router *gin.Engine) {
 		GET(":id/accounts", middleware.Auth(), controller.FindAllAccounts).
 		PUT(":id", middleware.Auth(), controller.Update).
 		POST("", middleware.Auth(), controller.Create).
+		POST("signin", controller.Login).
 		DELETE(":id", middleware.Auth(), controller.Delete)
 }
 

@@ -59,6 +59,10 @@ func (service BankService) Update(bankID string, request *models.Bank) (models.B
 	return bank, nil
 }
 
+func (service BankService) FindByUsernameAndSlug(username, slug string, bank *models.Bank) error {
+	return service.bankRepository.FindByUsernameAndSlug(username, slug, bank)
+}
+
 func (service BankService) Delete(bankID string) error {
 	return service.bankRepository.Delete(bankID)
 }
