@@ -99,7 +99,9 @@ func (service UserService) Login(request models.LoginRequest) (string, models.Us
 	var user models.User
 
 	if err := service.FindByEmail(request.Email, &user); err != nil {
-		return "", user, err
+		if err2 := service.FindByUsername(request.Email, &user); err2 != nil {
+			return "", user, err
+		}
 	}
 
 	if !service.VerifyPassword(request.Password, user.Password) {

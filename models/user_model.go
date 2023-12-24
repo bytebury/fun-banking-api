@@ -4,7 +4,7 @@ type User struct {
 	AuditModel
 	Username  string `json:"username" gorm:"unique;not null;size:15"`
 	Email     string `json:"email" gorm:"unique;not null"`
-	FirstName string `json:"first_name" gorm:"not null;size:15"`
+	FirstName string `json:"first_name" gorm:"not null;size:20"`
 	LastName  string `json:"last_name" gorm:"not null;size:20"`
 	Role      int    `json:"role" gorm:"not null; default:0"`
 	About     string `json:"about" gorm:"type:text"`
