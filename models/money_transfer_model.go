@@ -1,5 +1,10 @@
 package models
 
+type PagingInfo struct {
+	PageNumber uint `json:"page_number"`
+	TotalItems uint `json:"total_items"`
+}
+
 type MoneyTransfer struct {
 	AuditModel
 	Description    string  `json:"description" gorm:"not null;size:255"`
@@ -10,4 +15,9 @@ type MoneyTransfer struct {
 	Account        Account `json:"-" gorm:"foreignKey:AccountID;constraint:OnDelete:CASCADE;"`
 	UserID         *uint   `json:"user_id"`
 	User           User    `json:"updated_by"`
+}
+
+type PaginatedResponse[T any] struct {
+	Items      []T        `json:"items"`
+	PagingInfo PagingInfo `json:"paging_info"`
 }

@@ -47,6 +47,7 @@ func SetupRoutes(router *gin.Engine) {
 	setupAccountRoutes(router)
 	setupMoneyTransferRoutes(router)
 	setupAnnouncementRoutes(router)
+	setupNotificationRoutes(router)
 
 	bankController := controllers.NewBankController(bankService)
 	router.GET(":username/:slug", bankController.FindByUsernameAndSlug)
@@ -58,6 +59,11 @@ func SetupRoutes(router *gin.Engine) {
 func setupHealthCheckRoutes(router *gin.Engine) {
 	controller := controllers.NewHealthController(healthService)
 	router.GET("/health", controller.GetHealthCheck)
+}
+
+func setupNotificationRoutes(router *gin.Engine) {
+	controller := controllers.NewMoneyTransferController(moneyTransferService, accountService)
+	router.GET("/notifications", middleware.Auth(), controller.Notifications)
 }
 
 func setupAnnouncementRoutes(router *gin.Engine) {

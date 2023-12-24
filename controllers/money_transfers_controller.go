@@ -91,6 +91,20 @@ func (controller MoneyTransferController) Decline(c *gin.Context) {
 	c.JSON(http.StatusOK, transfer)
 }
 
+func (controller MoneyTransferController) Notifications(c *gin.Context) {
+	userID := c.MustGet("user_id").(string)
+
+	var transfers []models.MoneyTransfer
+
+	if err := controller.service.Notifications(userID, &transfers); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "Something went wrong"})
+		return
+	}
+
+	c.JSON(http.StatusOK, transfers)
+
+}
+
 func (controller MoneyTransferController) isBankStaff(transferID string, c *gin.Context) bool {
 	userID := c.MustGet("user_id").(string)
 

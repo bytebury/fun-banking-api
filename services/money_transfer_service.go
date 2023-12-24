@@ -46,8 +46,8 @@ func (service MoneyTransferService) FindByID(moneyTransferID string, moneyTransf
 	return service.repository.FindByID(moneyTransferID, moneyTransfer)
 }
 
-func (service MoneyTransferService) FindByAccount(accountID string, moneyTransfers *[]models.MoneyTransfer, c *gin.Context) error {
-	return service.repository.FindByAccount(accountID, moneyTransfers, c)
+func (service MoneyTransferService) FindByAccount(accountID string, moneyTransfers *[]models.MoneyTransfer, count *int64, c *gin.Context) error {
+	return service.repository.FindByAccount(accountID, moneyTransfers, count, c)
 }
 
 func (service MoneyTransferService) Approve(moneyTransferID, userID string) (models.MoneyTransfer, error) {
@@ -91,6 +91,10 @@ func (service MoneyTransferService) Decline(moneyTransferID, userID string) (mod
 	}
 
 	return moneyTransfer, nil
+}
+
+func (service MoneyTransferService) Notifications(userID string, transfers *[]models.MoneyTransfer) error {
+	return service.repository.FindByUserID(userID, transfers)
 }
 
 func (service MoneyTransferService) isBankStaff(accountId, userId string) bool {

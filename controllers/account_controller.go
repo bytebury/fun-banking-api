@@ -55,7 +55,8 @@ func (controller AccountController) FindMoneyTransfers(c *gin.Context) {
 	// }
 
 	var moneyTransfers []models.MoneyTransfer
-	if err := controller.moneyTransferService.FindByAccount(accountID, &moneyTransfers, c); err != nil {
+	var count int64
+	if err := controller.moneyTransferService.FindByAccount(accountID, &moneyTransfers, &count, c); err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"message": "Account not found"})
 		return
 	}
@@ -64,10 +65,24 @@ func (controller AccountController) FindMoneyTransfers(c *gin.Context) {
 		moneyTransfers = make([]models.MoneyTransfer, 0)
 	}
 
-	c.JSON(http.StatusOK, moneyTransfers)
+	pageNumber, err := strconv.Atoi(c.Query("page"))
+
+	if err != nil {
+		pageNumber = 1
+	}
+
+	paginatedResponse := models.PaginatedResponse[models.MoneyTransfer]{
+		Items: moneyTransfers,
+		PagingInfo: models.PagingInfo{
+			TotalItems: uint(count),
+			PageNumber: uint(pageNumber),
+		},
+	}
+
+	c.JSON(http.StatusOK, paginatedResponse)
 }
 
-func (controller AccountController) isBankStaff(account models.Account, c *gin.Context) bool {
-	userID := c.GetString("user_id")
-	return strconv.Itoa(int(account.Customer.Bank.UserID)) == userID
-}
+// func (controller AccountController) isBankStaff(account models.Account, c *gin.Context) bool {
+// 	userID := c.GetString("user_id")
+// 	return strconv.Itoa(int(account.Customer.Bank.UserID)) == userID
+// }
