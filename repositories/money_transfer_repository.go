@@ -62,6 +62,8 @@ func (repository MoneyTransferRepository) FindByUserID(userID string, transfers 
 		Joins("JOIN customers ON customers.id = accounts.customer_id").
 		Joins("JOIN banks ON banks.id = customers.bank_id").
 		Joins("JOIN users ON users.id = banks.user_id").
+		Preload("Account").
+		Preload("Account.Customer").
 		Where("money_transfers.status = ?", "pending").
 		Where("users.id = ?", userID).
 		Find(&transfers).Error
