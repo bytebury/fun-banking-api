@@ -41,7 +41,7 @@ func runMigrations() {
 	database.DB.AutoMigrate(&models.Bank{})
 	database.DB.AutoMigrate(&models.Customer{})
 	database.DB.AutoMigrate(&models.Account{})
-	database.DB.AutoMigrate(&models.MoneyTransfer{})
+	database.DB.AutoMigrate(&models.Transfer{})
 	database.DB.AutoMigrate(&models.Announcement{})
 }
 

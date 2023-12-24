@@ -14,7 +14,7 @@ var userService services.UserService
 var bankService services.BankService
 var customerService services.CustomerService
 var accountService services.AccountService
-var moneyTransferService services.MoneyTransferService
+var transferService services.TransferService
 var healthService services.HealthService
 var jwtService services.JwtService
 var passwordService services.PasswordService
@@ -26,7 +26,7 @@ func setupServices() {
 	bankService = *services.NewBankService(*repositories.NewBankRepository())
 	customerService = *services.NewCustomerService(*repositories.NewCustomerRepository())
 	accountService = *services.NewAccountService(*repositories.NewAccountRepository())
-	moneyTransferService = *services.NewMoneyTransferService(*repositories.NewMoneyTransferRepository(), accountService, userService)
+	transferService = *services.NewTransferService(*repositories.NewTransferRepository(), accountService, userService)
 	passwordService = *services.NewPasswordService(userService, jwtService, *mailers.NewPasswordResetMailer())
 	healthService = *services.NewHealthService(*repositories.NewHealthRepository())
 	announcementService = *services.NewAnnouncementService(*repositories.NewAnnouncementRepository())
@@ -62,7 +62,7 @@ func setupHealthCheckRoutes(router *gin.Engine) {
 }
 
 func setupNotificationRoutes(router *gin.Engine) {
-	controller := controllers.NewMoneyTransferController(moneyTransferService, accountService)
+	controller := controllers.NewTransferController(transferService, accountService)
 	router.GET("/notifications", middleware.Auth(), controller.Notifications)
 }
 
@@ -125,14 +125,14 @@ func setupCustomerRoutes(router *gin.Engine) {
 func setupAccountRoutes(router *gin.Engine) {
 	// TODO: Need to lock this down once we do tokens for customers
 	//       E.g. it's Audit right now, we'll need it to be Auth
-	controller := controllers.NewAccountController(accountService, moneyTransferService)
+	controller := controllers.NewAccountController(accountService, transferService)
 	router.Group("/accounts").
 		GET(":id", middleware.Audit(), controller.FindByID).
-		GET(":id/money-transfers", middleware.Audit(), controller.FindMoneyTransfers)
+		GET(":id/money-transfers", middleware.Audit(), controller.FindTransfers)
 }
 
 func setupMoneyTransferRoutes(router *gin.Engine) {
-	controller := controllers.NewMoneyTransferController(moneyTransferService, accountService)
+	controller := controllers.NewTransferController(transferService, accountService)
 	router.Group("/money-transfers").
 		POST("", middleware.Audit(), controller.Create).
 		PUT(":id/approve", middleware.Auth(), controller.Approve).

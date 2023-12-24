@@ -8,25 +8,25 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type MoneyTransferService struct {
-	repository     repositories.MoneyTransferRepository
+type TransferService struct {
+	repository     repositories.TransferRepository
 	accountService AccountService
 	userService    UserService
 }
 
-func NewMoneyTransferService(
-	repository repositories.MoneyTransferRepository,
+func NewTransferService(
+	repository repositories.TransferRepository,
 	accountService AccountService,
 	userService UserService,
-) *MoneyTransferService {
-	return &MoneyTransferService{
+) *TransferService {
+	return &TransferService{
 		repository,
 		accountService,
 		userService,
 	}
 }
 
-func (service MoneyTransferService) Create(request *models.MoneyTransfer, userID string) error {
+func (service TransferService) Create(request *models.Transfer, userID string) error {
 	if err := service.repository.Create(request); err != nil {
 		return err
 	}
@@ -42,62 +42,62 @@ func (service MoneyTransferService) Create(request *models.MoneyTransfer, userID
 	return err
 }
 
-func (service MoneyTransferService) FindByID(moneyTransferID string, moneyTransfer *models.MoneyTransfer) error {
-	return service.repository.FindByID(moneyTransferID, moneyTransfer)
+func (service TransferService) FindByID(transferID string, transfer *models.Transfer) error {
+	return service.repository.FindByID(transferID, transfer)
 }
 
-func (service MoneyTransferService) FindByAccount(accountID string, moneyTransfers *[]models.MoneyTransfer, count *int64, c *gin.Context) error {
-	return service.repository.FindByAccount(accountID, moneyTransfers, count, c)
+func (service TransferService) FindByAccount(accountID string, transfers *[]models.Transfer, count *int64, c *gin.Context) error {
+	return service.repository.FindByAccount(accountID, transfers, count, c)
 }
 
-func (service MoneyTransferService) Approve(moneyTransferID, userID string) (models.MoneyTransfer, error) {
-	var moneyTransfer models.MoneyTransfer
+func (service TransferService) Approve(transferID, userID string) (models.Transfer, error) {
+	var transfer models.Transfer
 
-	if err := service.repository.FindByID(moneyTransferID, &moneyTransfer); err != nil {
-		return moneyTransfer, err
+	if err := service.repository.FindByID(transferID, &transfer); err != nil {
+		return transfer, err
 	}
 
 	currentUserID, _ := stringToUintPtr(userID)
 
-	moneyTransfer.Status = "approved"
-	moneyTransfer.UserID = currentUserID
-	moneyTransfer.CurrentBalance = moneyTransfer.Account.Balance + float64(moneyTransfer.Amount)
+	transfer.Status = "approved"
+	transfer.UserID = currentUserID
+	transfer.CurrentBalance = transfer.Account.Balance + float64(transfer.Amount)
 
-	if err := service.repository.Update(&moneyTransfer); err != nil {
-		return moneyTransfer, err
+	if err := service.repository.Update(&transfer); err != nil {
+		return transfer, err
 	}
 
 	service.accountService.UpdateBalance(
-		strconv.Itoa((int(moneyTransfer.AccountID))),
-		moneyTransfer.CurrentBalance)
+		strconv.Itoa((int(transfer.AccountID))),
+		transfer.CurrentBalance)
 
-	return moneyTransfer, nil
+	return transfer, nil
 }
 
-func (service MoneyTransferService) Decline(moneyTransferID, userID string) (models.MoneyTransfer, error) {
-	var moneyTransfer models.MoneyTransfer
+func (service TransferService) Decline(transferID, userID string) (models.Transfer, error) {
+	var transfer models.Transfer
 
-	if err := service.repository.FindByID(moneyTransferID, &moneyTransfer); err != nil {
-		return moneyTransfer, err
+	if err := service.repository.FindByID(transferID, &transfer); err != nil {
+		return transfer, err
 	}
 
 	currentUserID, _ := stringToUintPtr(userID)
 
-	moneyTransfer.Status = "declined"
-	moneyTransfer.UserID = currentUserID
+	transfer.Status = "declined"
+	transfer.UserID = currentUserID
 
-	if err := service.repository.Update(&moneyTransfer); err != nil {
-		return moneyTransfer, err
+	if err := service.repository.Update(&transfer); err != nil {
+		return transfer, err
 	}
 
-	return moneyTransfer, nil
+	return transfer, nil
 }
 
-func (service MoneyTransferService) Notifications(userID string, transfers *[]models.MoneyTransfer) error {
+func (service TransferService) Notifications(userID string, transfers *[]models.Transfer) error {
 	return service.repository.FindByUserID(userID, transfers)
 }
 
-func (service MoneyTransferService) isBankStaff(accountId, userId string) bool {
+func (service TransferService) isBankStaff(accountId, userId string) bool {
 	var user models.User
 
 	if err := service.userService.FindByID(userId, &user); err != nil {

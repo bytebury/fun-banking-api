@@ -10,15 +10,15 @@ import (
 )
 
 type AccountController struct {
-	service              services.AccountService
-	moneyTransferService services.MoneyTransferService
+	service        services.AccountService
+	transferervice services.TransferService
 }
 
 func NewAccountController(
 	account services.AccountService,
-	moneyTransferService services.MoneyTransferService,
+	transferervice services.TransferService,
 ) *AccountController {
-	return &AccountController{account, moneyTransferService}
+	return &AccountController{account, transferervice}
 }
 
 func (controller AccountController) FindByID(c *gin.Context) {
@@ -39,7 +39,7 @@ func (controller AccountController) FindByID(c *gin.Context) {
 	c.JSON(http.StatusOK, account)
 }
 
-func (controller AccountController) FindMoneyTransfers(c *gin.Context) {
+func (controller AccountController) FindTransfers(c *gin.Context) {
 	accountID := c.Param("id")
 
 	var account models.Account
@@ -54,15 +54,15 @@ func (controller AccountController) FindMoneyTransfers(c *gin.Context) {
 	// 	return
 	// }
 
-	var moneyTransfers []models.MoneyTransfer
+	var transfers []models.Transfer
 	var count int64
-	if err := controller.moneyTransferService.FindByAccount(accountID, &moneyTransfers, &count, c); err != nil {
+	if err := controller.transferervice.FindByAccount(accountID, &transfers, &count, c); err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"message": "Account not found"})
 		return
 	}
 
-	if moneyTransfers == nil {
-		moneyTransfers = make([]models.MoneyTransfer, 0)
+	if transfers == nil {
+		transfers = make([]models.Transfer, 0)
 	}
 
 	pageNumber, err := strconv.Atoi(c.Query("page"))
@@ -71,8 +71,8 @@ func (controller AccountController) FindMoneyTransfers(c *gin.Context) {
 		pageNumber = 1
 	}
 
-	paginatedResponse := models.PaginatedResponse[models.MoneyTransfer]{
-		Items: moneyTransfers,
+	paginatedResponse := models.PaginatedResponse[models.Transfer]{
+		Items: transfers,
 		PagingInfo: models.PagingInfo{
 			TotalItems: uint(count),
 			PageNumber: uint(pageNumber),

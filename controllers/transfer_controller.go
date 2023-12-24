@@ -9,60 +9,60 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type MoneyTransferController struct {
-	service        services.MoneyTransferService
+type TransferController struct {
+	service        services.TransferService
 	accountService services.AccountService
 }
 
-func NewMoneyTransferController(
-	service services.MoneyTransferService,
+func NewTransferController(
+	service services.TransferService,
 	accountService services.AccountService,
-) *MoneyTransferController {
-	return &MoneyTransferController{service, accountService}
+) *TransferController {
+	return &TransferController{service, accountService}
 }
 
-func (controller MoneyTransferController) Create(c *gin.Context) {
-	var moneyTransfer models.MoneyTransfer
+func (controller TransferController) Create(c *gin.Context) {
+	var transfer models.Transfer
 	userID := c.GetString("user_id")
 
-	if err := c.ShouldBindJSON(&moneyTransfer); err != nil {
+	if err := c.ShouldBindJSON(&transfer); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"message": "Bad request"})
 		return
 	}
 
-	if moneyTransfer.Amount == 0 || moneyTransfer.Description == "" {
+	if transfer.Amount == 0 || transfer.Description == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"message": "Bad request"})
 		return
 	}
 
 	var account models.Account
-	if err := controller.accountService.FindByID(strconv.Itoa(int(moneyTransfer.AccountID)), &account); err != nil {
+	if err := controller.accountService.FindByID(strconv.Itoa(int(transfer.AccountID)), &account); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": "Unable to find that account"})
 		return
 	}
 
-	moneyTransfer.CurrentBalance = account.Balance
+	transfer.CurrentBalance = account.Balance
 
-	err := controller.service.Create(&moneyTransfer, userID)
+	err := controller.service.Create(&transfer, userID)
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": "Something went wrong creating your transfer"})
 		return
 	}
 
-	c.JSON(http.StatusCreated, moneyTransfer)
+	c.JSON(http.StatusCreated, transfer)
 }
 
-func (controller MoneyTransferController) Approve(c *gin.Context) {
+func (controller TransferController) Approve(c *gin.Context) {
 	userID := c.MustGet("user_id").(string)
-	moneyTransferID := c.Param("id")
+	transferID := c.Param("id")
 
-	if !controller.isBankStaff(moneyTransferID, c) {
+	if !controller.isBankStaff(transferID, c) {
 		c.JSON(http.StatusForbidden, gin.H{"message": "You don't have access to that"})
 		return
 	}
 
-	transfer, err := controller.service.Approve(moneyTransferID, userID)
+	transfer, err := controller.service.Approve(transferID, userID)
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": "Unable to approve the transfer"})
@@ -72,16 +72,16 @@ func (controller MoneyTransferController) Approve(c *gin.Context) {
 	c.JSON(http.StatusOK, transfer)
 }
 
-func (controller MoneyTransferController) Decline(c *gin.Context) {
+func (controller TransferController) Decline(c *gin.Context) {
 	userID := c.MustGet("user_id").(string)
-	moneyTransferID := c.Param("id")
+	transferID := c.Param("id")
 
-	if !controller.isBankStaff(moneyTransferID, c) {
+	if !controller.isBankStaff(transferID, c) {
 		c.JSON(http.StatusForbidden, gin.H{"message": "You don't have access to that"})
 		return
 	}
 
-	transfer, err := controller.service.Decline(moneyTransferID, userID)
+	transfer, err := controller.service.Decline(transferID, userID)
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": "Unable to decline the transfer"})
@@ -91,10 +91,10 @@ func (controller MoneyTransferController) Decline(c *gin.Context) {
 	c.JSON(http.StatusOK, transfer)
 }
 
-func (controller MoneyTransferController) Notifications(c *gin.Context) {
+func (controller TransferController) Notifications(c *gin.Context) {
 	userID := c.MustGet("user_id").(string)
 
-	var transfers []models.MoneyTransfer
+	var transfers []models.Transfer
 
 	if err := controller.service.Notifications(userID, &transfers); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": "Something went wrong"})
@@ -105,10 +105,10 @@ func (controller MoneyTransferController) Notifications(c *gin.Context) {
 
 }
 
-func (controller MoneyTransferController) isBankStaff(transferID string, c *gin.Context) bool {
+func (controller TransferController) isBankStaff(transferID string, c *gin.Context) bool {
 	userID := c.MustGet("user_id").(string)
 
-	var transfer models.MoneyTransfer
+	var transfer models.Transfer
 	if err := controller.service.FindByID(transferID, &transfer); err != nil {
 		return false
 	}

@@ -5,7 +5,7 @@ type PagingInfo struct {
 	TotalItems uint `json:"total_items"`
 }
 
-type MoneyTransfer struct {
+type Transfer struct {
 	AuditModel
 	Description    string  `json:"description" gorm:"not null;size:255"`
 	CurrentBalance float64 `json:"current_balance" gorm:"not null;type:decimal(50,2)"`
