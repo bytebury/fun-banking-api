@@ -41,6 +41,11 @@ func (controller TransferController) Create(c *gin.Context) {
 		return
 	}
 
+	if transfer.Amount > 100_000_000 {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "You can't transfer that much money at once"})
+		return
+	}
+
 	transfer.CurrentBalance = account.Balance
 
 	err := controller.service.Create(&transfer, userID)
