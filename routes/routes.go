@@ -27,11 +27,11 @@ func setupServices() {
 	bankService = *services.NewBankService(*repositories.NewBankRepository())
 	customerService = *services.NewCustomerService(*repositories.NewCustomerRepository())
 	accountService = *services.NewAccountService(*repositories.NewAccountRepository())
-	transferService = *services.NewTransferService(*repositories.NewTransferRepository(), accountService, userService)
 	passwordService = *services.NewPasswordService(userService, jwtService, *mailers.NewPasswordResetMailer())
 	healthService = *services.NewHealthService(*repositories.NewHealthRepository())
 	announcementService = *services.NewAnnouncementService(*repositories.NewAnnouncementRepository())
 	employeeService = *services.NewEmployeeService(*repositories.NewEmployeeRepository(), userService, bankService)
+	transferService = *services.NewTransferService(*repositories.NewTransferRepository(), accountService, userService, employeeService)
 }
 
 /**

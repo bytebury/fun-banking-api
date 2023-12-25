@@ -10,20 +10,23 @@ import (
 )
 
 type TransferService struct {
-	repository     repositories.TransferRepository
-	accountService AccountService
-	userService    UserService
+	repository      repositories.TransferRepository
+	accountService  AccountService
+	userService     UserService
+	employeeService EmployeeService
 }
 
 func NewTransferService(
 	repository repositories.TransferRepository,
 	accountService AccountService,
 	userService UserService,
+	employeeService EmployeeService,
 ) *TransferService {
 	return &TransferService{
 		repository,
 		accountService,
 		userService,
+		employeeService,
 	}
 }
 
@@ -118,7 +121,22 @@ func (service TransferService) isBankStaff(accountId, userId string) bool {
 		return false
 	}
 
-	return account.Customer.Bank.UserID == user.ID
+	if account.Customer.Bank.UserID == user.ID {
+		return true
+	}
+
+	var employees []models.Employee
+	if err := service.employeeService.FindByBank(strconv.Itoa(int(account.Customer.BankID)), &employees); err != nil {
+		return false
+	}
+
+	for _, employee := range employees {
+		if employee.UserID == user.ID {
+			return true
+		}
+	}
+
+	return false
 }
 
 func stringToUintPtr(s string) (*uint, error) {
