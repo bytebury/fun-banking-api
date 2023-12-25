@@ -1,6 +1,7 @@
 package services
 
 import (
+	"errors"
 	"golfer/models"
 	"golfer/repositories"
 	"strconv"
@@ -55,6 +56,10 @@ func (service TransferService) Approve(transferID, userID string) (models.Transf
 
 	if err := service.repository.FindByID(transferID, &transfer); err != nil {
 		return transfer, err
+	}
+
+	if transfer.Status != "pending" {
+		return transfer, errors.New("this transfer was already processed")
 	}
 
 	currentUserID, _ := stringToUintPtr(userID)

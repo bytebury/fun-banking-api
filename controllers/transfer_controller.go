@@ -10,15 +10,17 @@ import (
 )
 
 type TransferController struct {
-	service        services.TransferService
-	accountService services.AccountService
+	service         services.TransferService
+	accountService  services.AccountService
+	employeeService services.EmployeeService
 }
 
 func NewTransferController(
 	service services.TransferService,
 	accountService services.AccountService,
+	employeeService services.EmployeeService,
 ) *TransferController {
-	return &TransferController{service, accountService}
+	return &TransferController{service, accountService, employeeService}
 }
 
 func (controller TransferController) Create(c *gin.Context) {
@@ -41,7 +43,7 @@ func (controller TransferController) Create(c *gin.Context) {
 		return
 	}
 
-	if transfer.Amount > 100_000_000 {
+	if transfer.Amount > 1_000_000 {
 		c.JSON(http.StatusBadRequest, gin.H{"message": "You can't transfer that much money at once"})
 		return
 	}
@@ -118,5 +120,20 @@ func (controller TransferController) isBankStaff(transferID string, c *gin.Conte
 		return false
 	}
 
-	return strconv.Itoa(int(transfer.Account.Customer.Bank.UserID)) == userID
+	if strconv.Itoa(int(transfer.Account.Customer.Bank.UserID)) == userID {
+		return true
+	}
+
+	var employees []models.Employee
+	if err := controller.employeeService.FindByBank(strconv.Itoa(int(transfer.Account.Customer.Bank.ID)), &employees); err != nil {
+		return false
+	}
+
+	for _, employee := range employees {
+		if strconv.Itoa(int(employee.UserID)) == userID {
+			return true
+		}
+	}
+
+	return false
 }

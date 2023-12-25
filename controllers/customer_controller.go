@@ -11,17 +11,19 @@ import (
 )
 
 type CustomerController struct {
-	service        services.CustomerService
-	bankService    services.BankService
-	accountService services.AccountService
+	service         services.CustomerService
+	bankService     services.BankService
+	accountService  services.AccountService
+	employeeService services.EmployeeService
 }
 
 func NewCustomerController(
 	customer services.CustomerService,
 	bankService services.BankService,
 	accountService services.AccountService,
+	employeeService services.EmployeeService,
 ) *CustomerController {
-	return &CustomerController{customer, bankService, accountService}
+	return &CustomerController{customer, bankService, accountService, employeeService}
 }
 
 // TODO: YOU SHOULDN'T BE ABLE TO LOOK UP CUSTOMERS IF THEY AREN'T IN A BANK YOU OWN!
@@ -190,5 +192,20 @@ func (controller CustomerController) isBankStaff(customer models.Customer, c *gi
 		return false
 	}
 
-	return bank.UserID == uint(userID)
+	if bank.UserID == uint(userID) {
+		return true
+	}
+
+	var employees []models.Employee
+	if err := controller.employeeService.FindByBank(strconv.Itoa(int(bank.ID)), &employees); err != nil {
+		return false
+	}
+
+	for _, employee := range employees {
+		if int(employee.UserID) == userID {
+			return true
+		}
+	}
+
+	return false
 }

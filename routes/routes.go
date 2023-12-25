@@ -52,7 +52,7 @@ func SetupRoutes(router *gin.Engine) {
 	setupNotificationRoutes(router)
 	setupEmployeeRoutes(router)
 
-	bankController := controllers.NewBankController(bankService)
+	bankController := controllers.NewBankController(bankService, employeeService)
 	router.GET(":username/:slug", bankController.FindByUsernameAndSlug)
 }
 
@@ -65,7 +65,7 @@ func setupHealthCheckRoutes(router *gin.Engine) {
 }
 
 func setupNotificationRoutes(router *gin.Engine) {
-	controller := controllers.NewTransferController(transferService, accountService)
+	controller := controllers.NewTransferController(transferService, accountService, employeeService)
 	router.GET("/notifications", middleware.Auth(), controller.Notifications)
 }
 
@@ -106,7 +106,7 @@ func setupEmployeeRoutes(router *gin.Engine) {
  * Sets up the bank routes at `/banks`.
  */
 func setupBankRoutes(router *gin.Engine) {
-	controller := controllers.NewBankController(bankService)
+	controller := controllers.NewBankController(bankService, employeeService)
 	router.Group("/banks").
 		GET("", middleware.Auth(), controller.FindBanksByUserID).
 		GET(":id", middleware.Auth(), controller.FindByID).
@@ -120,7 +120,7 @@ func setupBankRoutes(router *gin.Engine) {
  * Sets up the customer routes at `/customers`.
  */
 func setupCustomerRoutes(router *gin.Engine) {
-	controller := controllers.NewCustomerController(customerService, bankService, accountService)
+	controller := controllers.NewCustomerController(customerService, bankService, accountService, employeeService)
 	router.Group("/customers").
 		GET(":id", middleware.Auth(), controller.FindByID).
 		// TODO: This needs to be audit once we do customer tokens!
@@ -144,7 +144,7 @@ func setupAccountRoutes(router *gin.Engine) {
 }
 
 func setupTransferRoutes(router *gin.Engine) {
-	controller := controllers.NewTransferController(transferService, accountService)
+	controller := controllers.NewTransferController(transferService, accountService, employeeService)
 	router.Group("/money-transfers").
 		POST("", middleware.Audit(), controller.Create).
 		PUT(":id/approve", middleware.Auth(), controller.Approve).

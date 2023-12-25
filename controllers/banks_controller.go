@@ -11,11 +11,12 @@ import (
 )
 
 type BankController struct {
-	bank services.BankService
+	bank            services.BankService
+	employeeService services.EmployeeService
 }
 
-func NewBankController(bank services.BankService) *BankController {
-	return &BankController{bank}
+func NewBankController(bank services.BankService, employeeService services.EmployeeService) *BankController {
+	return &BankController{bank, employeeService}
 }
 
 func (controller BankController) FindByID(c *gin.Context) {
@@ -27,7 +28,7 @@ func (controller BankController) FindByID(c *gin.Context) {
 		return
 	}
 
-	if !controller.isBankOwner(c) {
+	if !controller.isBankOwner(c) && !controller.isBankEmployee(c) {
 		c.JSON(http.StatusForbidden, gin.H{"message": "You don't have access to that"})
 		return
 	}
@@ -183,6 +184,24 @@ func (controller BankController) FindCustomers(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, customers)
+}
+
+func (controller BankController) isBankEmployee(c *gin.Context) bool {
+	bankID := c.Param("id")
+	currentUserID := c.MustGet("user_id").(string)
+
+	var employees []models.Employee
+	if err := controller.employeeService.FindByBank(bankID, &employees); err != nil {
+		return false
+	}
+
+	for _, employee := range employees {
+		if strconv.Itoa(int(employee.UserID)) == currentUserID {
+			return true
+		}
+	}
+
+	return false
 }
 
 /**
