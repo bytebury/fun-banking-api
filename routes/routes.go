@@ -31,7 +31,7 @@ func setupServices() {
 	passwordService = *services.NewPasswordService(userService, jwtService, *mailers.NewPasswordResetMailer())
 	healthService = *services.NewHealthService(*repositories.NewHealthRepository())
 	announcementService = *services.NewAnnouncementService(*repositories.NewAnnouncementRepository())
-	employeeService = *services.NewEmployeeService(*repositories.NewEmployeeRepository())
+	employeeService = *services.NewEmployeeService(*repositories.NewEmployeeRepository(), userService, bankService)
 }
 
 /**

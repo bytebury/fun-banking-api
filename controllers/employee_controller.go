@@ -4,6 +4,7 @@ import (
 	"golfer/models"
 	"golfer/services"
 	"net/http"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 )
@@ -21,14 +22,21 @@ func NewEmployeeController(
 }
 
 func (controller EmployeeController) Create(c *gin.Context) {
-	var employee models.Employee
+	var request models.EmployeeRequest
 
-	if err := c.ShouldBindJSON(&employee); err != nil {
+	if err := c.ShouldBindJSON(&request); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"message": "Bad request"})
 		return
 	}
 
-	if err := controller.employeeService.Create(&employee); err != nil {
+	userID := c.MustGet("user_id").(string)
+
+	var employee models.Employee
+	if err := controller.employeeService.Create(request, &employee, userID); err != nil {
+		if strings.Contains(err.Error(), "yourself as an employee") {
+			c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+			return
+		}
 		c.JSON(http.StatusInternalServerError, gin.H{"message": "Could not add user as an employee"})
 		return
 	}
