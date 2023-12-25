@@ -86,6 +86,10 @@ func (service TransferService) Decline(transferID, userID string) (models.Transf
 		return transfer, err
 	}
 
+	if transfer.Status != "pending" {
+		return transfer, errors.New("this transfer was already processed")
+	}
+
 	currentUserID, _ := stringToUintPtr(userID)
 
 	transfer.Status = "declined"
