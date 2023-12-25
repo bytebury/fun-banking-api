@@ -19,6 +19,7 @@ var healthService services.HealthService
 var jwtService services.JwtService
 var passwordService services.PasswordService
 var announcementService services.AnnouncementService
+var employeeService services.EmployeeService
 
 func setupServices() {
 	jwtService = services.JwtService{}
@@ -30,6 +31,7 @@ func setupServices() {
 	passwordService = *services.NewPasswordService(userService, jwtService, *mailers.NewPasswordResetMailer())
 	healthService = *services.NewHealthService(*repositories.NewHealthRepository())
 	announcementService = *services.NewAnnouncementService(*repositories.NewAnnouncementRepository())
+	employeeService = *services.NewEmployeeService(*repositories.NewEmployeeRepository())
 }
 
 /**
@@ -48,6 +50,7 @@ func SetupRoutes(router *gin.Engine) {
 	setupTransferRoutes(router)
 	setupAnnouncementRoutes(router)
 	setupNotificationRoutes(router)
+	setupEmployeeRoutes(router)
 
 	bankController := controllers.NewBankController(bankService)
 	router.GET(":username/:slug", bankController.FindByUsernameAndSlug)
@@ -87,6 +90,15 @@ func setupUserRoutes(router *gin.Engine) {
 		GET(":username", middleware.Auth(), controller.FindByUsername).
 		PUT(":id", middleware.Auth(), controller.Update).
 		POST("", controller.Create).
+		DELETE(":id", middleware.Auth(), controller.Delete)
+}
+
+func setupEmployeeRoutes(router *gin.Engine) {
+	controller := controllers.NewEmployeeController(employeeService)
+	router.Group("/employees").
+		POST("", middleware.Auth(), controller.Create).
+		GET("/bank/:id", middleware.Auth(), controller.FindByBank).
+		GET("/user/:id", middleware.Auth(), controller.FindByUser).
 		DELETE(":id", middleware.Auth(), controller.Delete)
 }
 
