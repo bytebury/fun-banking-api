@@ -45,7 +45,7 @@ func SetupRoutes(router *gin.Engine) {
 	setupBankRoutes(router)
 	setupCustomerRoutes(router)
 	setupAccountRoutes(router)
-	setupMoneyTransferRoutes(router)
+	setupTransferRoutes(router)
 	setupAnnouncementRoutes(router)
 	setupNotificationRoutes(router)
 
@@ -131,7 +131,7 @@ func setupAccountRoutes(router *gin.Engine) {
 		GET(":id/money-transfers", middleware.Audit(), controller.FindTransfers)
 }
 
-func setupMoneyTransferRoutes(router *gin.Engine) {
+func setupTransferRoutes(router *gin.Engine) {
 	controller := controllers.NewTransferController(transferService, accountService)
 	router.Group("/money-transfers").
 		POST("", middleware.Audit(), controller.Create).
