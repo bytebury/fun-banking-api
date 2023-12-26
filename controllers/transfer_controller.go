@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"golfer/config"
 	"golfer/models"
 	"golfer/services"
 	"net/http"
@@ -43,7 +44,8 @@ func (controller TransferController) Create(c *gin.Context) {
 		return
 	}
 
-	if transfer.Amount > 1_000_000 {
+	// TODO MOVE THIS TO THE SERVICE!!
+	if transfer.Amount > config.MAX_BANKING_TRANSFER_AMOUNT {
 		c.JSON(http.StatusBadRequest, gin.H{"message": "You can't transfer that much money at once"})
 		return
 	}

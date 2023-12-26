@@ -82,7 +82,7 @@ func (controller AnnouncementController) Update(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusAccepted, gin.H{"message": "User updated"})
+	c.JSON(http.StatusAccepted, gin.H{"message": "Announcement updated"})
 }
 
 func (controller AnnouncementController) Delete(c *gin.Context) {
