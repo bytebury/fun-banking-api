@@ -36,8 +36,7 @@ func (service EmployeeService) Create(request models.EmployeeRequest, employee *
 		return err
 	}
 
-	userIDNum, _ := strconv.Atoi(userID)
-	if bank.UserID == uint(userIDNum) {
+	if bank.UserID == uint(user.ID) {
 		return errors.New("you cannot add yourself as an employee")
 	}
 
