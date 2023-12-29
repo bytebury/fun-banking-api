@@ -60,8 +60,11 @@ func SetupRoutes(router *gin.Engine) {
  * Setups the health check route found at `/health`.
  */
 func setupHealthCheckRoutes(router *gin.Engine) {
+	userRepository := repositories.NewUserRepository()
 	controller := controllers.NewHealthController(healthService)
-	router.GET("/health", controller.GetHealthCheck)
+
+	router.GET("/health", controller.GetHealthCheck).
+		GET("/health/users", middleware.Admin(*userRepository), controller.GetUserInsights)
 }
 
 func setupNotificationRoutes(router *gin.Engine) {

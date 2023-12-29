@@ -9,3 +9,8 @@ type Health struct {
 	NumberOfCustomers int64  `json:"number_of_customers"`
 	NumberOfTransfers int64  `json:"number_of_transfers"`
 }
+
+type WeeklyInsights struct {
+	Week  int `json:"week"`
+	Count int `json:"count"`
+}

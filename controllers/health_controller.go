@@ -30,3 +30,14 @@ func (controller HealthController) GetHealthCheck(c *gin.Context) {
 
 	c.JSON(http.StatusOK, health)
 }
+
+func (controller HealthController) GetUserInsights(c *gin.Context) {
+	var weeklyInsights []models.WeeklyInsights
+
+	if err := controller.healthService.GetUserWeeklyInsights(&weeklyInsights); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "Unable to retrieve user insights"})
+		return
+	}
+
+	c.JSON(http.StatusOK, weeklyInsights)
+}

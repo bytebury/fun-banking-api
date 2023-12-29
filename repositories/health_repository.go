@@ -3,6 +3,7 @@ package repositories
 import (
 	"golfer/database"
 	"golfer/models"
+	"time"
 
 	"gorm.io/gorm"
 )
@@ -28,4 +29,15 @@ func (repository HealthRepository) GetHealthCheck(health *models.Health) error {
 	repository.db.Model(&models.Transfer{}).Count(&health.NumberOfTransfers)
 
 	return nil
+}
+
+func (repository HealthRepository) GetUserWeeklyInsights(insights *[]models.WeeklyInsights) error {
+	fourWeeksAgo := time.Now().AddDate(0, 0, -28) // 4 weeks ago
+
+	return repository.db.Model(&models.User{}).
+		Select("EXTRACT(WEEK FROM created_at) as week, COUNT(*) as count").
+		Where("created_at >= ?", fourWeeksAgo).
+		Group("week").
+		Order("week").
+		Scan(&insights).Error
 }

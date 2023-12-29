@@ -16,3 +16,7 @@ type HealthService struct {
 func (service HealthService) GetHealthCheck(health *models.Health) error {
 	return service.repository.GetHealthCheck(health)
 }
+
+func (service HealthService) GetUserWeeklyInsights(insights *[]models.WeeklyInsights) error {
+	return service.repository.GetUserWeeklyInsights(insights)
+}
