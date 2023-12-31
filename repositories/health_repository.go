@@ -32,11 +32,11 @@ func (repository HealthRepository) GetHealthCheck(health *models.Health) error {
 }
 
 func (repository HealthRepository) GetUserWeeklyInsights(insights *[]models.WeeklyInsights) error {
-	fourWeeksAgo := time.Now().AddDate(0, 0, -28) // 4 weeks ago
+	twelveWeeksAgo := time.Now().AddDate(0, 0, -12*7)
 
 	return repository.db.Model(&models.User{}).
 		Select("EXTRACT(WEEK FROM created_at) as week, COUNT(*) as count").
-		Where("created_at >= ?", fourWeeksAgo).
+		Where("created_at >= ?", twelveWeeksAgo).
 		Group("week").
 		Order("week").
 		Scan(&insights).Error
