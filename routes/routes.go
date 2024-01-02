@@ -143,7 +143,8 @@ func setupAccountRoutes(router *gin.Engine) {
 	controller := controllers.NewAccountController(accountService, transferService)
 	router.Group("/accounts").
 		GET(":id", middleware.Audit(), controller.FindByID).
-		GET(":id/money-transfers", middleware.Audit(), controller.FindTransfers)
+		GET(":id/money-transfers", middleware.Audit(), controller.FindTransfers).
+		GET(":id/insights/transfers", middleware.Audit(), controller.GetTransferHistoricalData)
 }
 
 func setupTransferRoutes(router *gin.Engine) {

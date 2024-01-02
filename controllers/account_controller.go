@@ -82,6 +82,24 @@ func (controller AccountController) FindTransfers(c *gin.Context) {
 	c.JSON(http.StatusOK, paginatedResponse)
 }
 
+func (controller AccountController) GetTransferHistoricalData(c *gin.Context) {
+	accountID := c.Param("id")
+	daysAgo, err := strconv.Atoi(c.Query("days-ago"))
+
+	if err != nil || daysAgo <= 0 {
+		daysAgo = 30
+	}
+
+	summary, err := controller.service.GetTransferHistoricalData(accountID, daysAgo)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "Something happened while retrieving data"})
+		return
+	}
+
+	c.JSON(http.StatusOK, summary)
+}
+
 // func (controller AccountController) isBankStaff(account models.Account, c *gin.Context) bool {
 // 	userID := c.GetString("user_id")
 // 	return strconv.Itoa(int(account.Customer.Bank.UserID)) == userID

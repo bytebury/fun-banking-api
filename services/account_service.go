@@ -64,3 +64,7 @@ func (service AccountService) UpdateBalance(accountID string, balance float64) (
 func (service AccountService) Delete(accountID string) error {
 	return service.repository.Delete(accountID)
 }
+
+func (service AccountService) GetTransferHistoricalData(accountID string, daysAgo int) ([]models.DailyTransferSummary, error) {
+	return service.repository.GetTransferHistoricalData(accountID, daysAgo)
+}
