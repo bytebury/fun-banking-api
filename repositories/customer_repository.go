@@ -30,6 +30,9 @@ func (repository CustomerRepository) Update(customer *models.Customer) error {
 }
 
 func (repository CustomerRepository) Delete(customerID string) error {
+	if err := repository.db.Delete(&models.Account{}, "customer_id = ?", customerID).Error; err != nil {
+		return err
+	}
 	return repository.db.Delete(&models.Customer{}, "id = ?", customerID).Error
 }
 
