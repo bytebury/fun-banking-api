@@ -27,8 +27,22 @@ func (service AnnouncementService) Create(announcement *models.Announcement, c *
 	return service.repository.Create(announcement)
 }
 
-func (service AnnouncementService) Find(announcements *[]models.Announcement) error {
-	return service.repository.Find(announcements)
+func (service AnnouncementService) Find(limit, page int) (models.PaginatedResponse[models.Announcement], error) {
+	announcements, totalItems, err := service.repository.Find(limit, page)
+
+	if err != nil {
+		return models.PaginatedResponse[models.Announcement]{}, err
+	}
+
+	response := models.PaginatedResponse[models.Announcement]{
+		Items: announcements,
+		PagingInfo: models.PagingInfo{
+			PageNumber: 1,
+			TotalItems: uint(totalItems),
+		},
+	}
+
+	return response, nil
 }
 
 func (service AnnouncementService) FindByID(announcementID string, announcement *models.Announcement) error {

@@ -21,8 +21,15 @@ func (repository AnnouncementRepository) Create(announcement *models.Announcemen
 	return repository.db.Create(&announcement).Error
 }
 
-func (repository AnnouncementRepository) Find(announcements *[]models.Announcement) error {
-	return repository.db.Order("created_at DESC").Find(&announcements).Error
+func (repository AnnouncementRepository) Find(limit, page int) ([]models.Announcement, int64, error) {
+	var announcements []models.Announcement
+	var count int64
+	repository.db.Find(&announcements).Count(&count)
+
+	offset := (page - 1) * limit
+	err := repository.db.Order("created_at DESC").Limit(limit).Offset(offset).Find(&announcements).Error
+
+	return announcements, count, err
 }
 
 func (repository AnnouncementRepository) FindByID(announcementID string, announcement *models.Announcement) error {

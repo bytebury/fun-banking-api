@@ -4,6 +4,7 @@ import (
 	"golfer/models"
 	"golfer/services"
 	"net/http"
+	"strconv"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -42,15 +43,22 @@ func (controller AnnouncementController) Create(c *gin.Context) {
 }
 
 func (controller AnnouncementController) Find(c *gin.Context) {
-	var announcements []models.Announcement
+	limit, limitErr := strconv.Atoi(c.Query("limit"))
+	page, pageErr := strconv.Atoi(c.Query("page"))
 
-	if err := controller.announcementService.Find(&announcements); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"message": "Something went wrong"})
-		return
+	if limitErr != nil || limit <= 0 {
+		limit = 5
 	}
 
-	if announcements == nil {
-		announcements = make([]models.Announcement, 0)
+	if pageErr != nil || page <= 0 {
+		page = 1
+	}
+
+	announcements, err := controller.announcementService.Find(limit, page)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "Something went wrong"})
+		return
 	}
 
 	c.JSON(http.StatusOK, announcements)
