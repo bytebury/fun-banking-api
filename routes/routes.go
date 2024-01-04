@@ -14,7 +14,7 @@ var userService services.UserService
 var bankService services.BankService
 var customerService services.CustomerService
 var accountService services.AccountService
-var transferService services.TransferService
+var transactionService services.TransactionService
 var healthService services.HealthService
 var jwtService services.JwtService
 var passwordService services.PasswordService
@@ -31,7 +31,7 @@ func setupServices() {
 	healthService = *services.NewHealthService(*repositories.NewHealthRepository())
 	announcementService = *services.NewAnnouncementService(*repositories.NewAnnouncementRepository())
 	employeeService = *services.NewEmployeeService(*repositories.NewEmployeeRepository(), userService, bankService)
-	transferService = *services.NewTransferService(*repositories.NewTransferRepository(), accountService, userService, employeeService)
+	transactionService = *services.NewTransactionService(*repositories.NewTransactionRepository(), accountService, userService, employeeService)
 }
 
 /**
@@ -47,7 +47,7 @@ func SetupRoutes(router *gin.Engine) {
 	setupBankRoutes(router)
 	setupCustomerRoutes(router)
 	setupAccountRoutes(router)
-	setupTransferRoutes(router)
+	setupTransactionRoutes(router)
 	setupAnnouncementRoutes(router)
 	setupNotificationRoutes(router)
 	setupEmployeeRoutes(router)
@@ -68,7 +68,7 @@ func setupHealthCheckRoutes(router *gin.Engine) {
 }
 
 func setupNotificationRoutes(router *gin.Engine) {
-	controller := controllers.NewTransferController(transferService, accountService, employeeService)
+	controller := controllers.NewTransactionController(transactionService, accountService, employeeService)
 	router.GET("/notifications", middleware.Auth(), controller.Notifications)
 }
 
@@ -140,16 +140,16 @@ func setupCustomerRoutes(router *gin.Engine) {
 func setupAccountRoutes(router *gin.Engine) {
 	// TODO: Need to lock this down once we do tokens for customers
 	//       E.g. it's Audit right now, we'll need it to be Auth
-	controller := controllers.NewAccountController(accountService, transferService)
+	controller := controllers.NewAccountController(accountService, transactionService)
 	router.Group("/accounts").
 		GET(":id", middleware.Audit(), controller.FindByID).
-		GET(":id/money-transfers", middleware.Audit(), controller.FindTransfers).
-		GET(":id/insights/transfers", middleware.Audit(), controller.GetTransferHistoricalData)
+		GET(":id/transactions", middleware.Audit(), controller.FindTransactions).
+		GET(":id/insights/transactions", middleware.Audit(), controller.GetTransactionHistoricalData)
 }
 
-func setupTransferRoutes(router *gin.Engine) {
-	controller := controllers.NewTransferController(transferService, accountService, employeeService)
-	router.Group("/money-transfers").
+func setupTransactionRoutes(router *gin.Engine) {
+	controller := controllers.NewTransactionController(transactionService, accountService, employeeService)
+	router.Group("/transactions").
 		POST("", middleware.Audit(), controller.Create).
 		PUT(":id/approve", middleware.Auth(), controller.Approve).
 		PUT(":id/decline", middleware.Auth(), controller.Decline)

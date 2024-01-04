@@ -10,22 +10,25 @@ import (
 )
 
 type AccountController struct {
-	service        services.AccountService
-	transferervice services.TransferService
+	accountService     services.AccountService
+	transactionService services.TransactionService
 }
 
 func NewAccountController(
-	account services.AccountService,
-	transferervice services.TransferService,
+	accountService services.AccountService,
+	transactionService services.TransactionService,
 ) *AccountController {
-	return &AccountController{account, transferervice}
+	return &AccountController{
+		accountService,
+		transactionService,
+	}
 }
 
-func (controller AccountController) FindByID(c *gin.Context) {
+func (ac AccountController) FindByID(c *gin.Context) {
 	accountID := c.Param("id")
 
 	var account models.Account
-	if err := controller.service.FindByID(accountID, &account); err != nil {
+	if err := ac.accountService.FindByID(accountID, &account); err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"message": "Account not found"})
 		return
 	}
@@ -39,11 +42,11 @@ func (controller AccountController) FindByID(c *gin.Context) {
 	c.JSON(http.StatusOK, account)
 }
 
-func (controller AccountController) FindTransfers(c *gin.Context) {
+func (ac AccountController) FindTransactions(c *gin.Context) {
 	accountID := c.Param("id")
 
 	var account models.Account
-	if err := controller.service.FindByID(accountID, &account); err != nil {
+	if err := ac.accountService.FindByID(accountID, &account); err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"message": "Account not found"})
 		return
 	}
@@ -54,15 +57,15 @@ func (controller AccountController) FindTransfers(c *gin.Context) {
 	// 	return
 	// }
 
-	var transfers []models.Transfer
+	var transfers []models.Transaction
 	var count int64
-	if err := controller.transferervice.FindByAccount(accountID, &transfers, &count, c); err != nil {
+	if err := ac.transactionService.FindByAccount(accountID, &transfers, &count, c); err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"message": "Account not found"})
 		return
 	}
 
 	if transfers == nil {
-		transfers = make([]models.Transfer, 0)
+		transfers = make([]models.Transaction, 0)
 	}
 
 	pageNumber, err := strconv.Atoi(c.Query("page"))
@@ -71,7 +74,7 @@ func (controller AccountController) FindTransfers(c *gin.Context) {
 		pageNumber = 1
 	}
 
-	paginatedResponse := models.PaginatedResponse[models.Transfer]{
+	paginatedResponse := models.PaginatedResponse[models.Transaction]{
 		Items: transfers,
 		PagingInfo: models.PagingInfo{
 			TotalItems: uint(count),
@@ -82,7 +85,7 @@ func (controller AccountController) FindTransfers(c *gin.Context) {
 	c.JSON(http.StatusOK, paginatedResponse)
 }
 
-func (controller AccountController) GetTransferHistoricalData(c *gin.Context) {
+func (ac AccountController) GetTransactionHistoricalData(c *gin.Context) {
 	accountID := c.Param("id")
 	daysAgo, err := strconv.Atoi(c.Query("days-ago"))
 
@@ -90,7 +93,7 @@ func (controller AccountController) GetTransferHistoricalData(c *gin.Context) {
 		daysAgo = 30
 	}
 
-	summary, err := controller.service.GetTransferHistoricalData(accountID, daysAgo)
+	summary, err := ac.accountService.GetTransactionHistoricalData(accountID, daysAgo)
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": "Something happened while retrieving data"})

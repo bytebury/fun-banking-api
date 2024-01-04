@@ -1,6 +1,6 @@
 package models
 
-type Transfer struct {
+type Transaction struct {
 	AuditModel
 	Description    string  `json:"description" gorm:"not null;size:255"`
 	CurrentBalance float64 `json:"current_balance" gorm:"not null;type:decimal(50,2)"`
