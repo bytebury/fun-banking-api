@@ -59,7 +59,6 @@ func (repository TransferRepository) FindByAccount(accountID string, transfers *
 func (repository TransferRepository) FindByUserID(userID string, transfers *[]models.Transfer) error {
 	unionQuery := "(SELECT bank_id FROM employees WHERE user_id = ? UNION SELECT id FROM banks WHERE user_id = ?)"
 
-	// Main query
 	return repository.db.Model(&models.Transfer{}).
 		Joins("JOIN accounts ON transfers.account_id = accounts.id").
 		Joins("JOIN customers ON accounts.customer_id = customers.id").
