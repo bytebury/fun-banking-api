@@ -57,15 +57,16 @@ func (repository TransferRepository) FindByAccount(accountID string, transfers *
 }
 
 func (repository TransferRepository) FindByUserID(userID string, transfers *[]models.Transfer) error {
+	unionQuery := "(SELECT bank_id FROM employees WHERE user_id = ? UNION SELECT id FROM banks WHERE user_id = ?)"
+
+	// Main query
 	return repository.db.Model(&models.Transfer{}).
-		Joins("JOIN accounts ON accounts.id = transfers.account_id").
-		Joins("JOIN customers ON customers.id = accounts.customer_id").
-		Joins("JOIN banks ON banks.id = customers.bank_id").
-		Joins("JOIN users ON users.id = banks.user_id").
-		Preload("Account").
-		Preload("Account.Customer").
+		Joins("JOIN accounts ON transfers.account_id = accounts.id").
+		Joins("JOIN customers ON accounts.customer_id = customers.id").
+		Joins("JOIN banks ON customers.bank_id = banks.id").
+		Where("banks.id IN (?)", gorm.Expr(unionQuery, userID, userID)).
 		Where("transfers.status = ?", "pending").
-		Where("users.id = ?", userID).
+		Preload("Account.Customer").
 		Find(&transfers).Error
 }
 
