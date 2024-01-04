@@ -26,7 +26,7 @@ func (repository HealthRepository) GetHealthCheck(health *models.Health) error {
 	repository.db.Model(&models.User{}).Count(&health.NumberOfUsers)
 	repository.db.Model(&models.Bank{}).Count(&health.NumberOfBanks)
 	repository.db.Model(&models.Customer{}).Count(&health.NumberOfCustomers)
-	repository.db.Model(&models.Transfer{}).Count(&health.NumberOfTransfers)
+	repository.db.Model(&models.Transaction{}).Count(&health.NumberOfTransfers)
 
 	return nil
 }

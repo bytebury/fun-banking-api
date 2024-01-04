@@ -10,22 +10,22 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type TransferController struct {
-	service         services.TransferService
+type TransactionController struct {
+	service         services.TransactionService
 	accountService  services.AccountService
 	employeeService services.EmployeeService
 }
 
-func NewTransferController(
-	service services.TransferService,
+func NewTransactionController(
+	service services.TransactionService,
 	accountService services.AccountService,
 	employeeService services.EmployeeService,
-) *TransferController {
-	return &TransferController{service, accountService, employeeService}
+) *TransactionController {
+	return &TransactionController{service, accountService, employeeService}
 }
 
-func (controller TransferController) Create(c *gin.Context) {
-	var transfer models.Transfer
+func (controller TransactionController) Create(c *gin.Context) {
+	var transfer models.Transaction
 	userID := c.GetString("user_id")
 
 	if err := c.ShouldBindJSON(&transfer); err != nil {
@@ -62,7 +62,7 @@ func (controller TransferController) Create(c *gin.Context) {
 	c.JSON(http.StatusCreated, transfer)
 }
 
-func (controller TransferController) Approve(c *gin.Context) {
+func (controller TransactionController) Approve(c *gin.Context) {
 	userID := c.MustGet("user_id").(string)
 	transferID := c.Param("id")
 
@@ -81,7 +81,7 @@ func (controller TransferController) Approve(c *gin.Context) {
 	c.JSON(http.StatusOK, transfer)
 }
 
-func (controller TransferController) Decline(c *gin.Context) {
+func (controller TransactionController) Decline(c *gin.Context) {
 	userID := c.MustGet("user_id").(string)
 	transferID := c.Param("id")
 
@@ -100,10 +100,10 @@ func (controller TransferController) Decline(c *gin.Context) {
 	c.JSON(http.StatusOK, transfer)
 }
 
-func (controller TransferController) Notifications(c *gin.Context) {
+func (controller TransactionController) Notifications(c *gin.Context) {
 	userID := c.MustGet("user_id").(string)
 
-	var transfers []models.Transfer
+	var transfers []models.Transaction
 
 	if err := controller.service.Notifications(userID, &transfers); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": "Something went wrong"})
@@ -114,10 +114,10 @@ func (controller TransferController) Notifications(c *gin.Context) {
 
 }
 
-func (controller TransferController) isBankStaff(transferID string, c *gin.Context) bool {
+func (controller TransactionController) isBankStaff(transferID string, c *gin.Context) bool {
 	userID := c.MustGet("user_id").(string)
 
-	var transfer models.Transfer
+	var transfer models.Transaction
 	if err := controller.service.FindByID(transferID, &transfer); err != nil {
 		return false
 	}
