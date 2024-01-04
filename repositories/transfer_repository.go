@@ -60,11 +60,11 @@ func (tr TransactionRepository) FindByUserID(userID string, transfers *[]models.
 	unionQuery := "(SELECT bank_id FROM employees WHERE user_id = ? UNION SELECT id FROM banks WHERE user_id = ?)"
 
 	return tr.db.Model(&models.Transaction{}).
-		Joins("JOIN accounts ON transfers.account_id = accounts.id").
+		Joins("JOIN accounts ON transactions.account_id = accounts.id").
 		Joins("JOIN customers ON accounts.customer_id = customers.id").
 		Joins("JOIN banks ON customers.bank_id = banks.id").
 		Where("banks.id IN (?)", gorm.Expr(unionQuery, userID, userID)).
-		Where("transfers.status = ?", "pending").
+		Where("transactions.status = ?", "pending").
 		Preload("Account.Customer").
 		Find(&transfers).Error
 }

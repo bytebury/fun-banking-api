@@ -49,8 +49,8 @@ func (repository AccountRepository) GetTransactionHistoricalData(accountID strin
 
 	result := repository.db.Model(&models.Transaction{}).
 		Select("DATE(updated_at) as date, current_balance as total_balance").
-		Joins("JOIN (?) as sub on sub.max_updated_at = transfers.updated_at", subQuery).
-		Where("transfers.account_id = ? AND status = ?", accountID, "approved").
+		Joins("JOIN (?) as sub on sub.max_updated_at = transactions.updated_at", subQuery).
+		Where("transactions.account_id = ? AND status = ?", accountID, "approved").
 		Order("date").
 		Scan(&dailySummaries)
 
