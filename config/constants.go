@@ -8,7 +8,7 @@ const (
 
 // Banking constants
 const (
-	MAX_BANKING_TRANSFER_AMOUNT = 25_000_000
+	MAX_BANKING_TRANSFER_AMOUNT = 100_000_000
 )
 
 var JwtKey []byte
