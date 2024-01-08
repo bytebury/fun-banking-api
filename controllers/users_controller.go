@@ -103,6 +103,11 @@ func (handler UserController) Create(c *gin.Context) {
 
 	err := handler.user.Create(&request, &user)
 
+	if isPasswordsDoNotMatchError(err) {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "Those passwords do not match"})
+		return
+	}
+
 	if isDuplicateError(err) {
 		if strings.Contains(err.Error(), "username") {
 			c.JSON(http.StatusBadRequest, gin.H{"message": "That username already exists"})

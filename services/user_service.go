@@ -1,6 +1,7 @@
 package services
 
 import (
+	"errors"
 	"golfer/models"
 	"golfer/repositories"
 	"strconv"
@@ -22,6 +23,10 @@ func NewUserService(userRepository repositories.UserRepository, jwtService JwtSe
 }
 
 func (service UserService) Create(request *models.UserRequest, out *models.User) error {
+	if request.Password != request.PasswordConfirmation {
+		return errors.New("passwords do not match")
+	}
+
 	passwordHash, err := service.HashPassword(request.Password)
 
 	if err != nil {

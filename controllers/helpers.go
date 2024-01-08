@@ -12,3 +12,7 @@ func isDuplicateError(err error) bool {
 func isRecordNotFoundError(err error) bool {
 	return err != nil && strings.Contains(err.Error(), "record not found")
 }
+
+func isPasswordsDoNotMatchError(err error) bool {
+	return err != nil && strings.Contains(err.Error(), "passwords do not match")
+}

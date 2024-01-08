@@ -13,13 +13,14 @@ type User struct {
 }
 
 type UserRequest struct {
-	Username  string `json:"username"`
-	Email     string `json:"email"`
-	FirstName string `json:"first_name"`
-	LastName  string `json:"last_name"`
-	Password  string `json:"password"`
-	Avatar    string `json:"avatar"`
-	About     string `json:"about"`
+	Username             string `json:"username"`
+	Email                string `json:"email"`
+	FirstName            string `json:"first_name"`
+	LastName             string `json:"last_name"`
+	Password             string `json:"password"`
+	PasswordConfirmation string `json:"password_confirmation"`
+	Avatar               string `json:"avatar"`
+	About                string `json:"about"`
 }
 
 type LoginRequest struct {
