@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"golfer/config"
 	"golfer/models"
 	"golfer/services"
 	"net/http"
@@ -12,11 +13,12 @@ import (
 
 type BankController struct {
 	bank            services.BankService
+	userService     services.UserService
 	employeeService services.EmployeeService
 }
 
-func NewBankController(bank services.BankService, employeeService services.EmployeeService) *BankController {
-	return &BankController{bank, employeeService}
+func NewBankController(bank services.BankService, userService services.UserService, employeeService services.EmployeeService) *BankController {
+	return &BankController{bank, userService, employeeService}
 }
 
 func (controller BankController) FindByID(c *gin.Context) {
@@ -210,6 +212,16 @@ func (controller BankController) isBankEmployee(c *gin.Context) bool {
 func (controller BankController) isBankOwner(c *gin.Context) bool {
 	bankID := c.Param("id")
 	currentUserID := c.MustGet("user_id").(string)
+
+	var user models.User
+	if err := controller.userService.FindByID(currentUserID, &user); err != nil {
+		return false
+	}
+
+	// Admins can access everything
+	if user.Role >= config.AdminRole {
+		return true
+	}
 
 	var bank models.Bank
 	if err := controller.bank.FindByID(bankID, &bank); err != nil {

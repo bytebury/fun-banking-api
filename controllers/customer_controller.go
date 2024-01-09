@@ -1,6 +1,8 @@
 package controllers
 
 import (
+	"fmt"
+	"golfer/config"
 	"golfer/models"
 	"golfer/services"
 	"net/http"
@@ -15,6 +17,7 @@ type CustomerController struct {
 	bankService     services.BankService
 	accountService  services.AccountService
 	employeeService services.EmployeeService
+	userService     services.UserService
 }
 
 func NewCustomerController(
@@ -22,8 +25,9 @@ func NewCustomerController(
 	bankService services.BankService,
 	accountService services.AccountService,
 	employeeService services.EmployeeService,
+	userService services.UserService,
 ) *CustomerController {
-	return &CustomerController{customer, bankService, accountService, employeeService}
+	return &CustomerController{customer, bankService, accountService, employeeService, userService}
 }
 
 // TODO: YOU SHOULDN'T BE ABLE TO LOOK UP CUSTOMERS IF THEY AREN'T IN A BANK YOU OWN!
@@ -184,6 +188,7 @@ func (controller CustomerController) isBankStaff(customer models.Customer, c *gi
 	userID, err := strconv.Atoi(c.MustGet("user_id").(string))
 
 	if err != nil {
+		fmt.Println("⚠️ Unable to parse a userID when we should have been able to:", err)
 		return false
 	}
 
@@ -193,6 +198,15 @@ func (controller CustomerController) isBankStaff(customer models.Customer, c *gi
 	}
 
 	if bank.UserID == uint(userID) {
+		return true
+	}
+
+	var user models.User
+	if err := controller.userService.FindByID(strconv.Itoa(userID), &user); err != nil {
+		return false
+	}
+
+	if user.Role >= config.AdminRole {
 		return true
 	}
 

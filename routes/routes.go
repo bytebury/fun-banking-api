@@ -52,7 +52,7 @@ func SetupRoutes(router *gin.Engine) {
 	setupNotificationRoutes(router)
 	setupEmployeeRoutes(router)
 
-	bankController := controllers.NewBankController(bankService, employeeService)
+	bankController := controllers.NewBankController(bankService, userService, employeeService)
 	router.GET(":username/:slug", bankController.FindByUsernameAndSlug)
 }
 
@@ -109,7 +109,7 @@ func setupEmployeeRoutes(router *gin.Engine) {
  * Sets up the bank routes at `/banks`.
  */
 func setupBankRoutes(router *gin.Engine) {
-	controller := controllers.NewBankController(bankService, employeeService)
+	controller := controllers.NewBankController(bankService, userService, employeeService)
 	router.Group("/banks").
 		GET("", middleware.Auth(), controller.FindBanksByUserID).
 		GET(":id", middleware.Auth(), controller.FindByID).
@@ -123,7 +123,7 @@ func setupBankRoutes(router *gin.Engine) {
  * Sets up the customer routes at `/customers`.
  */
 func setupCustomerRoutes(router *gin.Engine) {
-	controller := controllers.NewCustomerController(customerService, bankService, accountService, employeeService)
+	controller := controllers.NewCustomerController(customerService, bankService, accountService, employeeService, userService)
 	router.Group("/customers").
 		GET(":id", middleware.Auth(), controller.FindByID).
 		// TODO: This needs to be audit once we do customer tokens!
