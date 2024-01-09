@@ -34,7 +34,7 @@ func (repository UserRepository) FindByUsername(username string, user *models.Us
 }
 
 func (repository UserRepository) FindByEmailOrUsername(email string, user *models.User) error {
-	return repository.db.First(&user, "username = ?", email).Or("email = ?", email).Error
+	return repository.db.First(&user, "username = ? OR email = ?", email, email).Error
 }
 
 func (repository UserRepository) Update(user *models.User) error {
