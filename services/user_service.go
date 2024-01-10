@@ -103,6 +103,7 @@ func (service UserService) Delete(userID string) error {
 func (service UserService) Login(request models.LoginRequest) (string, models.User, error) {
 	var user models.User
 
+	request.Email = strings.ToLower(request.Email)
 	if err := service.userRepository.FindByEmailOrUsername(request.Email, &user); err != nil {
 		return "", user, err
 	}
