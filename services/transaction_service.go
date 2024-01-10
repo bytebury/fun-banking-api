@@ -112,6 +112,10 @@ func (ts TransactionService) Notifications(userID string, transfers *[]models.Tr
 func (ts TransactionService) isBankStaff(accountId, userId string) bool {
 	var user models.User
 
+	if userId == "" {
+		return false
+	}
+
 	if err := ts.userService.FindByID(userId, &user); err != nil {
 		return false
 	}
