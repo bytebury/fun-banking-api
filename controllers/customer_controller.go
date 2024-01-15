@@ -135,6 +135,11 @@ func (controller CustomerController) Update(c *gin.Context) {
 			c.JSON(http.StatusBadRequest, gin.H{"message": "That customer already exists"})
 			return
 		}
+
+		if strings.Contains(err.Error(), "pin") {
+			c.JSON(http.StatusBadRequest, gin.H{"message": "A customer with that PIN already exists"})
+			return
+		}
 	}
 
 	if err != nil {
