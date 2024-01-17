@@ -40,17 +40,30 @@ func (controller BankController) FindByID(c *gin.Context) {
 
 func (controller BankController) FindBanksByUserID(c *gin.Context) {
 	var banks []models.Bank
-	userID := c.MustGet("user_id").(string)
-	err := controller.bank.FindBanksByUserID(userID, &banks)
+	var employeeOf []models.Employee
+	var employeeBanks []models.Bank = make([]models.Bank, 0)
 
-	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"message": "No banks found"})
+	userID := c.MustGet("user_id").(string)
+
+	if err := controller.bank.FindBanksByUserID(userID, &banks); err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"message": "Unable to retrieve bank information"})
 		return
+	}
+
+	if err := controller.employeeService.FindByUser(userID, &employeeOf); err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"message": "Unable to retrieve bank information"})
+		return
+	}
+
+	for _, employee := range employeeOf {
+		employeeBanks = append(employeeBanks, employee.Bank)
 	}
 
 	if banks == nil {
 		banks = make([]models.Bank, 0)
 	}
+
+	banks = append(banks, employeeBanks...)
 
 	c.JSON(http.StatusOK, banks)
 }
