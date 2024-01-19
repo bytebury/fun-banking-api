@@ -1,9 +1,11 @@
 package controllers
 
 import (
+	"golfer/config"
 	"golfer/models"
 	"golfer/services"
 	"net/http"
+	"strconv"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -21,10 +23,9 @@ func NewUserController(user services.UserService) *UserController {
 
 func (controller UserController) FindCurrentUser(c *gin.Context) {
 	userID := c.MustGet("user_id").(string)
-	var user models.User
-	err := controller.user.FindByID(userID, &user)
 
-	if err != nil {
+	var user models.User
+	if err := controller.user.FindByID(userID, &user); err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"message": "User not found"})
 		return
 	}
@@ -41,6 +42,10 @@ func (handler UserController) FindByID(c *gin.Context) {
 		return
 	}
 
+	if hasAccess, err := handler.canModify(c, userID); !hasAccess || err != nil {
+		user.Email = ""
+	}
+
 	c.JSON(http.StatusOK, user)
 }
 
@@ -53,6 +58,10 @@ func (handler UserController) FindByUsername(c *gin.Context) {
 		return
 	}
 
+	if hasAccess, err := handler.canModify(c, strconv.Itoa(int(user.ID))); !hasAccess || err != nil {
+		user.Email = ""
+	}
+
 	c.JSON(http.StatusOK, user)
 }
 
@@ -60,7 +69,7 @@ func (handler UserController) Update(c *gin.Context) {
 	var request models.UserRequest
 	userID := c.Param("id")
 
-	if !handler.canModify(c) {
+	if hasAccess, err := handler.canModify(c, userID); !hasAccess || err != nil {
 		c.JSON(http.StatusForbidden, gin.H{"message": "You don't have access to that"})
 		return
 	}
@@ -131,7 +140,7 @@ func (handler UserController) Create(c *gin.Context) {
 func (handler UserController) Delete(c *gin.Context) {
 	userID := c.Param("id")
 
-	if !handler.canModify(c) {
+	if hasAccess, err := handler.canModify(c, userID); !hasAccess || err != nil {
 		c.JSON(http.StatusForbidden, gin.H{"message": "You don't have access to that"})
 		return
 	}
@@ -150,8 +159,17 @@ func (handler UserController) Delete(c *gin.Context) {
  * The logic just makes sure they are who the ID is. For example, you can only
  * update or delete your own account.
  */
-func (handler UserController) canModify(c *gin.Context) bool {
-	userID := c.Param("id")
+func (handler UserController) canModify(c *gin.Context, userID string) (bool, error) {
 	currentUserID := c.MustGet("user_id").(string)
-	return userID == currentUserID
+
+	if userID == currentUserID {
+		return true, nil
+	}
+
+	var user models.User
+	if err := handler.user.FindByID(currentUserID, &user); err != nil {
+		return false, err
+	}
+
+	return user.Role == config.AdminRole, nil
 }
