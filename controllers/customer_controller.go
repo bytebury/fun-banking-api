@@ -38,7 +38,7 @@ func (controller CustomerController) FindByID(c *gin.Context) {
 
 	// If you are not the customer and you are not bank staff, don't allow access
 	var currentCustomer, exists = c.Get("customer_id")
-	if !exists && !controller.isBankStaff(customer, c) || exists && currentCustomer != strconv.Itoa(int(customer.ID)) {
+	if !exists || !controller.isBankStaff(customer, c) && (exists && currentCustomer != strconv.Itoa(int(customer.ID))) {
 		c.JSON(http.StatusUnauthorized, gin.H{"message": "You do not have access to view this customer"})
 		return
 	}
