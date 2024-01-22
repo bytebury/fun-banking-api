@@ -30,11 +30,18 @@ func NewCustomerController(
 	return &CustomerController{customer, bankService, accountService, employeeService, userService}
 }
 
-// TODO: YOU SHOULDN'T BE ABLE TO LOOK UP CUSTOMERS IF THEY AREN'T IN A BANK YOU OWN!
 func (controller CustomerController) FindByID(c *gin.Context) {
 	customerID := c.Param("id")
+
 	var customer models.Customer
 	err := controller.service.FindByID(customerID, &customer)
+
+	// If you are not the customer and you are not bank staff, don't allow access
+	var currentCustomer, exists = c.Get("customer_id")
+	if !exists && !controller.isBankStaff(customer, c) || exists && currentCustomer != strconv.Itoa(int(customer.ID)) {
+		c.JSON(http.StatusUnauthorized, gin.H{"message": "You do not have access to view this customer"})
+		return
+	}
 
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"message": "customer not found"})
@@ -173,20 +180,26 @@ func (controller CustomerController) Delete(c *gin.Context) {
 }
 
 func (controller CustomerController) Login(c *gin.Context) {
-	var signInRequest models.CustomerSignInRequest
+	var request models.CustomerSignInRequest
 
-	if err := c.ShouldBindJSON(&signInRequest); err != nil {
+	if err := c.ShouldBindJSON(&request); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"message": "Bad request"})
 		return
 	}
 
-	var customer models.Customer
-	if err := controller.service.Login(signInRequest.BankID, signInRequest.PIN, &customer); err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"message": "Invalid login"})
+	token, customer, err := controller.service.Login(request)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "Something went wrong while trying to sign you in"})
 		return
 	}
 
-	c.JSON(http.StatusOK, customer)
+	if token == "" {
+		c.JSON(http.StatusUnauthorized, gin.H{"message": "Invalid credentials. If you have forgotten your PIN, reach out to your bank owner."})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"token": token, "customer": customer})
 }
 
 func (controller CustomerController) isBankStaff(customer models.Customer, c *gin.Context) bool {

@@ -42,7 +42,9 @@ func (tr TransactionRepository) FindByAccount(accountID string, transfers *[]mod
 
 	offset := (page - 1) * limit
 
-	query := tr.db.Preload("User")
+	query := tr.db.Preload("User", func(db *gorm.DB) *gorm.DB {
+		return db.Select("id", "first_name", "last_name", "username")
+	})
 	query = query.Where("account_id = ?", accountID)
 
 	if len(statuses) > 0 {

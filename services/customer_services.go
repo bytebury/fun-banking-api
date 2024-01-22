@@ -3,16 +3,19 @@ package services
 import (
 	"golfer/models"
 	"golfer/repositories"
+	"strconv"
 	"strings"
 )
 
 type CustomerService struct {
 	repository repositories.CustomerRepository
+	jwtService JwtService
 }
 
-func NewCustomerService(repository repositories.CustomerRepository) *CustomerService {
+func NewCustomerService(repository repositories.CustomerRepository, jwtService JwtService) *CustomerService {
 	return &CustomerService{
 		repository,
+		jwtService,
 	}
 }
 
@@ -56,6 +59,17 @@ func (service CustomerService) Delete(customerID string) error {
 	return service.repository.Delete(customerID)
 }
 
-func (service CustomerService) Login(bankID string, pin string, customer *models.Customer) error {
-	return service.repository.FindByBankAndPIN(bankID, pin, customer)
+func (service CustomerService) Login(request models.CustomerSignInRequest) (string, models.Customer, error) {
+	var customer models.Customer
+
+	if err := service.repository.FindByBankAndPIN(request.BankID, request.PIN, &customer); err != nil {
+		return "", customer, err
+	}
+
+	token, err := service.jwtService.GenerateCustomerToken(strconv.Itoa(int(customer.ID)))
+
+	if err != nil {
+		return "", customer, err
+	}
+	return token, customer, err
 }

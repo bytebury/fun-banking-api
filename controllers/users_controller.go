@@ -162,6 +162,10 @@ func (handler UserController) Delete(c *gin.Context) {
 func (handler UserController) canModify(c *gin.Context, userID string) (bool, error) {
 	currentUserID := c.MustGet("user_id").(string)
 
+	if currentUserID == "" {
+		return false, nil
+	}
+
 	if userID == currentUserID {
 		return true, nil
 	}

@@ -25,7 +25,7 @@ func setupServices() {
 	jwtService = services.JwtService{}
 	userService = *services.NewUserService(*repositories.NewUserRepository(), jwtService)
 	bankService = *services.NewBankService(*repositories.NewBankRepository())
-	customerService = *services.NewCustomerService(*repositories.NewCustomerRepository())
+	customerService = *services.NewCustomerService(*repositories.NewCustomerRepository(), jwtService)
 	accountService = *services.NewAccountService(*repositories.NewAccountRepository())
 	passwordService = *services.NewPasswordService(userService, jwtService, *mailers.NewPasswordResetMailer())
 	healthService = *services.NewHealthService(*repositories.NewHealthRepository())
@@ -90,7 +90,7 @@ func setupUserRoutes(router *gin.Engine) {
 	controller := controllers.NewUserController(userService)
 	router.Group("/users").
 		GET("", middleware.Auth(), controller.FindCurrentUser).
-		GET(":username", middleware.Auth(), controller.FindByUsername).
+		GET(":username", middleware.Audit(), controller.FindByUsername).
 		PUT(":id", middleware.Auth(), controller.Update).
 		POST("", controller.Create).
 		DELETE(":id", middleware.Auth(), controller.Delete)
@@ -125,13 +125,13 @@ func setupBankRoutes(router *gin.Engine) {
 func setupCustomerRoutes(router *gin.Engine) {
 	controller := controllers.NewCustomerController(customerService, bankService, accountService, employeeService, userService)
 	router.Group("/customers").
-		GET(":id", middleware.Auth(), controller.FindByID).
+		GET(":id", middleware.Customer(), controller.FindByID).
 		// TODO: This needs to be audit once we do customer tokens!
-		GET(":id/accounts", middleware.Audit(), controller.FindAllAccounts).
-		PUT(":id", middleware.Auth(), controller.Update).
-		POST("", middleware.Auth(), controller.Create).
+		GET(":id/accounts", middleware.Customer(), controller.FindAllAccounts).
+		PUT(":id", middleware.Customer(), controller.Update).
+		POST("", middleware.Customer(), controller.Create).
 		POST("signin", controller.Login).
-		DELETE(":id", middleware.Auth(), controller.Delete)
+		DELETE(":id", middleware.Customer(), controller.Delete)
 }
 
 /**

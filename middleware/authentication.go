@@ -26,7 +26,7 @@ func Auth() gin.HandlerFunc {
 		})
 
 		if err != nil {
-			c.JSON(http.StatusUnauthorized, gin.H{"message": "Unauthorized"})
+			c.JSON(http.StatusUnauthorized, gin.H{"message": "You are not authorized to do this action"})
 			c.Abort()
 			return
 		}
@@ -35,9 +35,46 @@ func Auth() gin.HandlerFunc {
 			c.Set("user_id", claims.UserID)
 			c.Next()
 		} else {
-			c.JSON(http.StatusUnauthorized, gin.H{"message": "Unauthorized"})
+			c.JSON(http.StatusUnauthorized, gin.H{"message": "You are not authorized to do this action"})
 			c.Abort()
 		}
+	}
+}
+
+func Customer() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		tokenString := c.GetHeader("Authorization")
+
+		if tokenString == "" {
+			c.JSON(http.StatusUnauthorized, gin.H{"message": "Authorization header is missing"})
+			c.Abort()
+			return
+		}
+
+		token, err := jwt.ParseWithClaims(tokenString, &services.CustomerClaims{}, func(token *jwt.Token) (interface{}, error) {
+			return config.JwtKey, nil
+		})
+
+		if err != nil {
+			c.JSON(http.StatusUnauthorized, gin.H{"message": "You are not authorized to do this action"})
+			c.Abort()
+			return
+		}
+
+		if claims, ok := token.Claims.(*services.CustomerClaims); ok && token.Valid {
+			c.Set("customer_id", claims.CustomerID)
+
+			if claims.CustomerID == "" {
+				Auth()(c)
+				return
+			}
+
+			c.Next()
+		} else {
+			c.JSON(http.StatusUnauthorized, gin.H{"message": "You are not authorized to do this action"})
+			c.Abort()
+		}
+
 	}
 }
 
