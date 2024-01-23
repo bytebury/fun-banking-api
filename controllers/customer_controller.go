@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"golfer/config"
 	"golfer/models"
+	"golfer/repositories"
 	"golfer/services"
 	"net/http"
 	"strconv"
@@ -13,11 +14,12 @@ import (
 )
 
 type CustomerController struct {
-	service         services.CustomerService
-	bankService     services.BankService
-	accountService  services.AccountService
-	employeeService services.EmployeeService
-	userService     services.UserService
+	service           services.CustomerService
+	bankService       services.BankService
+	accountService    services.AccountService
+	employeeService   services.EmployeeService
+	userService       services.UserService
+	visitorRepository repositories.VisitorRepository
 }
 
 func NewCustomerController(
@@ -26,8 +28,9 @@ func NewCustomerController(
 	accountService services.AccountService,
 	employeeService services.EmployeeService,
 	userService services.UserService,
+	visitorRepository repositories.VisitorRepository,
 ) *CustomerController {
-	return &CustomerController{customer, bankService, accountService, employeeService, userService}
+	return &CustomerController{customer, bankService, accountService, employeeService, userService, visitorRepository}
 }
 
 func (controller CustomerController) FindByID(c *gin.Context) {
@@ -37,8 +40,13 @@ func (controller CustomerController) FindByID(c *gin.Context) {
 	err := controller.service.FindByID(customerID, &customer)
 
 	// If you are not the customer and you are not bank staff, don't allow access
-	var currentCustomer, exists = c.Get("customer_id")
-	if !exists || !controller.isBankStaff(customer, c) && (exists && currentCustomer != strconv.Itoa(int(customer.ID))) {
+	var currentCustomer, customerExists = c.Get("customer_id")
+	if customerExists && currentCustomer != strconv.Itoa(int(customer.ID)) {
+		c.JSON(http.StatusUnauthorized, gin.H{"message": "You do not have access to view this customer"})
+		return
+	}
+
+	if !customerExists && !controller.isBankStaff(customer, c) {
 		c.JSON(http.StatusUnauthorized, gin.H{"message": "You do not have access to view this customer"})
 		return
 	}
@@ -199,11 +207,20 @@ func (controller CustomerController) Login(c *gin.Context) {
 		return
 	}
 
+	// Store the visitor
+	controller.visitorRepository.AddVisitor(&models.Visitor{UserID: nil, CustomerID: &customer.ID, IPAddress: c.ClientIP()})
+
 	c.JSON(http.StatusOK, gin.H{"token": token, "customer": customer})
 }
 
 func (controller CustomerController) isBankStaff(customer models.Customer, c *gin.Context) bool {
-	userID, err := strconv.Atoi(c.MustGet("user_id").(string))
+	userIDString, exists := c.Get("user_id")
+
+	if !exists {
+		return false
+	}
+
+	userID, err := strconv.Atoi(userIDString.(string))
 
 	if err != nil {
 		fmt.Println("⚠️ Unable to parse a userID when we should have been able to:", err)

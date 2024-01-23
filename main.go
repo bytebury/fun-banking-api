@@ -44,6 +44,7 @@ func runMigrations() {
 	database.DB.AutoMigrate(&models.Transaction{})
 	database.DB.AutoMigrate(&models.Announcement{})
 	database.DB.AutoMigrate(&models.Employee{})
+	database.DB.AutoMigrate(&models.Visitor{})
 }
 
 func setupConfigs() {

@@ -61,10 +61,12 @@ func SetupRoutes(router *gin.Engine) {
  */
 func setupHealthCheckRoutes(router *gin.Engine) {
 	userRepository := repositories.NewUserRepository()
-	controller := controllers.NewHealthController(healthService)
+	visitor := repositories.NewVisitorRepository()
+	controller := controllers.NewHealthController(healthService, *visitor)
 
 	router.GET("/health", controller.GetHealthCheck).
-		GET("/health/users", middleware.Admin(*userRepository), controller.GetUserInsights)
+		GET("/health/users", middleware.Admin(*userRepository), controller.GetUserInsights).
+		GET("/health/visitors", middleware.Admin(*userRepository), controller.GetVisitorInsights)
 }
 
 func setupNotificationRoutes(router *gin.Engine) {
@@ -87,7 +89,7 @@ func setupAnnouncementRoutes(router *gin.Engine) {
  * Setups the users routes at `/users`.
  */
 func setupUserRoutes(router *gin.Engine) {
-	controller := controllers.NewUserController(userService)
+	controller := controllers.NewUserController(userService, *repositories.NewVisitorRepository())
 	router.Group("/users").
 		GET("", middleware.Auth(), controller.FindCurrentUser).
 		GET(":username", middleware.Audit(), controller.FindByUsername).
@@ -123,10 +125,10 @@ func setupBankRoutes(router *gin.Engine) {
  * Sets up the customer routes at `/customers`.
  */
 func setupCustomerRoutes(router *gin.Engine) {
-	controller := controllers.NewCustomerController(customerService, bankService, accountService, employeeService, userService)
+	visitorRepository := repositories.NewVisitorRepository()
+	controller := controllers.NewCustomerController(customerService, bankService, accountService, employeeService, userService, *visitorRepository)
 	router.Group("/customers").
 		GET(":id", middleware.Customer(), controller.FindByID).
-		// TODO: This needs to be audit once we do customer tokens!
 		GET(":id/accounts", middleware.Customer(), controller.FindAllAccounts).
 		PUT(":id", middleware.Customer(), controller.Update).
 		POST("", middleware.Customer(), controller.Create).
@@ -138,13 +140,11 @@ func setupCustomerRoutes(router *gin.Engine) {
  * Sets up the accounts routes at `/accounts`.
  */
 func setupAccountRoutes(router *gin.Engine) {
-	// TODO: Need to lock this down once we do tokens for customers
-	//       E.g. it's Audit right now, we'll need it to be Auth
 	controller := controllers.NewAccountController(accountService, transactionService)
 	router.Group("/accounts").
-		GET(":id", middleware.Audit(), controller.FindByID).
-		GET(":id/transactions", middleware.Audit(), controller.FindTransactions).
-		GET(":id/insights/transactions", middleware.Audit(), controller.GetTransactionHistoricalData)
+		GET(":id", middleware.Customer(), controller.FindByID).
+		GET(":id/transactions", middleware.Customer(), controller.FindTransactions).
+		GET(":id/insights/transactions", middleware.Customer(), controller.GetTransactionHistoricalData)
 }
 
 func setupTransactionRoutes(router *gin.Engine) {

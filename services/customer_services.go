@@ -71,5 +71,6 @@ func (service CustomerService) Login(request models.CustomerSignInRequest) (stri
 	if err != nil {
 		return "", customer, err
 	}
+
 	return token, customer, err
 }

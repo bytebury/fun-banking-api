@@ -3,6 +3,7 @@ package controllers
 import (
 	"golfer/config"
 	"golfer/models"
+	"golfer/repositories"
 	"golfer/services"
 	"net/http"
 	"strconv"
@@ -12,12 +13,17 @@ import (
 )
 
 type UserController struct {
-	user services.UserService
+	user              services.UserService
+	visitorRepository repositories.VisitorRepository
 }
 
-func NewUserController(user services.UserService) *UserController {
+func NewUserController(
+	user services.UserService,
+	visitorRepository repositories.VisitorRepository,
+) *UserController {
 	return &UserController{
-		user: user,
+		user:              user,
+		visitorRepository: visitorRepository,
 	}
 }
 
@@ -29,6 +35,9 @@ func (controller UserController) FindCurrentUser(c *gin.Context) {
 		c.JSON(http.StatusNotFound, gin.H{"message": "User not found"})
 		return
 	}
+
+	// Store a visitor
+	controller.visitorRepository.AddVisitor(&models.Visitor{UserID: &user.ID, IPAddress: c.ClientIP(), CustomerID: nil})
 
 	c.JSON(http.StatusOK, user)
 }
