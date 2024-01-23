@@ -62,14 +62,13 @@ func Customer() gin.HandlerFunc {
 		}
 
 		if claims, ok := token.Claims.(*services.CustomerClaims); ok && token.Valid {
-			c.Set("customer_id", claims.CustomerID)
-
-			if claims.CustomerID == "" {
+			if claims.CustomerID != "" {
+				c.Set("customer_id", claims.CustomerID)
+				c.Next()
+			} else {
 				Auth()(c)
 				return
 			}
-
-			c.Next()
 		} else {
 			c.JSON(http.StatusUnauthorized, gin.H{"message": "You are not authorized to do this action"})
 			c.Abort()
