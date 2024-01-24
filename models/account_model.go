@@ -1,7 +1,5 @@
 package models
 
-import "time"
-
 type Account struct {
 	AuditModel
 	Name       string   `json:"name" gorm:"not null;size:100"`
@@ -10,7 +8,8 @@ type Account struct {
 	Customer   Customer `json:"customer" gorm:"foreignKey:CustomerID;constraint:OnDelete:CASCADE;"`
 }
 
-type DailyTransferSummary struct {
-	Date         time.Time `json:"date"`
-	TotalBalance float64   `json:"total_balance"`
+type AccountMonthlySummary struct {
+	Month       string  `json:"month"`
+	Deposits    float64 `json:"deposits"`
+	Withdrawals float64 `json:"withdrawals"`
 }

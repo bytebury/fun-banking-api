@@ -87,20 +87,29 @@ func (ac AccountController) FindTransactions(c *gin.Context) {
 
 func (ac AccountController) GetTransactionHistoricalData(c *gin.Context) {
 	accountID := c.Param("id")
-	daysAgo, err := strconv.Atoi(c.Query("days-ago"))
 
-	if err != nil || daysAgo <= 0 {
-		daysAgo = 30
-	}
-
-	summary, err := ac.accountService.GetTransactionHistoricalData(accountID, daysAgo)
+	summary, err := ac.accountService.GetMonthlyData(accountID)
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": "Something happened while retrieving data"})
 		return
 	}
 
-	c.JSON(http.StatusOK, summary)
+	var labels []string
+	var deposits []float64
+	var withdrawals []float64
+
+	for _, agg := range summary {
+		labels = append(labels, agg.Month)
+		deposits = append(deposits, agg.Deposits)
+		withdrawals = append(withdrawals, agg.Withdrawals)
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"label":       labels,
+		"deposits":    deposits,
+		"withdrawals": withdrawals,
+	})
 }
 
 // func (controller AccountController) isBankStaff(account models.Account, c *gin.Context) bool {

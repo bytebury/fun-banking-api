@@ -65,6 +65,6 @@ func (service AccountService) Delete(accountID string) error {
 	return service.repository.Delete(accountID)
 }
 
-func (service AccountService) GetTransactionHistoricalData(accountID string, daysAgo int) ([]models.DailyTransferSummary, error) {
-	return service.repository.GetTransactionHistoricalData(accountID, daysAgo)
+func (service AccountService) GetMonthlyData(accountID string) ([]models.AccountMonthlySummary, error) {
+	return service.repository.GetMonthlyData(accountID)
 }

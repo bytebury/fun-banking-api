@@ -38,21 +38,17 @@ func (repository AccountRepository) Delete(accountID string) error {
 	return repository.db.Delete(&models.Account{}, "id = ?", accountID).Error
 }
 
-func (repository AccountRepository) GetTransactionHistoricalData(accountID string, daysAgo int) ([]models.DailyTransferSummary, error) {
-	var dailySummaries []models.DailyTransferSummary
-	xDaysAgo := time.Now().AddDate(0, 0, -daysAgo)
+func (repository AccountRepository) GetMonthlyData(accountID string) ([]models.AccountMonthlySummary, error) {
+	startDate := time.Now().AddDate(0, -3, 0)
 
-	subQuery := repository.db.Model(&models.Transaction{}).
-		Select("MAX(updated_at) as max_updated_at").
-		Where("updated_at >= ? AND account_id = ?", xDaysAgo, accountID).
-		Group("DATE(updated_at)")
+	var monthlyAggregations []models.AccountMonthlySummary
+	err := repository.db.Model(&models.Transaction{}).
+		Select("TO_CHAR(updated_at, 'YYYY-MM') as month, SUM(CASE WHEN amount >= 0 THEN amount ELSE 0 END) as deposits, SUM(CASE WHEN amount < 0 THEN amount ELSE 0 END) as withdrawals").
+		Where("updated_at >= ? AND account_id = ?", startDate, accountID).
+		Group("month").
+		Order("month").
+		Find(&monthlyAggregations).Error
 
-	result := repository.db.Model(&models.Transaction{}).
-		Select("DATE(updated_at) as date, current_balance as total_balance").
-		Joins("JOIN (?) as sub on sub.max_updated_at = transactions.updated_at", subQuery).
-		Where("transactions.account_id = ? AND status = ?", accountID, "approved").
-		Order("date").
-		Scan(&dailySummaries)
+	return monthlyAggregations, err
 
-	return dailySummaries, result.Error
 }
