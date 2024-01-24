@@ -106,7 +106,7 @@ func (ac AccountController) GetTransactionHistoricalData(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"label":       labels,
+		"labels":      labels,
 		"deposits":    deposits,
 		"withdrawals": withdrawals,
 	})
