@@ -39,12 +39,17 @@ func (repository AccountRepository) Delete(accountID string) error {
 }
 
 func (repository AccountRepository) GetMonthlyData(accountID string) ([]models.AccountMonthlySummary, error) {
-	startDate := time.Now().AddDate(0, -3, 0)
+	// Get the current month and year
+	currentMonth := time.Now().Month()
+	currentYear := time.Now().Year()
+
+	// Calculate the start of the current month
+	startOfMonth := time.Date(currentYear, currentMonth, 1, 0, 0, 0, 0, time.UTC)
 
 	var monthlyAggregations []models.AccountMonthlySummary
 	err := repository.db.Model(&models.Transaction{}).
 		Select("TO_CHAR(updated_at, 'Month') as month, SUM(CASE WHEN amount >= 0 THEN amount ELSE 0 END) as deposits, SUM(CASE WHEN amount < 0 THEN amount ELSE 0 END) as withdrawals").
-		Where("updated_at >= ? AND account_id = ?", startDate, accountID).
+		Where("updated_at >= ? AND account_id = ?", startOfMonth, accountID).
 		Group("month").
 		Order("month").
 		Find(&monthlyAggregations).Error
