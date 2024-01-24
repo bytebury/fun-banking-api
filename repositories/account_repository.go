@@ -43,7 +43,7 @@ func (repository AccountRepository) GetMonthlyData(accountID string) ([]models.A
 
 	var monthlyAggregations []models.AccountMonthlySummary
 	err := repository.db.Model(&models.Transaction{}).
-		Select("TO_CHAR(updated_at, 'YYYY-MM') as month, SUM(CASE WHEN amount >= 0 THEN amount ELSE 0 END) as deposits, SUM(CASE WHEN amount < 0 THEN amount ELSE 0 END) as withdrawals").
+		Select("TO_CHAR(updated_at, 'Month') as month, SUM(CASE WHEN amount >= 0 THEN amount ELSE 0 END) as deposits, SUM(CASE WHEN amount < 0 THEN amount ELSE 0 END) as withdrawals").
 		Where("updated_at >= ? AND account_id = ?", startDate, accountID).
 		Group("month").
 		Order("month").
