@@ -140,7 +140,7 @@ func setupCustomerRoutes(router *gin.Engine) {
  * Sets up the accounts routes at `/accounts`.
  */
 func setupAccountRoutes(router *gin.Engine) {
-	controller := controllers.NewAccountController(accountService, transactionService)
+	controller := controllers.NewAccountController(accountService, transactionService, bankService, userService, employeeService)
 	router.Group("/accounts").
 		GET(":id", middleware.Customer(), controller.FindByID).
 		GET(":id/transactions", middleware.Customer(), controller.FindTransactions).
