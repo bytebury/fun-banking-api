@@ -1,7 +1,16 @@
 package main
 
-import "fmt"
+import (
+	"funbanking/internal/infrastructure/persistence"
+	"log"
+
+	"github.com/joho/godotenv"
+)
 
 func main() {
-	fmt.Println("Hello World")
+	// Load environment variables
+	if err := godotenv.Load(".env"); err != nil {
+		log.Println("🟡 Unable to load .env configuration")
+	}
+	persistence.SetUpConnection()
 }
