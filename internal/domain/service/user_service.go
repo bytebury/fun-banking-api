@@ -18,9 +18,8 @@ func NewUserService(userRepository repository.UserRepository) UserService {
 
 func (s UserService) GetCurrentUser(c *gin.Context) {
 	var user model.User
-	err := s.repo.GetCurrentUser(&user)
 
-	if err != nil {
+	if err := s.repo.GetCurrentUser(&user); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": "Something went wrong"})
 		return
 	}

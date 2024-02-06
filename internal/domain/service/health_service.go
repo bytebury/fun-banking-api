@@ -9,18 +9,17 @@ import (
 )
 
 type HealthService struct {
-	repo repository.Health
+	repo repository.HealthRepository
 }
 
-func NewHealthService(healthRepository repository.Health) HealthService {
+func NewHealthService(healthRepository repository.HealthRepository) HealthService {
 	return HealthService{repo: healthRepository}
 }
 
 func (s HealthService) GetHealthCheck(c *gin.Context) {
 	var health model.Health
-	err := s.repo.GetHealthCheck(&health)
 
-	if err != nil {
+	if err := s.repo.GetHealthCheck(&health); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": "Something went wrong"})
 		return
 	}
