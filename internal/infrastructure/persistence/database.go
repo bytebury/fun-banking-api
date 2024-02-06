@@ -34,3 +34,7 @@ func SetUpConnection() {
 	DB = db
 	log.Println("🟢 Successfully connected to the database")
 }
+
+func RunMigrations() {
+	// TODO
+}

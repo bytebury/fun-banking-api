@@ -2,6 +2,7 @@ package main
 
 import (
 	"funbanking/internal/infrastructure/persistence"
+	"funbanking/internal/interfaces/api"
 	"log"
 
 	"github.com/joho/godotenv"
@@ -12,5 +13,9 @@ func main() {
 	if err := godotenv.Load(".env"); err != nil {
 		log.Println("🟡 Unable to load .env configuration")
 	}
+
 	persistence.SetUpConnection()
+	persistence.RunMigrations()
+
+	api.Run()
 }
