@@ -7,18 +7,18 @@ import (
 	"gorm.io/gorm"
 )
 
-type User interface {
+type UserRepository interface {
 	GetCurrentUser(user *model.User) error
 }
 
-type UserRepository struct {
+type userRepository struct {
 	db *gorm.DB
 }
 
 func NewUserRepository() UserRepository {
-	return UserRepository{db: persistence.DB}
+	return userRepository{db: persistence.DB}
 }
 
-func (r UserRepository) GetCurrentUser(user *model.User) error {
+func (r userRepository) GetCurrentUser(user *model.User) error {
 	return r.db.Find(&user, "username = ?", "marcello").Error
 }

@@ -7,19 +7,19 @@ import (
 	"gorm.io/gorm"
 )
 
-type Health interface {
+type HealthRepository interface {
 	GetHealthCheck(health *model.Health) error
 }
 
-type HealthRepository struct {
+type healthRepository struct {
 	db *gorm.DB
 }
 
 func NewHealthRepository() HealthRepository {
-	return HealthRepository{db: persistence.DB}
+	return healthRepository{db: persistence.DB}
 }
 
-func (r HealthRepository) GetHealthCheck(health *model.Health) error {
+func (r healthRepository) GetHealthCheck(health *model.Health) error {
 	health.Name = "Fun Banking"
 	health.Version = "1.0.0"
 	health.Message = "Everything is up and running!"
