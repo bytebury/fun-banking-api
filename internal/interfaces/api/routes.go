@@ -18,9 +18,15 @@ type runner struct {
 
 func (r runner) setup() {
 	r.setupHealthRoutes()
+	r.setupUserRoutes()
 }
 
 func (r runner) setupHealthRoutes() {
 	handler := handlers.NewHealthHandler()
 	r.router.Group("/health").GET("/", handler.GetHealthCheck)
+}
+
+func (r runner) setupUserRoutes() {
+	handler := handlers.NewUserHandler()
+	r.router.GET("/current-user", handler.GetCurrentUser)
 }
