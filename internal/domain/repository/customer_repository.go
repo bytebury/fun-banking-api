@@ -32,9 +32,19 @@ func (r customerRepository) FindAccounts(customerID string, accounts *[]model.Ac
 	return r.db.Find(&accounts, "customer_id = ?", customerID).Error
 }
 
-// TODO: When we create a customer, we also create an account! So need to add a transaction here
 func (r customerRepository) Create(customer *model.Customer) error {
-	return r.db.Create(&customer).Error
+	// When you create a customer, you also create a checkings account
+	return r.db.Transaction(func(tx *gorm.DB) error {
+		if err := tx.Create(&customer).Error; err != nil {
+			return err
+		}
+
+		if err := tx.Create(&model.Account{Name: "Checkings", CustomerID: customer.ID}).Error; err != nil {
+			return err
+		}
+
+		return nil
+	})
 }
 
 func (r customerRepository) Update(customer *model.Customer) error {

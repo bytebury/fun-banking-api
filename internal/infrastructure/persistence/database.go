@@ -1,6 +1,7 @@
 package persistence
 
 import (
+	"funbanking/internal/domain/model"
 	"log"
 	"os"
 
@@ -36,5 +37,9 @@ func SetUpConnection() {
 }
 
 func RunMigrations() {
-	// TODO
+	DB.AutoMigrate(&model.User{})
+	DB.AutoMigrate(&model.Bank{})
+	DB.AutoMigrate(&model.Customer{})
+	DB.AutoMigrate(&model.Account{})
+	DB.AutoMigrate(&model.Transaction{})
 }
