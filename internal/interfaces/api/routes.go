@@ -19,6 +19,7 @@ type runner struct {
 func (r runner) setup() {
 	r.setupHealthRoutes()
 	r.setupUserRoutes()
+	r.setupBankRoutes()
 }
 
 func (r runner) setupHealthRoutes() {
@@ -29,4 +30,15 @@ func (r runner) setupHealthRoutes() {
 func (r runner) setupUserRoutes() {
 	handler := handlers.NewUserHandler()
 	r.router.GET("/current-user", handler.GetCurrentUser)
+}
+
+func (r runner) setupBankRoutes() {
+	handler := handlers.NewBankHandler()
+	r.router.Group("/banks").
+		GET("", handler.FindAllByUserID).
+		GET(":id", handler.FindByID).
+		POST("", handler.FindByUsernameAndSlug).
+		PUT("", handler.Create).
+		PATCH("", handler.Update).
+		DELETE(":id", handler.Delete)
 }

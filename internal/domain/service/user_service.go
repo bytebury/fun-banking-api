@@ -9,17 +9,17 @@ import (
 )
 
 type UserService struct {
-	repo repository.UserRepository
+	userRepository repository.UserRepository
 }
 
 func NewUserService(userRepository repository.UserRepository) UserService {
-	return UserService{repo: userRepository}
+	return UserService{userRepository}
 }
 
 func (s UserService) GetCurrentUser(c *gin.Context) {
 	var user model.User
 
-	if err := s.repo.GetCurrentUser(&user); err != nil {
+	if err := s.userRepository.GetCurrentUser(&user); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": "Something went wrong"})
 		return
 	}
