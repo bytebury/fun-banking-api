@@ -21,6 +21,7 @@ func (r runner) setup() {
 	r.setupUserRoutes()
 	r.setupBankRoutes()
 	r.setupCustomerRoutes()
+	r.setupAccountRoutes()
 }
 
 func (r runner) setupHealthRoutes() {
@@ -53,4 +54,11 @@ func (r runner) setupCustomerRoutes() {
 		PUT("", handler.Create).
 		PATCH("", handler.Update).
 		DELETE(":id", handler.Delete)
+}
+
+func (r runner) setupAccountRoutes() {
+	handler := handlers.NewAccountHandler()
+	r.router.Group("/accounts").
+		GET(":id", handler.FindByID).
+		PATCH("", handler.Update)
 }
