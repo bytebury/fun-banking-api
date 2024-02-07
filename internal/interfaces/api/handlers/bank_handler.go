@@ -13,7 +13,9 @@ type BankHandler struct {
 
 func NewBankHandler() BankHandler {
 	return BankHandler{
-		bank: service.NewBankService(repository.NewBankRepository()),
+		bank: service.NewBankService(
+			repository.NewBankRepository(),
+		),
 	}
 }
 
@@ -21,12 +23,16 @@ func (h BankHandler) FindByID(c *gin.Context) {
 	h.bank.FindByID(c)
 }
 
-func (h BankHandler) FindAllByUserID(c *gin.Context) {
-	h.bank.FindAllByUserID(c)
+func (h BankHandler) FindAllMyBanks(c *gin.Context) {
+	h.bank.FindAllMyBanks(c)
 }
 
 func (h BankHandler) FindByUsernameAndSlug(c *gin.Context) {
 	h.bank.FindByUsernameAndSlug(c)
+}
+
+func (h BankHandler) FindAllCustomers(c *gin.Context) {
+	h.bank.FindAllCustomers(c)
 }
 
 func (h BankHandler) Create(c *gin.Context) {

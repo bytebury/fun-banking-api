@@ -20,6 +20,7 @@ func (r runner) setup() {
 	r.setupHealthRoutes()
 	r.setupUserRoutes()
 	r.setupBankRoutes()
+	r.setupCustomerRoutes()
 }
 
 func (r runner) setupHealthRoutes() {
@@ -35,9 +36,20 @@ func (r runner) setupUserRoutes() {
 func (r runner) setupBankRoutes() {
 	handler := handlers.NewBankHandler()
 	r.router.Group("/banks").
-		GET("", handler.FindAllByUserID).
+		GET("", handler.FindAllMyBanks).
 		GET(":id", handler.FindByID).
+		GET(":id/customers", handler.FindAllCustomers).
 		POST("", handler.FindByUsernameAndSlug).
+		PUT("", handler.Create).
+		PATCH("", handler.Update).
+		DELETE(":id", handler.Delete)
+}
+
+func (r runner) setupCustomerRoutes() {
+	handler := handlers.NewCustomerHandler()
+	r.router.Group("/customers").
+		GET(":id", handler.FindByID).
+		GET(":id/accounts", handler.FindAccounts).
 		PUT("", handler.Create).
 		PATCH("", handler.Update).
 		DELETE(":id", handler.Delete)

@@ -24,11 +24,10 @@ func (r healthRepository) GetHealthCheck(health *model.Health) error {
 	health.Version = "1.0.0"
 	health.Message = "Everything is up and running!"
 
-	// TODO(marcello): add these
-	// r.db.Model(&model.User{}).Count(&health.NumberOfUsers)
-	// r.db.Model(&model.Bank{}).Count(&health.NumberOfBanks)
-	// r.db.Model(&model.Customer{}).Count(&health.NumberOfCustomers)
-	// r.db.Model(&model.Transaction{}).Count(&health.NumberOfTransactions)
+	r.db.Model(&model.User{}).Count(&health.NumberOfUsers)
+	r.db.Model(&model.Bank{}).Count(&health.NumberOfBanks)
+	r.db.Model(&model.Customer{}).Count(&health.NumberOfCustomers)
+	r.db.Model(&model.Transaction{}).Count(&health.NumberOfTransactions)
 
 	return nil
 }

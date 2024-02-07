@@ -11,8 +11,9 @@ import (
 
 type BankService interface {
 	FindByID(ctx *gin.Context)
-	FindAllByUserID(ctx *gin.Context)
+	FindAllMyBanks(ctx *gin.Context)
 	FindByUsernameAndSlug(ctx *gin.Context)
+	FindAllCustomers(ctx *gin.Context)
 	Create(ctx *gin.Context)
 	Update(ctx *gin.Context)
 	Delete(ctx *gin.Context)
@@ -38,7 +39,7 @@ func (s bankService) FindByID(c *gin.Context) {
 	c.JSON(http.StatusOK, bank)
 }
 
-func (s bankService) FindAllByUserID(c *gin.Context) {
+func (s bankService) FindAllMyBanks(c *gin.Context) {
 	var banks []model.Bank
 	// TODO: This will come from context from the token!
 	userID := c.Param("user_id")
@@ -70,6 +71,18 @@ func (s bankService) FindByUsernameAndSlug(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, bank)
+}
+
+func (s bankService) FindAllCustomers(c *gin.Context) {
+	var customers []model.Customer
+	bankID := c.Param("id")
+
+	if err := s.bankRepository.FindAllCustomers(bankID, &customers); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "Something went wrong"})
+		return
+	}
+
+	c.JSON(http.StatusOK, utils.Listify(customers))
 }
 
 func (s bankService) Create(c *gin.Context) {
