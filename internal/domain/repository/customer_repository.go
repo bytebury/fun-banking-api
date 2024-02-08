@@ -65,7 +65,7 @@ func (r customerRepository) Update(customerID string, customer *model.Customer) 
 		customer.PIN = foundCustomer.PIN
 	}
 
-	return r.db.Model(&customer).Select("FirstName", "LastName", "PIN").Updates(&customer).Error
+	return r.db.Model(&foundCustomer).Select("FirstName", "LastName", "PIN").Updates(&customer).Error
 }
 
 func (r customerRepository) Delete(customerID string) error {

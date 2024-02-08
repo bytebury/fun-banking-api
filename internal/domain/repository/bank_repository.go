@@ -70,7 +70,7 @@ func (r bankRepository) Update(bankID string, bank *model.Bank) error {
 		bank.Description = foundBank.Description
 	}
 
-	return r.db.Model(&bank).Select("Name", "Slug", "Description").Updates(&bank).Error
+	return r.db.Model(&foundBank).Select("Name", "Slug", "Description").Updates(&bank).Error
 }
 
 func (r bankRepository) Delete(bankID string) error {

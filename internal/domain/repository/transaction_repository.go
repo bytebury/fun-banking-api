@@ -30,8 +30,9 @@ func (r transactionRepository) Create(transaction *model.Transaction) error {
 }
 
 func (r transactionRepository) Update(id string, transaction *model.Transaction) error {
-	if err := r.db.First(&transaction, "id = ?", id).Error; err != nil {
+	var foundTransaction model.Transaction
+	if err := r.db.First(&foundTransaction, "id = ?", id).Error; err != nil {
 		return err
 	}
-	return r.db.Model(&transaction).Select("Status", "User").Updates(&transaction).Error
+	return r.db.Model(&foundTransaction).Select("Status", "User").Updates(&transaction).Error
 }

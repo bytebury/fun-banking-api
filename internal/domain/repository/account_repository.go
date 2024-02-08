@@ -40,5 +40,5 @@ func (r accountRepository) Update(accountID string, account *model.Account) erro
 		account.Name = foundAccount.Name
 	}
 
-	return r.db.Model(&account).Select("Name").Updates(account).Error
+	return r.db.Model(&foundAccount).Select("Name").Updates(account).Error
 }
