@@ -32,6 +32,11 @@ func (r runner) setupHealthRoutes() {
 func (r runner) setupUserRoutes() {
 	handler := handlers.NewUserHandler()
 	r.router.GET("/current-user", handler.GetCurrentUser)
+	r.router.Group("users").
+		GET("", handler.GetCurrentUser).
+		GET(":id", handler.FindByID).
+		PUT("", handler.Create).
+		PATCH("", handler.Update)
 }
 
 func (r runner) setupBankRoutes() {
@@ -60,5 +65,10 @@ func (r runner) setupAccountRoutes() {
 	handler := handlers.NewAccountHandler()
 	r.router.Group("/accounts").
 		GET(":id", handler.FindByID).
+		GET(":id/transactions", handler.FindTransactions).
 		PATCH("", handler.Update)
+}
+
+func (r runner) setupTransactionRoutes() {
+	// TODO
 }

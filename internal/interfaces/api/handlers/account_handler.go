@@ -23,6 +23,10 @@ func (h AccountHandler) FindByID(c *gin.Context) {
 	h.accountService.FindByID(c)
 }
 
+func (h AccountHandler) FindTransactions(c *gin.Context) {
+	h.accountService.FindTransactions(c)
+}
+
 func (h AccountHandler) Update(c *gin.Context) {
 	h.accountService.Update(c)
 }

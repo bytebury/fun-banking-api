@@ -20,3 +20,19 @@ func NewUserHandler() UserHandler {
 func (h UserHandler) GetCurrentUser(c *gin.Context) {
 	h.user.GetCurrentUser(c)
 }
+
+func (h UserHandler) FindByID(c *gin.Context) {
+	h.user.FindByID(c)
+}
+
+func (h UserHandler) FindByUsernameOrEmail(c *gin.Context) {
+	h.user.FindByUsernameOrEmail(c)
+}
+
+func (h UserHandler) Update(c *gin.Context) {
+	h.user.Update(c)
+}
+
+func (h UserHandler) Create(c *gin.Context) {
+	h.user.Create(c)
+}

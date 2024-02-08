@@ -3,6 +3,7 @@ package service
 import (
 	"funbanking/internal/domain/model"
 	"funbanking/internal/domain/repository"
+	"funbanking/package/utils"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -10,6 +11,7 @@ import (
 
 type AccountService interface {
 	FindByID(ctx *gin.Context)
+	FindTransactions(ctx *gin.Context)
 	Update(ctx *gin.Context)
 }
 
@@ -31,6 +33,19 @@ func (s accountService) FindByID(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, account)
+}
+
+// TODO: THIS IS GOING TO BE PAGINATED
+func (s accountService) FindTransactions(c *gin.Context) {
+	var transactions []model.Transaction
+	accountID := c.Param("id")
+
+	if err := s.accountRepository.FindTransactions(accountID, &transactions); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "Something went wrong"})
+		return
+	}
+
+	c.JSON(http.StatusOK, utils.Listify(transactions))
 }
 
 func (s accountService) Update(c *gin.Context) {

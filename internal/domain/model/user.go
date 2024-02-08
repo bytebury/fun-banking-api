@@ -12,7 +12,7 @@ type User struct {
 	Password  string `json:"-"`
 }
 
-type UserRequest struct {
+type NewUserRequest struct {
 	Username             string `json:"username"`
 	Email                string `json:"email"`
 	FirstName            string `json:"first_name"`
@@ -21,4 +21,12 @@ type UserRequest struct {
 	PasswordConfirmation string `json:"password_confirmation"`
 	Avatar               string `json:"avatar"`
 	About                string `json:"about"`
+}
+
+type UpdateUserRequest struct {
+	Username  string `json:"username"`
+	FirstName string `json:"first_name"`
+	LastName  string `json:"last_name"`
+	Avatar    string `json:"avatar"`
+	About     string `json:"about"`
 }

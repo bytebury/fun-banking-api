@@ -73,6 +73,7 @@ func (s bankService) FindByUsernameAndSlug(c *gin.Context) {
 	c.JSON(http.StatusOK, bank)
 }
 
+// TODO: THIS SHOULD BE PAGINATED
 func (s bankService) FindAllCustomers(c *gin.Context) {
 	var customers []model.Customer
 	bankID := c.Param("id")
