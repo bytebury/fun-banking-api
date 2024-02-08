@@ -23,6 +23,7 @@ func (r runner) setup() {
 	r.setupCustomerRoutes()
 	r.setupAccountRoutes()
 	r.setupTransactionRoutes()
+	r.setupAnnouncementRoutes()
 }
 
 func (r runner) setupHealthRoutes() {
@@ -77,4 +78,12 @@ func (r runner) setupTransactionRoutes() {
 		PATCH(":id/approve", handler.Approve).
 		PATCH(":id/decline", handler.Decline).
 		PUT("", handler.Create)
+}
+
+func (r runner) setupAnnouncementRoutes() {
+	handler := handlers.NewAnnouncementHandler()
+	r.router.Group("/announcements").
+		GET(":id", handler.FindByID).
+		PUT("", handler.Create).
+		PATCH(":id", handler.Update)
 }
