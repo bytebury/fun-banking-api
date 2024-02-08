@@ -3,26 +3,22 @@ package service
 import (
 	"funbanking/internal/domain/model"
 	"funbanking/internal/domain/repository"
-	"net/http"
-
-	"github.com/gin-gonic/gin"
 )
 
-type HealthService struct {
-	repo repository.HealthRepository
+type HealthService interface {
+	GetHealthCheck() (model.Health, error)
+}
+
+type healthService struct {
+	healthRepository repository.HealthRepository
 }
 
 func NewHealthService(healthRepository repository.HealthRepository) HealthService {
-	return HealthService{repo: healthRepository}
+	return healthService{healthRepository}
 }
 
-func (s HealthService) GetHealthCheck(c *gin.Context) {
+func (s healthService) GetHealthCheck() (model.Health, error) {
 	var health model.Health
-
-	if err := s.repo.GetHealthCheck(&health); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"message": "Something went wrong"})
-		return
-	}
-
-	c.JSON(http.StatusOK, health)
+	err := s.healthRepository.GetHealthCheck(&health)
+	return health, err
 }

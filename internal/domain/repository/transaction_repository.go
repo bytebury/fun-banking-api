@@ -8,9 +8,9 @@ import (
 )
 
 type TransactionRepository interface {
-	FindByID(transactionID string, transaction *model.Transaction) error
+	FindByID(id string, transaction *model.Transaction) error
 	Create(transaction *model.Transaction) error
-	Update(transaction *model.Transaction) error
+	Update(id string, transaction *model.Transaction) error
 }
 
 type transactionRepository struct {
@@ -29,6 +29,9 @@ func (r transactionRepository) Create(transaction *model.Transaction) error {
 	return r.db.Create(&transaction).Error
 }
 
-func (r transactionRepository) Update(transaction *model.Transaction) error {
+func (r transactionRepository) Update(id string, transaction *model.Transaction) error {
+	if err := r.db.First(&transaction, "id = ?", id).Error; err != nil {
+		return err
+	}
 	return r.db.Model(&transaction).Select("Status", "User").Updates(&transaction).Error
 }

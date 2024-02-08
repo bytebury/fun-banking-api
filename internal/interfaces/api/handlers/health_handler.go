@@ -3,6 +3,7 @@ package handlers
 import (
 	"funbanking/internal/domain/repository"
 	"funbanking/internal/domain/service"
+	"net/http"
 
 	"github.com/gin-gonic/gin"
 )
@@ -18,5 +19,12 @@ func NewHealthHandler() HealthHandler {
 }
 
 func (h HealthHandler) GetHealthCheck(c *gin.Context) {
-	h.health.GetHealthCheck(c)
+	healthMetrics, err := h.health.GetHealthCheck()
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "Something went wrong"})
+		return
+	}
+
+	c.JSON(http.StatusOK, healthMetrics)
 }
