@@ -1,5 +1,11 @@
 package model
 
+const (
+	TransactionPending  = "pending"
+	TransactionApproved = "approved"
+	TransactionDeclined = "declined"
+)
+
 type Transaction struct {
 	AuditModel
 	Description    string  `json:"description" gorm:"not null;size:255"`
