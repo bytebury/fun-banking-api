@@ -1,42 +1,86 @@
 package handlers
 
 import (
+	"funbanking/internal/domain/model"
 	"funbanking/internal/domain/repository"
 	"funbanking/internal/domain/service"
+	"net/http"
 
 	"github.com/gin-gonic/gin"
 )
 
 type UserHandler struct {
-	user service.UserService
+	userService service.UserService
 }
 
 func NewUserHandler() UserHandler {
 	return UserHandler{
-		user: service.NewUserService(repository.NewUserRepository()),
+		userService: service.NewUserService(
+			repository.NewUserRepository(),
+		),
 	}
 }
 
 func (h UserHandler) GetCurrentUser(c *gin.Context) {
-	h.user.GetCurrentUser(c)
+	// TODO: need to wait for middleware to be done to do this one
+	h.userService.FindByID("0")
 }
 
 func (h UserHandler) FindByID(c *gin.Context) {
-	h.user.FindByID(c)
-}
+	id := c.Param("id")
 
-func (h UserHandler) FindByUsernameOrEmail(c *gin.Context) {
-	h.user.FindByUsernameOrEmail(c)
+	user, err := h.userService.FindByID(id)
+
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"message": "Unable to find user"})
+		return
+	}
+
+	c.JSON(http.StatusOK, user)
 }
 
 func (h UserHandler) FindBanks(c *gin.Context) {
-	h.user.FindBanks(c)
+	id := c.Param("id")
+
+	banks, err := h.userService.FindBanks(id)
+
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"message": "Unable to find user"})
+		return
+	}
+
+	c.JSON(http.StatusOK, banks)
 }
 
 func (h UserHandler) Update(c *gin.Context) {
-	h.user.Update(c)
+	var user model.User
+	id := c.Param("id")
+
+	if err := c.ShouldBindJSON(&user); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "Malformed request"})
+		return
+	}
+
+	if err := h.userService.Update(id, &user); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "Something went wrong"})
+		return
+	}
+
+	c.JSON(http.StatusCreated, user)
 }
 
 func (h UserHandler) Create(c *gin.Context) {
-	h.user.Create(c)
+	var user model.User
+
+	if err := c.ShouldBindJSON(&user); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "Malformed request"})
+		return
+	}
+
+	if err := h.userService.Create(&user); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "Something went wrong"})
+		return
+	}
+
+	c.JSON(http.StatusCreated, user)
 }

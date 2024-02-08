@@ -3,19 +3,15 @@ package service
 import (
 	"funbanking/internal/domain/model"
 	"funbanking/internal/domain/repository"
-	"net/http"
-	"strings"
-
-	"github.com/gin-gonic/gin"
+	"funbanking/package/utils"
 )
 
 type UserService interface {
-	GetCurrentUser(c *gin.Context)
-	FindByID(c *gin.Context)
-	FindByUsernameOrEmail(c *gin.Context)
-	FindBanks(c *gin.Context)
-	Update(c *gin.Context)
-	Create(c *gin.Context)
+	FindByID(id string) (model.User, error)
+	FindByUsernameOrEmail(usernameOrEmail string) (model.User, error)
+	FindBanks(id string) ([]model.Bank, error)
+	Update(id string, user *model.User) error
+	Create(user *model.User) error
 }
 
 type userService struct {
@@ -26,86 +22,29 @@ func NewUserService(userRepository repository.UserRepository) UserService {
 	return userService{userRepository}
 }
 
-func (s userService) GetCurrentUser(c *gin.Context) {
+func (s userService) FindByID(id string) (model.User, error) {
 	var user model.User
-
-	if err := s.userRepository.GetCurrentUser(&user); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"message": "Something went wrong"})
-		return
-	}
-
-	c.JSON(http.StatusOK, user)
+	err := s.userRepository.FindByID(id, &user)
+	return user, err
 }
 
-func (s userService) FindByID(c *gin.Context) {
+func (s userService) FindByUsernameOrEmail(usernameOrEmail string) (model.User, error) {
 	var user model.User
-	userID := c.Param("id")
-
-	if err := s.userRepository.FindByID(userID, &user); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"message": "Something went wrong"})
-		return
-	}
-
-	c.JSON(http.StatusOK, user)
+	err := s.userRepository.FindByUsernameOrEmail(usernameOrEmail, &user)
+	return user, err
 }
 
-func (s userService) FindByUsernameOrEmail(c *gin.Context) {
-	var user model.User
-	var request struct {
-		username string
-		email    string
-	}
-
-	if err := c.ShouldBindJSON(&request); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"message": "Malformed request"})
-		return
-	}
-
-	if strings.TrimSpace(request.username) == "" {
-		request.username = request.email
-	}
-
-	if err := s.userRepository.FindByUsernameOrEmail(request.username, &user); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"message": "Something went wrong"})
-		return
-	}
-
-	c.JSON(http.StatusOK, user)
+func (s userService) FindBanks(id string) ([]model.Bank, error) {
+	var banks []model.Bank
+	err := s.userRepository.FindBanks(id, &banks)
+	return utils.Listify(banks), err
 }
 
-func (s userService) FindBanks(c *gin.Context) {
-	// TODO
+func (s userService) Update(id string, user *model.User) error {
+	return s.userRepository.Update(id, user)
 }
 
-func (s userService) Update(c *gin.Context) {
-	var user model.User
-	userID := c.Param("id")
-
-	if err := c.ShouldBindJSON(&user); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"message": "Malformed request"})
-		return
-	}
-
-	if err := s.userRepository.Update(userID, &user); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"message": "Something went wrong"})
-		return
-	}
-
-	c.JSON(http.StatusAccepted, user)
-}
-
-func (s userService) Create(c *gin.Context) {
-	var user model.User
-
-	if err := c.ShouldBindJSON(&user); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"message": "Malformed request"})
-		return
-	}
-
-	if err := s.userRepository.Create(&user); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"message": "Something went wrong"})
-		return
-	}
-
-	c.JSON(http.StatusCreated, user)
+func (s userService) Create(user *model.User) error {
+	// TODO this will need to map a user to a new user request
+	return s.userRepository.Create(user)
 }
