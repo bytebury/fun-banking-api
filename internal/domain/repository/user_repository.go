@@ -40,12 +40,33 @@ func (r userRepository) FindBanks(id string, banks *[]model.Bank) error {
 	return r.db.Find(&banks, "user_id = ?", id).Error
 }
 
-// TODO: Only update if it is present
 func (r userRepository) Update(userID string, user *model.User) error {
-	if err := r.FindByID(userID, user); err != nil {
+	var foundUser model.User
+	if err := r.FindByID(userID, &foundUser); err != nil {
 		return err
 	}
-	return r.db.Model(&user).Select("Username", "FirstName", "LastName", "Avatar", "About").Updates(&user).Error
+
+	if user.Username == "" {
+		user.Username = foundUser.Username
+	}
+
+	if user.FirstName == "" {
+		user.FirstName = foundUser.FirstName
+	}
+
+	if user.LastName == "" {
+		user.LastName = foundUser.LastName
+	}
+
+	if user.Avatar == "" {
+		user.Avatar = foundUser.Avatar
+	}
+
+	if user.About == "" {
+		user.About = foundUser.About
+	}
+
+	return r.db.Model(&foundUser).Select("Username", "FirstName", "LastName", "Avatar", "About").Updates(&user).Error
 }
 
 func (r userRepository) Create(user *model.User) error {
