@@ -11,6 +11,7 @@ type UserRepository interface {
 	GetCurrentUser(user *model.User) error
 	FindByID(userID string, user *model.User) error
 	FindByUsernameOrEmail(usernameOrEmail string, user *model.User) error
+	FindBanks(id string, banks *[]model.Bank) error
 	Update(userID string, user *model.User) error
 	Create(user *model.User) error
 }
@@ -33,6 +34,10 @@ func (r userRepository) FindByID(userID string, user *model.User) error {
 
 func (r userRepository) FindByUsernameOrEmail(usernameOrEmail string, user *model.User) error {
 	return r.db.Find(&user, "username = ? or email = ?", usernameOrEmail).Error
+}
+
+func (r userRepository) FindBanks(id string, banks *[]model.Bank) error {
+	return r.db.Find(&banks, "user_id = ?", id).Error
 }
 
 // TODO: Only update if it is present

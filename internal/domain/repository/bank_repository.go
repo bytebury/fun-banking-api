@@ -8,8 +8,7 @@ import (
 )
 
 type BankRepository interface {
-	FindByID(bankID string, bank *model.Bank) error
-	FindAllByUserID(userID string, banks *[]model.Bank) error
+	FindByID(id string, bank *model.Bank) error
 	FindByUsernameAndSlug(username, slug string, bank *model.Bank) error
 	FindAllCustomers(bankID string, customers *[]model.Customer) error
 	Create(bank *model.Bank) error

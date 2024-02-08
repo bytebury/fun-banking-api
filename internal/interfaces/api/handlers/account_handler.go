@@ -1,8 +1,11 @@
 package handlers
 
 import (
+	"funbanking/internal/domain/model"
 	"funbanking/internal/domain/repository"
 	"funbanking/internal/domain/service"
+	"funbanking/package/utils"
+	"net/http"
 
 	"github.com/gin-gonic/gin"
 )
@@ -20,13 +23,46 @@ func NewAccountHandler() AccountHandler {
 }
 
 func (h AccountHandler) FindByID(c *gin.Context) {
-	h.accountService.FindByID(c)
+	id := c.Param("id")
+
+	account, err := h.accountService.FindByID(id)
+
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"message": "Unable to find that account"})
+		return
+	}
+
+	c.JSON(http.StatusOK, account)
 }
 
 func (h AccountHandler) FindTransactions(c *gin.Context) {
-	h.accountService.FindTransactions(c)
+	id := c.Param("id")
+
+	transactions, err := h.accountService.FindTransactions(id)
+
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"message": "Unable to find that account"})
+		return
+	}
+
+	c.JSON(http.StatusOK, utils.Listify(transactions))
 }
 
 func (h AccountHandler) Update(c *gin.Context) {
-	h.accountService.Update(c)
+	var account model.Account
+	id := c.Param("id")
+
+	if err := c.ShouldBindJSON(&account); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "Malformed request"})
+		return
+	}
+
+	account, err := h.accountService.Update(id, &account)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "Something went wrong"})
+		return
+	}
+
+	c.JSON(http.StatusAccepted, account)
 }

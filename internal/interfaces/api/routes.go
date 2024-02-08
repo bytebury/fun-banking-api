@@ -36,6 +36,7 @@ func (r runner) setupUserRoutes() {
 	r.router.Group("users").
 		GET("", handler.GetCurrentUser).
 		GET(":id", handler.FindByID).
+		GET(":id/banks", handler.FindBanks).
 		PUT("", handler.Create).
 		PATCH(":id", handler.Update)
 }
@@ -43,7 +44,6 @@ func (r runner) setupUserRoutes() {
 func (r runner) setupBankRoutes() {
 	handler := handlers.NewBankHandler()
 	r.router.Group("/banks").
-		GET("", handler.FindAllMyBanks).
 		GET(":id", handler.FindByID).
 		GET(":id/customers", handler.FindAllCustomers).
 		POST("", handler.FindByUsernameAndSlug).

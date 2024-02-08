@@ -4,15 +4,12 @@ import (
 	"funbanking/internal/domain/model"
 	"funbanking/internal/domain/repository"
 	"funbanking/package/utils"
-	"net/http"
-
-	"github.com/gin-gonic/gin"
 )
 
 type AccountService interface {
-	FindByID(ctx *gin.Context)
-	FindTransactions(ctx *gin.Context)
-	Update(ctx *gin.Context)
+	FindByID(id string) (model.Account, error)
+	FindTransactions(id string) ([]model.Transaction, error)
+	Update(id string, account *model.Account) (model.Account, error)
 }
 
 type accountService struct {
@@ -23,44 +20,20 @@ func NewAccountService(accountRepository repository.AccountRepository) AccountSe
 	return accountService{accountRepository}
 }
 
-func (s accountService) FindByID(c *gin.Context) {
+func (s accountService) FindByID(id string) (model.Account, error) {
 	var account model.Account
-	accountID := c.Param("id")
-
-	if err := s.accountRepository.FindByID(accountID, &account); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"message": "Something went wrong"})
-		return
-	}
-
-	c.JSON(http.StatusOK, account)
+	err := s.accountRepository.FindByID(id, &account)
+	return account, err
 }
 
 // TODO: THIS IS GOING TO BE PAGINATED
-func (s accountService) FindTransactions(c *gin.Context) {
+func (s accountService) FindTransactions(id string) ([]model.Transaction, error) {
 	var transactions []model.Transaction
-	accountID := c.Param("id")
-
-	if err := s.accountRepository.FindTransactions(accountID, &transactions); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"message": "Something went wrong"})
-		return
-	}
-
-	c.JSON(http.StatusOK, utils.Listify(transactions))
+	err := s.accountRepository.FindTransactions(id, &transactions)
+	return utils.Listify(transactions), err
 }
 
-func (s accountService) Update(c *gin.Context) {
-	var account model.Account
-	accountID := c.Param("id")
-
-	if err := c.ShouldBindJSON(&account); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"message": "Malformed request"})
-		return
-	}
-
-	if err := s.accountRepository.Update(accountID, &account); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"message": "Something went wrong"})
-		return
-	}
-
-	c.JSON(http.StatusAccepted, account)
+func (s accountService) Update(id string, account *model.Account) (model.Account, error) {
+	err := s.accountRepository.Update(id, account)
+	return *account, err
 }

@@ -13,6 +13,7 @@ type UserService interface {
 	GetCurrentUser(c *gin.Context)
 	FindByID(c *gin.Context)
 	FindByUsernameOrEmail(c *gin.Context)
+	FindBanks(c *gin.Context)
 	Update(c *gin.Context)
 	Create(c *gin.Context)
 }
@@ -70,6 +71,10 @@ func (s userService) FindByUsernameOrEmail(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, user)
+}
+
+func (s userService) FindBanks(c *gin.Context) {
+	// TODO
 }
 
 func (s userService) Update(c *gin.Context) {

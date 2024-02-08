@@ -29,6 +29,10 @@ func (h UserHandler) FindByUsernameOrEmail(c *gin.Context) {
 	h.user.FindByUsernameOrEmail(c)
 }
 
+func (h UserHandler) FindBanks(c *gin.Context) {
+	h.user.FindBanks(c)
+}
+
 func (h UserHandler) Update(c *gin.Context) {
 	h.user.Update(c)
 }

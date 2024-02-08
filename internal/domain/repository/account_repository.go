@@ -8,9 +8,9 @@ import (
 )
 
 type AccountRepository interface {
-	FindByID(accountID string, account *model.Account) error
-	FindTransactions(accountID string, transactions *[]model.Transaction) error
-	Update(accoundID string, account *model.Account) error
+	FindByID(id string, account *model.Account) error
+	FindTransactions(id string, transactions *[]model.Transaction) error
+	Update(id string, account *model.Account) error
 }
 
 type accountRepository struct {
