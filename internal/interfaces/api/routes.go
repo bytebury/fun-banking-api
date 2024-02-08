@@ -21,6 +21,7 @@ func (r runner) setup() {
 	r.setupUserRoutes()
 	r.setupBankRoutes()
 	r.setupCustomerRoutes()
+	r.setupEmployeeRoutes()
 	r.setupAccountRoutes()
 	r.setupTransactionRoutes()
 	r.setupAnnouncementRoutes()
@@ -61,6 +62,14 @@ func (r runner) setupCustomerRoutes() {
 		PUT("", handler.Create).
 		PATCH(":id", handler.Update).
 		DELETE(":id", handler.Delete)
+}
+
+func (r runner) setupEmployeeRoutes() {
+	handler := handlers.NewEmployeeHandler()
+	r.router.Group("/employees").
+		GET("banks/:id", handler.FindAllByBankID).
+		GET("users/:id", handler.FindAllByUserID).
+		PUT("", handler.Create)
 }
 
 func (r runner) setupAccountRoutes() {
