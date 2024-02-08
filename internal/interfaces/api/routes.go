@@ -22,6 +22,7 @@ func (r runner) setup() {
 	r.setupBankRoutes()
 	r.setupCustomerRoutes()
 	r.setupAccountRoutes()
+	r.setupTransactionRoutes()
 }
 
 func (r runner) setupHealthRoutes() {
@@ -36,7 +37,7 @@ func (r runner) setupUserRoutes() {
 		GET("", handler.GetCurrentUser).
 		GET(":id", handler.FindByID).
 		PUT("", handler.Create).
-		PATCH("", handler.Update)
+		PATCH(":id", handler.Update)
 }
 
 func (r runner) setupBankRoutes() {
@@ -47,7 +48,7 @@ func (r runner) setupBankRoutes() {
 		GET(":id/customers", handler.FindAllCustomers).
 		POST("", handler.FindByUsernameAndSlug).
 		PUT("", handler.Create).
-		PATCH("", handler.Update).
+		PATCH(":id", handler.Update).
 		DELETE(":id", handler.Delete)
 }
 
@@ -57,7 +58,7 @@ func (r runner) setupCustomerRoutes() {
 		GET(":id", handler.FindByID).
 		GET(":id/accounts", handler.FindAccounts).
 		PUT("", handler.Create).
-		PATCH("", handler.Update).
+		PATCH(":id", handler.Update).
 		DELETE(":id", handler.Delete)
 }
 
@@ -66,9 +67,14 @@ func (r runner) setupAccountRoutes() {
 	r.router.Group("/accounts").
 		GET(":id", handler.FindByID).
 		GET(":id/transactions", handler.FindTransactions).
-		PATCH("", handler.Update)
+		PATCH(":id", handler.Update)
 }
 
 func (r runner) setupTransactionRoutes() {
-	// TODO
+	handler := handlers.NewTransactionHandler()
+	r.router.Group("/transactions").
+		GET(":id", handler.FindByID).
+		PATCH(":id/approve", handler.Approve).
+		PATCH(":id/decline", handler.Decline).
+		PUT("", handler.Create)
 }

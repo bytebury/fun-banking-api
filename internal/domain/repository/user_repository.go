@@ -11,7 +11,7 @@ type UserRepository interface {
 	GetCurrentUser(user *model.User) error
 	FindByID(userID string, user *model.User) error
 	FindByUsernameOrEmail(usernameOrEmail string, user *model.User) error
-	Update(user *model.User) error
+	Update(userID string, user *model.User) error
 	Create(user *model.User) error
 }
 
@@ -36,7 +36,10 @@ func (r userRepository) FindByUsernameOrEmail(usernameOrEmail string, user *mode
 }
 
 // TODO: Only update if it is present
-func (r userRepository) Update(user *model.User) error {
+func (r userRepository) Update(userID string, user *model.User) error {
+	if err := r.FindByID(userID, user); err != nil {
+		return err
+	}
 	return r.db.Model(&user).Select("Username", "FirstName", "LastName", "Avatar", "About").Updates(&user).Error
 }
 

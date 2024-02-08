@@ -50,13 +50,14 @@ func (s accountService) FindTransactions(c *gin.Context) {
 
 func (s accountService) Update(c *gin.Context) {
 	var account model.Account
+	accountID := c.Param("id")
 
 	if err := c.ShouldBindJSON(&account); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"message": "Malformed request"})
 		return
 	}
 
-	if err := s.accountRepository.Update(&account); err != nil {
+	if err := s.accountRepository.Update(accountID, &account); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": "Something went wrong"})
 		return
 	}

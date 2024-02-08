@@ -10,7 +10,7 @@ import (
 type AccountRepository interface {
 	FindByID(accountID string, account *model.Account) error
 	FindTransactions(accountID string, transactions *[]model.Transaction) error
-	Update(account *model.Account) error
+	Update(accoundID string, account *model.Account) error
 }
 
 type accountRepository struct {
@@ -29,10 +29,10 @@ func (r accountRepository) FindTransactions(accountID string, transactions *[]mo
 	return r.db.Find(&transactions, "account_id = ?", accountID).Error
 }
 
-func (r accountRepository) Update(account *model.Account) error {
+func (r accountRepository) Update(accountID string, account *model.Account) error {
 	var foundAccount model.Account
 
-	if err := r.db.First(&account).Error; err != nil {
+	if err := r.db.First(&account, "id = ?", accountID).Error; err != nil {
 		return err
 	}
 

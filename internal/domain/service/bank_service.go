@@ -106,6 +106,7 @@ func (s bankService) Create(c *gin.Context) {
 
 func (s bankService) Update(c *gin.Context) {
 	var bank model.Bank
+	bankID := c.Param("id")
 
 	if err := c.ShouldBindJSON(&bank); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"message": "Malformed request"})
@@ -114,7 +115,7 @@ func (s bankService) Update(c *gin.Context) {
 
 	// Do validations
 
-	if err := s.bankRepository.Update(&bank); err != nil {
+	if err := s.bankRepository.Update(bankID, &bank); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": "Something went wrong"})
 		return
 	}

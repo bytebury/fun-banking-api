@@ -74,13 +74,14 @@ func (s userService) FindByUsernameOrEmail(c *gin.Context) {
 
 func (s userService) Update(c *gin.Context) {
 	var user model.User
+	userID := c.Param("id")
 
 	if err := c.ShouldBindJSON(&user); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"message": "Malformed request"})
 		return
 	}
 
-	if err := s.userRepository.Update(&user); err != nil {
+	if err := s.userRepository.Update(userID, &user); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": "Something went wrong"})
 		return
 	}

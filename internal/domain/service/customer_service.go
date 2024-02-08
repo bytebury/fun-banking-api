@@ -66,13 +66,14 @@ func (s customerService) Create(c *gin.Context) {
 
 func (s customerService) Update(c *gin.Context) {
 	var customer model.Customer
+	customerID := c.Param("id")
 
 	if err := c.ShouldBindJSON(&customer); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"message": "Malformed request"})
 		return
 	}
 
-	if err := s.customerRepository.Update(&customer); err != nil {
+	if err := s.customerRepository.Update(customerID, &customer); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": "Something went wrong"})
 		return
 	}

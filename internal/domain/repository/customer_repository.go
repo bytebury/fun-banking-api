@@ -3,7 +3,6 @@ package repository
 import (
 	"funbanking/internal/domain/model"
 	"funbanking/internal/infrastructure/persistence"
-	"strconv"
 
 	"gorm.io/gorm"
 )
@@ -12,7 +11,7 @@ type CustomerRepository interface {
 	FindByID(customerID string, customer *model.Customer) error
 	FindAccounts(customerID string, accounts *[]model.Account) error
 	Create(customer *model.Customer) error
-	Update(customer *model.Customer) error
+	Update(customerID string, customer *model.Customer) error
 	Delete(customerID string) error
 }
 
@@ -47,10 +46,10 @@ func (r customerRepository) Create(customer *model.Customer) error {
 	})
 }
 
-func (r customerRepository) Update(customer *model.Customer) error {
+func (r customerRepository) Update(customerID string, customer *model.Customer) error {
 	var foundCustomer model.Customer
 
-	if err := r.FindByID(strconv.Itoa(int(customer.ID)), &foundCustomer); err != nil {
+	if err := r.FindByID(customerID, &foundCustomer); err != nil {
 		return err
 	}
 
