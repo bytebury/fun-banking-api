@@ -80,9 +80,7 @@ func (h BankHandler) Create(c *gin.Context) {
 		return
 	}
 
-	bank, err := h.bankService.Create(&bank)
-
-	if err != nil {
+	if err := h.bankService.Create(&bank); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": "Something went wrong"})
 		return
 	}
@@ -99,9 +97,7 @@ func (h BankHandler) Update(c *gin.Context) {
 		return
 	}
 
-	bank, err := h.bankService.Update(id, &bank)
-
-	if err != nil {
+	if err := h.bankService.Update(id, &bank); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": "Something went wrong"})
 		return
 	}

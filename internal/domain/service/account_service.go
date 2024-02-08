@@ -9,7 +9,7 @@ import (
 type AccountService interface {
 	FindByID(id string) (model.Account, error)
 	FindTransactions(id string) ([]model.Transaction, error)
-	Update(id string, account *model.Account) (model.Account, error)
+	Update(id string, account *model.Account) error
 }
 
 type accountService struct {
@@ -33,7 +33,6 @@ func (s accountService) FindTransactions(id string) ([]model.Transaction, error)
 	return utils.Listify(transactions), err
 }
 
-func (s accountService) Update(id string, account *model.Account) (model.Account, error) {
-	err := s.accountRepository.Update(id, account)
-	return *account, err
+func (s accountService) Update(id string, account *model.Account) error {
+	return s.accountRepository.Update(id, account)
 }

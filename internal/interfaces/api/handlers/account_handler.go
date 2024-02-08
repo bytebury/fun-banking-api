@@ -57,9 +57,7 @@ func (h AccountHandler) Update(c *gin.Context) {
 		return
 	}
 
-	account, err := h.accountService.Update(id, &account)
-
-	if err != nil {
+	if err := h.accountService.Update(id, &account); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": "Something went wrong"})
 		return
 	}

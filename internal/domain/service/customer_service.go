@@ -3,17 +3,15 @@ package service
 import (
 	"funbanking/internal/domain/model"
 	"funbanking/internal/domain/repository"
-	"net/http"
-
-	"github.com/gin-gonic/gin"
+	"funbanking/package/utils"
 )
 
 type CustomerService interface {
-	FindByID(ctx *gin.Context)
-	FindAccounts(ctx *gin.Context)
-	Create(ctx *gin.Context)
-	Update(ctx *gin.Context)
-	Delete(ctx *gin.Context)
+	FindByID(id string) (model.Customer, error)
+	FindAccounts(id string) ([]model.Account, error)
+	Create(customer *model.Customer) error
+	Update(id string, customer *model.Customer) error
+	Delete(id string) error
 }
 
 type customerService struct {
@@ -24,70 +22,26 @@ func NewCustomerService(customerRepository repository.CustomerRepository) Custom
 	return customerService{customerRepository}
 }
 
-func (s customerService) FindByID(c *gin.Context) {
+func (s customerService) FindByID(id string) (model.Customer, error) {
 	var customer model.Customer
-	customerID := c.Param("id")
-
-	if err := s.customerRepository.FindByID(customerID, &customer); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"message": "Something went wrong"})
-		return
-	}
-
-	c.JSON(http.StatusOK, customer)
+	err := s.customerRepository.FindByID(id, &customer)
+	return customer, err
 }
 
-func (s customerService) FindAccounts(c *gin.Context) {
+func (s customerService) FindAccounts(id string) ([]model.Account, error) {
 	var accounts []model.Account
-	customerID := c.Param("id")
-
-	if err := s.customerRepository.FindAccounts(customerID, &accounts); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"message": "Something went wrong"})
-		return
-	}
-
-	c.JSON(http.StatusOK, accounts)
+	err := s.customerRepository.FindAccounts(id, &accounts)
+	return utils.Listify(accounts), err
 }
 
-func (s customerService) Create(c *gin.Context) {
-	var customer model.Customer
-
-	if err := c.ShouldBindJSON(&customer); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"message": "Malformed request"})
-		return
-	}
-
-	if err := s.customerRepository.Create(&customer); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"message": "Something went wrong"})
-		return
-	}
-
-	c.JSON(http.StatusCreated, customer)
+func (s customerService) Create(customer *model.Customer) error {
+	return s.customerRepository.Create(customer)
 }
 
-func (s customerService) Update(c *gin.Context) {
-	var customer model.Customer
-	customerID := c.Param("id")
-
-	if err := c.ShouldBindJSON(&customer); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"message": "Malformed request"})
-		return
-	}
-
-	if err := s.customerRepository.Update(customerID, &customer); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"message": "Something went wrong"})
-		return
-	}
-
-	c.JSON(http.StatusAccepted, customer)
+func (s customerService) Update(id string, customer *model.Customer) error {
+	return s.customerRepository.Update(id, customer)
 }
 
-func (s customerService) Delete(c *gin.Context) {
-	customerID := c.Param("id")
-
-	if err := s.customerRepository.Delete(customerID); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"message": "Something went wrong"})
-		return
-	}
-
-	c.JSON(http.StatusNoContent, nil)
+func (s customerService) Delete(id string) error {
+	return s.customerRepository.Delete(id)
 }

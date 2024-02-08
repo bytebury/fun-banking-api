@@ -10,8 +10,8 @@ type BankService interface {
 	FindByID(id string) (model.Bank, error)
 	FindByUsernameAndSlug(username, slug string) (model.Bank, error)
 	FindAllCustomers(id string) ([]model.Customer, error)
-	Create(bank *model.Bank) (model.Bank, error)
-	Update(id string, bank *model.Bank) (model.Bank, error)
+	Create(bank *model.Bank) error
+	Update(id string, bank *model.Bank) error
 	Delete(id string) error
 }
 
@@ -41,14 +41,12 @@ func (s bankService) FindAllCustomers(id string) ([]model.Customer, error) {
 	return utils.Listify(customers), err
 }
 
-func (s bankService) Create(bank *model.Bank) (model.Bank, error) {
-	err := s.bankRepository.Create(bank)
-	return *bank, err
+func (s bankService) Create(bank *model.Bank) error {
+	return s.bankRepository.Create(bank)
 }
 
-func (s bankService) Update(id string, bank *model.Bank) (model.Bank, error) {
-	err := s.bankRepository.Update(id, bank)
-	return *bank, err
+func (s bankService) Update(id string, bank *model.Bank) error {
+	return s.bankRepository.Update(id, bank)
 }
 
 func (s bankService) Delete(id string) error {
