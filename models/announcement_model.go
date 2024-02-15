@@ -9,7 +9,7 @@ type Announcement struct {
 }
 
 type UpdateAnnouncementRequest struct {
-	Title       string `json:"string"`
+	Title       string `json:"title"`
 	Description string `json:"description"`
 	UserID      uint   `json:"user_id"`
 }
