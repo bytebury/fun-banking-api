@@ -35,7 +35,7 @@ func (auth userAuth) Login(request LoginRequest) (string, model.User, error) {
 		return "", user, err
 	}
 
-	if !verifyUserPassword(request.Password, user.Password) {
+	if !auth.verifyUserPassword(request.Password, user.Password) {
 		return "", user, errors.New("invalid password")
 	}
 
@@ -48,17 +48,7 @@ func (auth userAuth) Login(request LoginRequest) (string, model.User, error) {
 	return token, user, err
 }
 
-func HashString(password string) (string, error) {
-	hash, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
-
-	if err != nil {
-		return "", err
-	}
-
-	return string(hash), nil
-}
-
-func verifyUserPassword(password, hashedPassword string) bool {
+func (auth userAuth) verifyUserPassword(password, hashedPassword string) bool {
 	err := bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(password))
 	return err == nil
 }
