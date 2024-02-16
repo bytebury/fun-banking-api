@@ -4,6 +4,7 @@ import (
 	"funbanking/internal/domain/model"
 	"funbanking/internal/domain/repository"
 	"funbanking/internal/domain/service"
+	"funbanking/internal/infrastructure/auth"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -83,4 +84,28 @@ func (h UserHandler) Create(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusCreated, user)
+}
+
+func (h UserHandler) Login(c *gin.Context) {
+	var request auth.LoginRequest
+
+	if err := c.ShouldBindJSON(&request); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "Malformed request"})
+		return
+	}
+
+	token, user, err := h.userService.Login(request.UsernameOrEmail, request.Password)
+
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"message": "Unable to log you in, invalid credentials"})
+		return
+	}
+
+	response := struct {
+		Token string     `json:"token"`
+		User  model.User `json:"user"`
+	}{Token: token, User: user}
+
+	c.JSON(http.StatusOK, response)
+
 }

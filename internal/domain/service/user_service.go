@@ -3,6 +3,7 @@ package service
 import (
 	"funbanking/internal/domain/model"
 	"funbanking/internal/domain/repository"
+	"funbanking/internal/infrastructure/auth"
 	"funbanking/package/utils"
 )
 
@@ -11,6 +12,7 @@ type UserService interface {
 	FindByUsernameOrEmail(usernameOrEmail string) (model.User, error)
 	FindBanks(id string) ([]model.Bank, error)
 	Update(id string, user *model.User) error
+	Login(usernameOrEmail, password string) (string, model.User, error)
 	Create(user *model.User) error
 }
 
@@ -47,4 +49,14 @@ func (s userService) Update(id string, user *model.User) error {
 func (s userService) Create(user *model.User) error {
 	// TODO this will need to map a user to a new user request
 	return s.userRepository.Create(user)
+}
+
+func (s userService) Login(usernameOrEmail, password string) (string, model.User, error) {
+	authService := auth.NewUserAuth(s.userRepository)
+	request := auth.LoginRequest{
+		UsernameOrEmail: usernameOrEmail,
+		Password:        password,
+	}
+
+	return authService.Login(request)
 }

@@ -25,6 +25,7 @@ func (r runner) setup() {
 	r.setupAccountRoutes()
 	r.setupTransactionRoutes()
 	r.setupAnnouncementRoutes()
+	r.setupSessionRoutes()
 }
 
 func (r runner) setupHealthRoutes() {
@@ -41,6 +42,12 @@ func (r runner) setupUserRoutes() {
 		GET(":id/banks", handler.FindBanks).
 		PUT("", handler.Create).
 		PATCH(":id", handler.Update)
+}
+
+func (r runner) setupSessionRoutes() {
+	handler := handlers.NewUserHandler()
+	r.router.Group("sessions").
+		POST("users", handler.Login)
 }
 
 func (r runner) setupBankRoutes() {

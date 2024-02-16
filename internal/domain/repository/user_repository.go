@@ -33,7 +33,7 @@ func (r userRepository) FindByID(userID string, user *model.User) error {
 }
 
 func (r userRepository) FindByUsernameOrEmail(usernameOrEmail string, user *model.User) error {
-	return r.db.Find(&user, "username = ? or email = ?", usernameOrEmail).Error
+	return r.db.Find(&user, "username = ? or email = ?", usernameOrEmail, usernameOrEmail).Error
 }
 
 func (r userRepository) FindBanks(id string, banks *[]model.Bank) error {
