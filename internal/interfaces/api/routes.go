@@ -45,9 +45,11 @@ func (r runner) setupUserRoutes() {
 }
 
 func (r runner) setupSessionRoutes() {
-	handler := handlers.NewUserHandler()
+	userHandler := handlers.NewUserHandler()
+	customerHandler := handlers.NewCustomerHandler()
 	r.router.Group("sessions").
-		POST("users", handler.Login)
+		POST("users", userHandler.Login).
+		POST("customers", customerHandler.Login)
 }
 
 func (r runner) setupBankRoutes() {

@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"errors"
 	"funbanking/internal/domain/model"
 	"funbanking/internal/infrastructure/persistence"
 
@@ -10,6 +11,7 @@ import (
 type CustomerRepository interface {
 	FindByID(customerID string, customer *model.Customer) error
 	FindAccounts(customerID string, accounts *[]model.Account) error
+	FindByBankAndPIN(bankID string, pin string, customer *model.Customer) error
 	Create(customer *model.Customer) error
 	Update(customerID string, customer *model.Customer) error
 	Delete(customerID string) error
@@ -29,6 +31,14 @@ func (r customerRepository) FindByID(customerID string, customer *model.Customer
 
 func (r customerRepository) FindAccounts(customerID string, accounts *[]model.Account) error {
 	return r.db.Find(&accounts, "customer_id = ?", customerID).Error
+}
+
+func (r customerRepository) FindByBankAndPIN(bankID string, pin string, customer *model.Customer) error {
+	if bankID == "" || pin == "" {
+		return errors.New("missing required fields: BankID or PIN")
+	}
+
+	return r.db.Preload("Accounts").First(&customer, "bank_id = ? AND pin = ?", bankID, pin).Error
 }
 
 func (r customerRepository) Create(customer *model.Customer) error {

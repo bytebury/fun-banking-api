@@ -87,7 +87,7 @@ func (h UserHandler) Create(c *gin.Context) {
 }
 
 func (h UserHandler) Login(c *gin.Context) {
-	var request auth.LoginRequest
+	var request auth.UserLoginRequest
 
 	if err := c.ShouldBindJSON(&request); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"message": "Malformed request"})

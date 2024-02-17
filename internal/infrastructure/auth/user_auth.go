@@ -10,9 +10,13 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-type LoginRequest struct {
+type UserLoginRequest struct {
 	UsernameOrEmail string `json:"username_or_email"`
 	Password        string `json:"password"`
+}
+
+type UserAuth interface {
+	Login(request UserLoginRequest) (string, model.User, error)
 }
 
 type userAuth struct {
@@ -20,14 +24,14 @@ type userAuth struct {
 	jwt            JWTService
 }
 
-func NewUserAuth(userRepository repository.UserRepository) userAuth {
+func NewUserAuth(userRepository repository.UserRepository) UserAuth {
 	return userAuth{
 		userRepository: userRepository,
 		jwt:            NewJWTService(),
 	}
 }
 
-func (auth userAuth) Login(request LoginRequest) (string, model.User, error) {
+func (auth userAuth) Login(request UserLoginRequest) (string, model.User, error) {
 	request.UsernameOrEmail = strings.TrimSpace(strings.ToLower(request.UsernameOrEmail))
 
 	var user model.User

@@ -17,11 +17,15 @@ type UserService interface {
 }
 
 type userService struct {
+	authService    auth.UserAuth
 	userRepository repository.UserRepository
 }
 
 func NewUserService(userRepository repository.UserRepository) UserService {
-	return userService{userRepository}
+	return userService{
+		userRepository: userRepository,
+		authService:    auth.NewUserAuth(userRepository),
+	}
 }
 
 func (s userService) FindByID(id string) (model.User, error) {
@@ -52,11 +56,10 @@ func (s userService) Create(user *model.User) error {
 }
 
 func (s userService) Login(usernameOrEmail, password string) (string, model.User, error) {
-	authService := auth.NewUserAuth(s.userRepository)
-	request := auth.LoginRequest{
+	request := auth.UserLoginRequest{
 		UsernameOrEmail: usernameOrEmail,
 		Password:        password,
 	}
 
-	return authService.Login(request)
+	return s.authService.Login(request)
 }

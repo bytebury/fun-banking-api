@@ -27,6 +27,20 @@ func (j JWTService) GenerateUserToken(userID string) (string, error) {
 	return generateToken(claims)
 }
 
+func (j JWTService) GenerateCustomerToken(customerID string) (string, error) {
+	claims := struct {
+		CustomerID string `json:"customer_id"`
+		jwt.StandardClaims
+	}{
+		CustomerID: customerID,
+		StandardClaims: jwt.StandardClaims{
+			ExpiresAt: time.Now().Add(24 * time.Hour).Unix(),
+			IssuedAt:  time.Now().Unix(),
+		},
+	}
+	return generateToken(claims)
+}
+
 func generateToken(claims jwt.Claims) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	tokenString, err := token.SignedString([]byte(os.Getenv("JWT_SECRET")))
