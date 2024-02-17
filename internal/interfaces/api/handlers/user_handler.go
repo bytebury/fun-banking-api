@@ -23,8 +23,16 @@ func NewUserHandler() UserHandler {
 }
 
 func (h UserHandler) GetCurrentUser(c *gin.Context) {
-	// TODO: need to wait for middleware to be done to do this one
-	h.userService.FindByID("0")
+	userID := c.MustGet("user_id").(string)
+
+	user, err := h.userService.FindByID(userID)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "Something went wrong trying to get user information"})
+		return
+	}
+
+	c.JSON(http.StatusOK, user)
 }
 
 func (h UserHandler) FindByID(c *gin.Context) {

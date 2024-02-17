@@ -2,6 +2,7 @@ package api
 
 import (
 	"funbanking/internal/interfaces/api/handlers"
+	"funbanking/internal/interfaces/api/middleware"
 
 	"github.com/gin-gonic/gin"
 )
@@ -35,7 +36,7 @@ func (r runner) setupHealthRoutes() {
 
 func (r runner) setupUserRoutes() {
 	handler := handlers.NewUserHandler()
-	r.router.GET("/current-user", handler.GetCurrentUser)
+	r.router.GET("/current-user", middleware.Auth(), handler.GetCurrentUser)
 	r.router.Group("users").
 		GET("", handler.GetCurrentUser).
 		GET(":id", handler.FindByID).
