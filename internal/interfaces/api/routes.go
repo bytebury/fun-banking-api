@@ -40,6 +40,7 @@ func (r runner) setupUserRoutes() {
 	r.router.Group("users").
 		GET("", middleware.Admin(), handler.Search).
 		GET(":username", middleware.Audit(), handler.FindByUsername).
+		// GET(":username/banks") to get a user's banks <-- only will display if you are them / admin
 		PUT("", handler.Create).
 		PATCH(":id", middleware.Auth(), handler.Update)
 }
