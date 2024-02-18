@@ -24,14 +24,14 @@ func NewEmployeeHandler() EmployeeHandler {
 func (h EmployeeHandler) FindAllByUserID(c *gin.Context) {
 	userID := c.Param("id")
 
-	employee, err := h.employeeService.FindAllByUserID(userID)
+	employees, err := h.employeeService.FindAllByUserID(userID)
 
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"message": "Unable to find user"})
 		return
 	}
 
-	c.JSON(http.StatusOK, employee)
+	c.JSON(http.StatusOK, employees)
 }
 
 func (h EmployeeHandler) FindAllByBankID(c *gin.Context) {

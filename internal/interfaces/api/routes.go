@@ -77,7 +77,7 @@ func (r runner) setupCustomerRoutes() {
 
 func (r runner) setupEmployeeRoutes() {
 	handler := handlers.NewEmployeeHandler()
-	r.router.Group("/employees").
+	r.router.Group("/employees", middleware.Auth()).
 		GET("banks/:id", handler.FindAllByBankID).
 		GET("users/:id", handler.FindAllByUserID).
 		PUT("", handler.Create)
@@ -86,24 +86,24 @@ func (r runner) setupEmployeeRoutes() {
 func (r runner) setupAccountRoutes() {
 	handler := handlers.NewAccountHandler()
 	r.router.Group("/accounts").
-		GET(":id", handler.FindByID).
-		GET(":id/transactions", handler.FindTransactions).
-		PATCH(":id", handler.Update)
+		GET(":id", handler.FindByID).                      // CUSTOMER
+		GET(":id/transactions", handler.FindTransactions). // CUSTOMER
+		PATCH(":id", handler.Update)                       // CUSTOMER
 }
 
 func (r runner) setupTransactionRoutes() {
 	handler := handlers.NewTransactionHandler()
 	r.router.Group("/transactions").
-		GET(":id", handler.FindByID).
-		PATCH(":id/approve", handler.Approve).
-		PATCH(":id/decline", handler.Decline).
-		PUT("", handler.Create)
+		GET(":id", handler.FindByID). // CUSTOMER
+		PATCH(":id/approve", middleware.Auth(), handler.Approve).
+		PATCH(":id/decline", middleware.Auth(), handler.Decline).
+		PUT("", handler.Create) // CUSTOMER
 }
 
 func (r runner) setupAnnouncementRoutes() {
 	handler := handlers.NewAnnouncementHandler()
 	r.router.Group("/announcements").
 		GET(":id", handler.FindByID).
-		PUT("", handler.Create).
-		PATCH(":id", handler.Update)
+		PUT("", middleware.Admin(), handler.Create).
+		PATCH(":id", middleware.Admin(), handler.Update)
 }
