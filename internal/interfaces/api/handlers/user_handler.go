@@ -62,14 +62,21 @@ func (h UserHandler) Search(c *gin.Context) {
 
 func (h UserHandler) Update(c *gin.Context) {
 	var user users.User
-	id := c.Param("id")
+
+	currentUserID := c.MustGet("user_id").(string)
+	userID := c.Param("id")
+
+	if currentUserID != userID && !utils.IsAdmin(currentUserID) {
+		c.JSON(http.StatusForbidden, gin.H{"message": "You don't have access to do that"})
+		return
+	}
 
 	if err := c.ShouldBindJSON(&user); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"message": "Malformed request"})
 		return
 	}
 
-	if err := h.userService.Update(id, &user); err != nil {
+	if err := h.userService.Update(userID, &user); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": "Something went wrong"})
 		return
 	}
