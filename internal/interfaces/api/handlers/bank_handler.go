@@ -99,6 +99,11 @@ func (h BankHandler) Update(c *gin.Context) {
 	bankID := c.Param("id")
 	userID := c.MustGet("user_id").(string)
 
+	if !h.bankService.IsBankOwner(bankID, userID) {
+		c.JSON(http.StatusForbidden, gin.H{"message": "You do not have access to update this bank"})
+		return
+	}
+
 	if err := c.ShouldBindJSON(&bank); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"message": "Malformed request"})
 		return
@@ -109,11 +114,6 @@ func (h BankHandler) Update(c *gin.Context) {
 		return
 	}
 
-	if !h.bankService.IsBankOwner(bankID, userID) {
-		c.JSON(http.StatusForbidden, gin.H{"message": "You do not have access to update this bank"})
-		return
-	}
-
 	c.JSON(http.StatusAccepted, bank)
 }
 
@@ -121,13 +121,13 @@ func (h BankHandler) Delete(c *gin.Context) {
 	bankID := c.Param("id")
 	userID := c.MustGet("user_id").(string)
 
-	if err := h.bankService.Delete(bankID); err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"message": "Unable to find bank"})
+	if !h.bankService.IsBankOwner(bankID, userID) {
+		c.JSON(http.StatusForbidden, gin.H{"message": "You do not have access to delete this bank"})
 		return
 	}
 
-	if !h.bankService.IsBankOwner(bankID, userID) {
-		c.JSON(http.StatusForbidden, gin.H{"message": "You do not have access to delete this bank"})
+	if err := h.bankService.Delete(bankID); err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"message": "Unable to find bank"})
 		return
 	}
 
