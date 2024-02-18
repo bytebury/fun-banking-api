@@ -17,11 +17,15 @@ type BankService interface {
 }
 
 type bankService struct {
-	bankRepository BankRepository
+	bankRepository     BankRepository
+	employeeRepository EmployeeRepository
 }
 
 func NewBankService(bankRepository BankRepository) BankService {
-	return bankService{bankRepository}
+	return bankService{
+		bankRepository:     bankRepository,
+		employeeRepository: NewEmployeeRepository(),
+	}
 }
 
 func (s bankService) FindByID(id string) (Bank, error) {
@@ -67,4 +71,29 @@ func (s bankService) IsBankOwner(bankID string, userID string) bool {
 	}
 
 	return strconv.Itoa(int(bank.UserID)) == userID || utils.IsAdmin(userID)
+}
+
+func (s bankService) IsBankEmployee(bankID string, userID string) bool {
+	var bank Bank
+	var employees []Employee
+
+	if err := s.bankRepository.FindByID(bankID, &bank); err != nil {
+		return false
+	}
+
+	if s.IsBankOwner(bankID, userID) {
+		return true
+	}
+
+	if err := s.employeeRepository.FindAllByBankID(bankID, &employees); err != nil {
+		return false
+	}
+
+	for _, employee := range employees {
+		if strconv.Itoa(int(employee.UserID)) == userID {
+			return true
+		}
+	}
+
+	return false
 }
