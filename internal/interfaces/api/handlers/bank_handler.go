@@ -5,7 +5,6 @@ import (
 	"funbanking/internal/domain/repository"
 	"funbanking/internal/domain/service"
 	"net/http"
-	"strings"
 
 	"github.com/gin-gonic/gin"
 )
@@ -23,12 +22,18 @@ func NewBankHandler() BankHandler {
 }
 
 func (h BankHandler) FindByID(c *gin.Context) {
-	id := c.Param("id")
+	bankID := c.Param("id")
+	userID := c.MustGet("user_id").(string)
 
-	bank, err := h.bankService.FindByID(id)
+	bank, err := h.bankService.FindByID(bankID)
 
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"message": "Unable to find bank"})
+		return
+	}
+
+	if !h.bankService.IsBankOwner(bankID, userID) {
+		c.JSON(http.StatusForbidden, gin.H{"message": "You do not have access to this bank"})
 		return
 	}
 
@@ -46,10 +51,7 @@ func (h BankHandler) FindByUsernameAndSlug(c *gin.Context) {
 		return
 	}
 
-	bank, err := h.bankService.FindByUsernameAndSlug(
-		strings.TrimSpace(request.username),
-		strings.TrimSpace(request.slug),
-	)
+	bank, err := h.bankService.FindByUsernameAndSlug(request.username, request.slug)
 
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"message": "Unable to find bank"})
@@ -60,12 +62,18 @@ func (h BankHandler) FindByUsernameAndSlug(c *gin.Context) {
 }
 
 func (h BankHandler) FindAllCustomers(c *gin.Context) {
-	id := c.Param("id")
+	bankID := c.Param("id")
+	userID := c.MustGet("user_id").(string)
 
-	customers, err := h.bankService.FindAllCustomers(id)
+	customers, err := h.bankService.FindAllCustomers(bankID)
 
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"message": "Unable to find bank"})
+		return
+	}
+
+	if !h.bankService.IsBankOwner(bankID, userID) {
+		c.JSON(http.StatusForbidden, gin.H{"message": "You do not have access to this bank"})
 		return
 	}
 
@@ -90,15 +98,21 @@ func (h BankHandler) Create(c *gin.Context) {
 
 func (h BankHandler) Update(c *gin.Context) {
 	var bank model.Bank
-	id := c.Param("id")
+	bankID := c.Param("id")
+	userID := c.MustGet("user_id").(string)
 
 	if err := c.ShouldBindJSON(&bank); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"message": "Malformed request"})
 		return
 	}
 
-	if err := h.bankService.Update(id, &bank); err != nil {
+	if err := h.bankService.Update(bankID, &bank); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": "Something went wrong"})
+		return
+	}
+
+	if !h.bankService.IsBankOwner(bankID, userID) {
+		c.JSON(http.StatusForbidden, gin.H{"message": "You do not have access to update this bank"})
 		return
 	}
 
@@ -106,10 +120,16 @@ func (h BankHandler) Update(c *gin.Context) {
 }
 
 func (h BankHandler) Delete(c *gin.Context) {
-	id := c.Param("id")
+	bankID := c.Param("id")
+	userID := c.MustGet("user_id").(string)
 
-	if err := h.bankService.Delete(id); err != nil {
+	if err := h.bankService.Delete(bankID); err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"message": "Unable to find bank"})
+		return
+	}
+
+	if !h.bankService.IsBankOwner(bankID, userID) {
+		c.JSON(http.StatusForbidden, gin.H{"message": "You do not have access to delete this bank"})
 		return
 	}
 

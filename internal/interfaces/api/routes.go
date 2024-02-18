@@ -56,12 +56,12 @@ func (r runner) setupSessionRoutes() {
 func (r runner) setupBankRoutes() {
 	handler := handlers.NewBankHandler()
 	r.router.Group("/banks").
-		GET(":id", handler.FindByID).
-		GET(":id/customers", handler.FindAllCustomers).
+		GET(":id", middleware.Auth(), handler.FindByID).
+		GET(":id/customers", middleware.Auth(), handler.FindAllCustomers).
 		POST("", handler.FindByUsernameAndSlug).
-		PUT("", handler.Create).
-		PATCH(":id", handler.Update).
-		DELETE(":id", handler.Delete)
+		PUT("", middleware.Auth(), handler.Create).
+		PATCH(":id", middleware.Auth(), handler.Update).
+		DELETE(":id", middleware.Auth(), handler.Delete)
 }
 
 func (r runner) setupCustomerRoutes() {

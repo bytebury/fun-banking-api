@@ -50,7 +50,6 @@ func (r bankRepository) Create(bank *model.Bank) error {
 	return r.db.Create(&bank).Error
 }
 
-// TODO: This should be a transaction!
 func (r bankRepository) Update(bankID string, bank *model.Bank) error {
 	var foundBank model.Bank
 
