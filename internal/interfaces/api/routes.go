@@ -38,11 +38,11 @@ func (r runner) setupUserRoutes() {
 	handler := handlers.NewUserHandler()
 	r.router.GET("/current-user", middleware.Auth(), handler.GetCurrentUser)
 	r.router.Group("users").
-		GET("", handler.GetCurrentUser).
-		GET(":id", handler.FindByID).
-		GET(":id/banks", handler.FindBanks).
+		GET("", middleware.Admin(), handler.Search).
+		GET(":username", middleware.Audit(), handler.FindByUsername).
+		GET(":username/banks", middleware.Auth(), handler.FindBanks).
 		PUT("", handler.Create).
-		PATCH(":id", handler.Update)
+		PATCH(":id", middleware.Auth(), handler.Update)
 }
 
 func (r runner) setupSessionRoutes() {
@@ -56,6 +56,7 @@ func (r runner) setupSessionRoutes() {
 func (r runner) setupBankRoutes() {
 	handler := handlers.NewBankHandler()
 	r.router.Group("/banks").
+		// TODO: Search for banks GET("/banks")
 		GET(":id", middleware.Auth(), handler.FindByID).
 		GET(":id/customers", middleware.Auth(), handler.FindAllCustomers).
 		POST("", handler.FindByUsernameAndSlug).

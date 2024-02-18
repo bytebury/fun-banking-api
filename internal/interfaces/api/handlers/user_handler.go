@@ -5,7 +5,9 @@ import (
 	"funbanking/internal/domain/repository"
 	"funbanking/internal/domain/service"
 	"funbanking/internal/infrastructure/auth"
+	"funbanking/package/utils"
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
@@ -35,26 +37,43 @@ func (h UserHandler) GetCurrentUser(c *gin.Context) {
 	c.JSON(http.StatusOK, user)
 }
 
-func (h UserHandler) FindByID(c *gin.Context) {
-	id := c.Param("id")
+func (h UserHandler) FindByUsername(c *gin.Context) {
+	username := c.Param("username")
+	userID := c.GetString("user_id")
 
-	user, err := h.userService.FindByID(id)
+	user, err := h.userService.FindByUsernameOrEmail(username)
+
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"message": "Unable to find that user"})
+		return
+	}
+
+	if userID == "" || !utils.IsAdmin(userID) || strconv.Itoa(int(user.ID)) != userID {
+		user.Email = ""
+	}
+
+	c.JSON(http.StatusOK, user)
+}
+
+func (h UserHandler) Search(c *gin.Context) {
+	// TODO: This will be used by admins to search for users
+	// will be paginated
+}
+
+func (h UserHandler) FindBanks(c *gin.Context) {
+	username := c.Param("username")
+
+	user, err := h.userService.FindByUsernameOrEmail(username)
 
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"message": "Unable to find user"})
 		return
 	}
 
-	c.JSON(http.StatusOK, user)
-}
-
-func (h UserHandler) FindBanks(c *gin.Context) {
-	id := c.Param("id")
-
-	banks, err := h.userService.FindBanks(id)
+	banks, err := h.userService.FindBanks(strconv.Itoa(int(user.ID)))
 
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"message": "Unable to find user"})
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "Unable to get banks for that user"})
 		return
 	}
 
