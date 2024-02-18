@@ -7,7 +7,7 @@ import (
 )
 
 type CustomerAuth interface {
-	Login(request banking.CustomerLoginRequest) (string, banking.Customer, error)
+	Login(request banking.LoginRequest) (string, banking.Customer, error)
 }
 
 type customerAuth struct {
@@ -22,7 +22,7 @@ func NewCustomerAuth(customerRepository banking.CustomerRepository) CustomerAuth
 	}
 }
 
-func (auth customerAuth) Login(request banking.CustomerLoginRequest) (string, banking.Customer, error) {
+func (auth customerAuth) Login(request banking.LoginRequest) (string, banking.Customer, error) {
 	request.PIN = strings.TrimSpace(request.PIN)
 
 	var customer banking.Customer

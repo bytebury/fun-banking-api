@@ -2,39 +2,29 @@ package auth
 
 import (
 	"errors"
-	"funbanking/internal/domain/model"
-	"funbanking/internal/domain/repository"
+	"funbanking/internal/domain/users"
 	"strconv"
 	"strings"
 
 	"golang.org/x/crypto/bcrypt"
 )
 
-type UserLoginRequest struct {
-	UsernameOrEmail string `json:"username_or_email"`
-	Password        string `json:"password"`
-}
-
-type UserAuth interface {
-	Login(request UserLoginRequest) (string, model.User, error)
-}
-
 type userAuth struct {
-	userRepository repository.UserRepository
+	userRepository users.UserRepository
 	jwt            JWTService
 }
 
-func NewUserAuth(userRepository repository.UserRepository) UserAuth {
+func NewUserAuth(userRepository users.UserRepository) users.UserAuth {
 	return userAuth{
 		userRepository: userRepository,
 		jwt:            NewJWTService(),
 	}
 }
 
-func (auth userAuth) Login(request UserLoginRequest) (string, model.User, error) {
+func (auth userAuth) Login(request users.LoginRequest) (string, users.User, error) {
 	request.UsernameOrEmail = strings.TrimSpace(strings.ToLower(request.UsernameOrEmail))
 
-	var user model.User
+	var user users.User
 	if err := auth.userRepository.FindByUsernameOrEmail(request.UsernameOrEmail, &user); err != nil {
 		return "", user, err
 	}

@@ -1,7 +1,12 @@
-package model
+package users
+
+import (
+	"funbanking/internal/domain"
+	"funbanking/internal/infrastructure/persistence"
+)
 
 type User struct {
-	AuditModel
+	domain.AuditModel
 	Username  string `json:"username" gorm:"unique;not null;size:15"`
 	Email     string `json:"email" gorm:"unique;not null"`
 	FirstName string `json:"first_name" gorm:"not null;size:20"`
@@ -29,4 +34,8 @@ type UpdateUserRequest struct {
 	LastName  string `json:"last_name"`
 	Avatar    string `json:"avatar"`
 	About     string `json:"about"`
+}
+
+func RunMigrations() {
+	persistence.DB.AutoMigrate(&User{})
 }

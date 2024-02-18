@@ -1,7 +1,7 @@
 package banking
 
 import (
-	"funbanking/internal/domain/model"
+	"funbanking/internal/domain/users"
 	"funbanking/internal/infrastructure/persistence"
 
 	"gorm.io/gorm"
@@ -33,7 +33,7 @@ func (r bankRepository) FindAllByUserID(userID string, banks *[]Bank) error {
 }
 
 func (r bankRepository) FindByUsernameAndSlug(username, slug string, bank *Bank) error {
-	var user model.User
+	var user users.User
 
 	if err := r.db.First(&user, "username = ?", username).Error; err != nil {
 		return err

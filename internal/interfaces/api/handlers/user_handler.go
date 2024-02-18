@@ -1,9 +1,7 @@
 package handlers
 
 import (
-	"funbanking/internal/domain/model"
-	"funbanking/internal/domain/repository"
-	"funbanking/internal/domain/service"
+	"funbanking/internal/domain/users"
 	"funbanking/internal/infrastructure/auth"
 	"funbanking/package/utils"
 	"net/http"
@@ -13,13 +11,15 @@ import (
 )
 
 type UserHandler struct {
-	userService service.UserService
+	userService users.UserService
 }
 
 func NewUserHandler() UserHandler {
+	userRepository := users.NewUserRepository()
 	return UserHandler{
-		userService: service.NewUserService(
-			repository.NewUserRepository(),
+		userService: users.NewUserService(
+			userRepository,
+			auth.NewUserAuth(userRepository),
 		),
 	}
 }
@@ -61,7 +61,7 @@ func (h UserHandler) Search(c *gin.Context) {
 }
 
 func (h UserHandler) Update(c *gin.Context) {
-	var user model.User
+	var user users.User
 	id := c.Param("id")
 
 	if err := c.ShouldBindJSON(&user); err != nil {
@@ -78,7 +78,7 @@ func (h UserHandler) Update(c *gin.Context) {
 }
 
 func (h UserHandler) Create(c *gin.Context) {
-	var user model.User
+	var user users.User
 
 	if err := c.ShouldBindJSON(&user); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"message": "Malformed request"})
@@ -94,7 +94,7 @@ func (h UserHandler) Create(c *gin.Context) {
 }
 
 func (h UserHandler) Login(c *gin.Context) {
-	var request auth.UserLoginRequest
+	var request users.LoginRequest
 
 	if err := c.ShouldBindJSON(&request); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"message": "Malformed request"})
@@ -110,7 +110,7 @@ func (h UserHandler) Login(c *gin.Context) {
 
 	response := struct {
 		Token string     `json:"token"`
-		User  model.User `json:"user"`
+		User  users.User `json:"user"`
 	}{Token: token, User: user}
 
 	c.JSON(http.StatusOK, response)

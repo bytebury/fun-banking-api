@@ -2,7 +2,7 @@ package metrics
 
 import (
 	"funbanking/internal/domain/banking"
-	"funbanking/internal/domain/model"
+	"funbanking/internal/domain/users"
 	"funbanking/internal/infrastructure/persistence"
 
 	"gorm.io/gorm"
@@ -25,7 +25,7 @@ func (r metricRepository) GetApplicationInfo(appInfo *ApplicationInfo) error {
 	appInfo.Version = "1.0.0"
 	appInfo.Message = "Everything is up and running!"
 
-	r.db.Model(&model.User{}).Count(&appInfo.NumberOfUsers)
+	r.db.Model(&users.User{}).Count(&appInfo.NumberOfUsers)
 	r.db.Model(&banking.Bank{}).Count(&appInfo.NumberOfBanks)
 	r.db.Model(&banking.Customer{}).Count(&appInfo.NumberOfCustomers)
 	r.db.Model(&banking.Transaction{}).Count(&appInfo.NumberOfTransactions)

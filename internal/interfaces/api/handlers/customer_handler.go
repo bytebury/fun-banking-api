@@ -93,7 +93,7 @@ func (h CustomerHandler) Delete(c *gin.Context) {
 }
 
 func (h CustomerHandler) Login(c *gin.Context) {
-	var request banking.CustomerLoginRequest
+	var request banking.LoginRequest
 
 	if err := c.ShouldBindJSON(&request); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"message": "Malformed request"})

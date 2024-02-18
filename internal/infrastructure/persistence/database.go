@@ -1,7 +1,6 @@
 package persistence
 
 import (
-	"funbanking/internal/domain/model"
 	"log"
 	"os"
 
@@ -34,8 +33,4 @@ func SetUpConnection() {
 
 	DB = db
 	log.Println("🟢 Successfully connected to the database")
-}
-
-func RunMigrations() {
-	DB.AutoMigrate(&model.User{})
 }

@@ -1,13 +1,13 @@
 package utils
 
 import (
-	"funbanking/internal/domain/model"
+	"funbanking/internal/domain/users"
 	"funbanking/internal/infrastructure/persistence"
 	"funbanking/package/constants"
 )
 
 func IsAdmin(userID string) bool {
-	var user model.User
+	var user users.User
 
 	if err := persistence.DB.Find(&user, "id = ?", userID).Error; err != nil {
 		return false

@@ -4,13 +4,13 @@ import (
 	"funbanking/package/utils"
 )
 
-type CustomerLoginRequest struct {
+type LoginRequest struct {
 	BankID string `json:"bank_id"`
 	PIN    string `json:"pin"`
 }
 
 type CustomerAuth interface {
-	Login(request CustomerLoginRequest) (string, Customer, error)
+	Login(request LoginRequest) (string, Customer, error)
 }
 
 type CustomerService interface {
@@ -47,7 +47,7 @@ func (s customerService) FindAccounts(id string) ([]Account, error) {
 }
 
 func (s customerService) Login(bankID string, pin string) (string, Customer, error) {
-	request := CustomerLoginRequest{
+	request := LoginRequest{
 		BankID: bankID,
 		PIN:    pin,
 	}
