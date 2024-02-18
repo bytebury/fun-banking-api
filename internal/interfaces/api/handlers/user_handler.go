@@ -60,26 +60,6 @@ func (h UserHandler) Search(c *gin.Context) {
 	// will be paginated
 }
 
-func (h UserHandler) FindBanks(c *gin.Context) {
-	username := c.Param("username")
-
-	user, err := h.userService.FindByUsernameOrEmail(username)
-
-	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"message": "Unable to find user"})
-		return
-	}
-
-	banks, err := h.userService.FindBanks(strconv.Itoa(int(user.ID)))
-
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"message": "Unable to get banks for that user"})
-		return
-	}
-
-	c.JSON(http.StatusOK, banks)
-}
-
 func (h UserHandler) Update(c *gin.Context) {
 	var user model.User
 	id := c.Param("id")

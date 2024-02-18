@@ -12,7 +12,6 @@ type UserRepository interface {
 	GetCurrentUser(user *model.User) error
 	FindByID(userID string, user *model.User) error
 	FindByUsernameOrEmail(usernameOrEmail string, user *model.User) error
-	FindBanks(id string, banks *[]model.Bank) error
 	Update(userID string, user *model.User) error
 	Create(user *model.User) error
 }
@@ -36,10 +35,6 @@ func (r userRepository) FindByID(userID string, user *model.User) error {
 func (r userRepository) FindByUsernameOrEmail(usernameOrEmail string, user *model.User) error {
 	usernameOrEmail = strings.TrimSpace(strings.ToLower(usernameOrEmail))
 	return r.db.Find(&user, "username = ? or email = ?", usernameOrEmail, usernameOrEmail).Error
-}
-
-func (r userRepository) FindBanks(id string, banks *[]model.Bank) error {
-	return r.db.Preload("User").Find(&banks, "user_id = ?", id).Error
 }
 
 func (r userRepository) Update(userID string, user *model.User) error {

@@ -1,16 +1,15 @@
-package repository
+package banking
 
 import (
-	"funbanking/internal/domain/model"
 	"funbanking/internal/infrastructure/persistence"
 
 	"gorm.io/gorm"
 )
 
 type AccountRepository interface {
-	FindByID(id string, account *model.Account) error
-	FindTransactions(id string, transactions *[]model.Transaction) error
-	Update(id string, account *model.Account) error
+	FindByID(accountID string, account *Account) error
+	FindTransactions(accountID string, transactions *[]Transaction) error
+	Update(accountID string, account *Account) error
 }
 
 type accountRepository struct {
@@ -21,16 +20,16 @@ func NewAccountRepository() AccountRepository {
 	return accountRepository{db: persistence.DB}
 }
 
-func (r accountRepository) FindByID(accountID string, account *model.Account) error {
+func (r accountRepository) FindByID(accountID string, account *Account) error {
 	return r.db.First(&account, "id = ?", accountID).Error
 }
 
-func (r accountRepository) FindTransactions(accountID string, transactions *[]model.Transaction) error {
+func (r accountRepository) FindTransactions(accountID string, transactions *[]Transaction) error {
 	return r.db.Find(&transactions, "account_id = ?", accountID).Error
 }
 
-func (r accountRepository) Update(accountID string, account *model.Account) error {
-	var foundAccount model.Account
+func (r accountRepository) Update(accountID string, account *Account) error {
+	var foundAccount Account
 
 	if err := r.db.First(&account, "id = ?", accountID).Error; err != nil {
 		return err

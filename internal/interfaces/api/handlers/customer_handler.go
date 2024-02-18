@@ -1,9 +1,7 @@
 package handlers
 
 import (
-	"funbanking/internal/domain/model"
-	"funbanking/internal/domain/repository"
-	"funbanking/internal/domain/service"
+	"funbanking/internal/domain/banking"
 	"funbanking/internal/infrastructure/auth"
 	"net/http"
 
@@ -11,13 +9,15 @@ import (
 )
 
 type CustomerHandler struct {
-	customerService service.CustomerService
+	customerService banking.CustomerService
 }
 
 func NewCustomerHandler() CustomerHandler {
+	customerRepository := banking.NewCustomerRepository()
 	return CustomerHandler{
-		customerService: service.NewCustomerService(
-			repository.NewCustomerRepository(),
+		customerService: banking.NewCustomerService(
+			customerRepository,
+			auth.NewCustomerAuth(customerRepository),
 		),
 	}
 }
@@ -49,7 +49,7 @@ func (h CustomerHandler) FindAccounts(c *gin.Context) {
 }
 
 func (h CustomerHandler) Create(c *gin.Context) {
-	var customer model.Customer
+	var customer banking.Customer
 
 	if err := c.ShouldBindJSON(&customer); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"message": "Malformed request"})
@@ -65,7 +65,7 @@ func (h CustomerHandler) Create(c *gin.Context) {
 }
 
 func (h CustomerHandler) Update(c *gin.Context) {
-	var customer model.Customer
+	var customer banking.Customer
 	id := c.Param("id")
 
 	if err := c.ShouldBindJSON(&customer); err != nil {
@@ -93,7 +93,7 @@ func (h CustomerHandler) Delete(c *gin.Context) {
 }
 
 func (h CustomerHandler) Login(c *gin.Context) {
-	var request auth.CustomerLoginRequest
+	var request banking.CustomerLoginRequest
 
 	if err := c.ShouldBindJSON(&request); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"message": "Malformed request"})
@@ -108,8 +108,8 @@ func (h CustomerHandler) Login(c *gin.Context) {
 	}
 
 	response := struct {
-		Token    string         `json:"token"`
-		Customer model.Customer `json:"customer"`
+		Token    string           `json:"token"`
+		Customer banking.Customer `json:"customer"`
 	}{Token: token, Customer: customer}
 
 	c.JSON(http.StatusOK, response)

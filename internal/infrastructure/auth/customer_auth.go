@@ -1,37 +1,31 @@
 package auth
 
 import (
-	"funbanking/internal/domain/model"
-	"funbanking/internal/domain/repository"
+	"funbanking/internal/domain/banking"
 	"strconv"
 	"strings"
 )
 
-type CustomerLoginRequest struct {
-	BankID string `json:"bank_id"`
-	PIN    string `json:"pin"`
-}
-
 type CustomerAuth interface {
-	Login(request CustomerLoginRequest) (string, model.Customer, error)
+	Login(request banking.CustomerLoginRequest) (string, banking.Customer, error)
 }
 
 type customerAuth struct {
-	customerRepository repository.CustomerRepository
+	customerRepository banking.CustomerRepository
 	jwt                JWTService
 }
 
-func NewCustomerAuth(customerRepository repository.CustomerRepository) CustomerAuth {
+func NewCustomerAuth(customerRepository banking.CustomerRepository) CustomerAuth {
 	return customerAuth{
 		customerRepository: customerRepository,
 		jwt:                NewJWTService(),
 	}
 }
 
-func (auth customerAuth) Login(request CustomerLoginRequest) (string, model.Customer, error) {
+func (auth customerAuth) Login(request banking.CustomerLoginRequest) (string, banking.Customer, error) {
 	request.PIN = strings.TrimSpace(request.PIN)
 
-	var customer model.Customer
+	var customer banking.Customer
 	if err := auth.customerRepository.FindByBankAndPIN(request.BankID, request.PIN, &customer); err != nil {
 		return "", customer, err
 	}

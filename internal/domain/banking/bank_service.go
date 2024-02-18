@@ -1,39 +1,37 @@
-package service
+package banking
 
 import (
-	"funbanking/internal/domain/model"
-	"funbanking/internal/domain/repository"
 	"funbanking/package/utils"
 	"strconv"
 	"strings"
 )
 
 type BankService interface {
-	FindByID(id string) (model.Bank, error)
-	FindByUsernameAndSlug(username, slug string) (model.Bank, error)
-	FindAllCustomers(id string) ([]model.Customer, error)
-	Create(bank *model.Bank) error
-	Update(id string, bank *model.Bank) error
+	FindByID(id string) (Bank, error)
+	FindByUsernameAndSlug(username, slug string) (Bank, error)
+	FindAllCustomers(id string) ([]Customer, error)
+	Create(bank *Bank) error
+	Update(id string, bank *Bank) error
 	Delete(id string) error
 	IsBankOwner(bankID, userID string) bool
 }
 
 type bankService struct {
-	bankRepository repository.BankRepository
+	bankRepository BankRepository
 }
 
-func NewBankService(bankRepository repository.BankRepository) BankService {
+func NewBankService(bankRepository BankRepository) BankService {
 	return bankService{bankRepository}
 }
 
-func (s bankService) FindByID(id string) (model.Bank, error) {
-	var bank model.Bank
+func (s bankService) FindByID(id string) (Bank, error) {
+	var bank Bank
 	err := s.bankRepository.FindByID(id, &bank)
 	return bank, err
 }
 
-func (s bankService) FindByUsernameAndSlug(username, slug string) (model.Bank, error) {
-	var bank model.Bank
+func (s bankService) FindByUsernameAndSlug(username, slug string) (Bank, error) {
+	var bank Bank
 
 	// Normalize inputs
 	username = strings.TrimSpace(strings.ToLower(username))
@@ -43,17 +41,17 @@ func (s bankService) FindByUsernameAndSlug(username, slug string) (model.Bank, e
 	return bank, err
 }
 
-func (s bankService) FindAllCustomers(id string) ([]model.Customer, error) {
-	var customers []model.Customer
+func (s bankService) FindAllCustomers(id string) ([]Customer, error) {
+	var customers []Customer
 	err := s.bankRepository.FindAllCustomers(id, &customers)
 	return utils.Listify(customers), err
 }
 
-func (s bankService) Create(bank *model.Bank) error {
+func (s bankService) Create(bank *Bank) error {
 	return s.bankRepository.Create(bank)
 }
 
-func (s bankService) Update(id string, bank *model.Bank) error {
+func (s bankService) Update(id string, bank *Bank) error {
 	return s.bankRepository.Update(id, bank)
 }
 
@@ -62,7 +60,7 @@ func (s bankService) Delete(id string) error {
 }
 
 func (s bankService) IsBankOwner(bankID string, userID string) bool {
-	var bank model.Bank
+	var bank Bank
 
 	if err := s.bankRepository.FindByID(bankID, &bank); err != nil {
 		return false

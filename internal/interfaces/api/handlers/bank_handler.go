@@ -1,22 +1,20 @@
 package handlers
 
 import (
-	"funbanking/internal/domain/model"
-	"funbanking/internal/domain/repository"
-	"funbanking/internal/domain/service"
+	"funbanking/internal/domain/banking"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 )
 
 type BankHandler struct {
-	bankService service.BankService
+	bankService banking.BankService
 }
 
 func NewBankHandler() BankHandler {
 	return BankHandler{
-		bankService: service.NewBankService(
-			repository.NewBankRepository(),
+		bankService: banking.NewBankService(
+			banking.NewBankRepository(),
 		),
 	}
 }
@@ -81,7 +79,7 @@ func (h BankHandler) FindAllCustomers(c *gin.Context) {
 }
 
 func (h BankHandler) Create(c *gin.Context) {
-	var bank model.Bank
+	var bank banking.Bank
 
 	if err := c.ShouldBindJSON(&bank); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"message": "Malformed request"})
@@ -97,7 +95,7 @@ func (h BankHandler) Create(c *gin.Context) {
 }
 
 func (h BankHandler) Update(c *gin.Context) {
-	var bank model.Bank
+	var bank banking.Bank
 	bankID := c.Param("id")
 	userID := c.MustGet("user_id").(string)
 

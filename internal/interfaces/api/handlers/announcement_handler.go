@@ -1,30 +1,28 @@
 package handlers
 
 import (
-	"funbanking/internal/domain/model"
-	"funbanking/internal/domain/repository"
-	"funbanking/internal/domain/service"
+	"funbanking/internal/domain/announcements"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 )
 
 type AnnouncementHandler struct {
-	announcementService service.AnnouncementService
+	announcementService announcements.AnnouncementService
 }
 
 func NewAnnouncementHandler() AnnouncementHandler {
 	return AnnouncementHandler{
-		announcementService: service.NewAnnouncementService(
-			repository.NewAnnouncementRepository(),
+		announcementService: announcements.NewAnnouncementService(
+			announcements.NewAnnouncementRepository(),
 		),
 	}
 }
 
 func (h AnnouncementHandler) FindByID(c *gin.Context) {
-	id := c.Param("id")
+	announcementID := c.Param("id")
 
-	announcement, err := h.announcementService.FindByID(id)
+	announcement, err := h.announcementService.FindByID(announcementID)
 
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"message": "Unable to find announcement"})
@@ -35,7 +33,7 @@ func (h AnnouncementHandler) FindByID(c *gin.Context) {
 }
 
 func (h AnnouncementHandler) Create(c *gin.Context) {
-	var announcement model.Announcement
+	var announcement announcements.Announcement
 
 	if err := c.ShouldBindJSON(&announcement); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"message": "Malformed request"})
@@ -51,15 +49,15 @@ func (h AnnouncementHandler) Create(c *gin.Context) {
 }
 
 func (h AnnouncementHandler) Update(c *gin.Context) {
-	var announcement model.Announcement
-	id := c.Param("id")
+	var announcement announcements.Announcement
+	announcementID := c.Param("id")
 
 	if err := c.ShouldBindJSON(&announcement); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"message": "Malformed request"})
 		return
 	}
 
-	if err := h.announcementService.Update(id, &announcement); err != nil {
+	if err := h.announcementService.Update(announcementID, &announcement); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": "Something went wrong"})
 		return
 	}

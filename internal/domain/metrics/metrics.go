@@ -1,6 +1,6 @@
-package model
+package metrics
 
-type Health struct {
+type ApplicationInfo struct {
 	Name                 string `json:"name"`
 	Version              string `json:"version"`
 	Message              string `json:"message"`

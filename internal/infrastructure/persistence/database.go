@@ -38,8 +38,4 @@ func SetUpConnection() {
 
 func RunMigrations() {
 	DB.AutoMigrate(&model.User{})
-	DB.AutoMigrate(&model.Bank{})
-	DB.AutoMigrate(&model.Customer{})
-	DB.AutoMigrate(&model.Account{})
-	DB.AutoMigrate(&model.Transaction{})
 }

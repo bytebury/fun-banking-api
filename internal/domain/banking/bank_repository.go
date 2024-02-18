@@ -1,4 +1,4 @@
-package repository
+package banking
 
 import (
 	"funbanking/internal/domain/model"
@@ -8,11 +8,11 @@ import (
 )
 
 type BankRepository interface {
-	FindByID(id string, bank *model.Bank) error
-	FindByUsernameAndSlug(username, slug string, bank *model.Bank) error
-	FindAllCustomers(bankID string, customers *[]model.Customer) error
-	Create(bank *model.Bank) error
-	Update(bankID string, bank *model.Bank) error
+	FindByID(id string, bank *Bank) error
+	FindByUsernameAndSlug(username, slug string, bank *Bank) error
+	FindAllCustomers(bankID string, customers *[]Customer) error
+	Create(bank *Bank) error
+	Update(bankID string, bank *Bank) error
 	Delete(bankID string) error
 }
 
@@ -24,15 +24,15 @@ func NewBankRepository() BankRepository {
 	return bankRepository{db: persistence.DB}
 }
 
-func (r bankRepository) FindByID(bankID string, bank *model.Bank) error {
+func (r bankRepository) FindByID(bankID string, bank *Bank) error {
 	return r.db.Preload("User").First(&bank, bankID).Error
 }
 
-func (r bankRepository) FindAllByUserID(userID string, banks *[]model.Bank) error {
+func (r bankRepository) FindAllByUserID(userID string, banks *[]Bank) error {
 	return r.db.Preload("User").Find(&banks, "user_id = ?", userID).Error
 }
 
-func (r bankRepository) FindByUsernameAndSlug(username, slug string, bank *model.Bank) error {
+func (r bankRepository) FindByUsernameAndSlug(username, slug string, bank *Bank) error {
 	var user model.User
 
 	if err := r.db.First(&user, "username = ?", username).Error; err != nil {
@@ -42,16 +42,16 @@ func (r bankRepository) FindByUsernameAndSlug(username, slug string, bank *model
 	return r.db.First(&bank, "user_id = ? AND slug = ?", user.ID, slug).Error
 }
 
-func (r bankRepository) FindAllCustomers(bankID string, customers *[]model.Customer) error {
+func (r bankRepository) FindAllCustomers(bankID string, customers *[]Customer) error {
 	return r.db.Find(&customers, "bank_id = ?", bankID).Error
 }
 
-func (r bankRepository) Create(bank *model.Bank) error {
+func (r bankRepository) Create(bank *Bank) error {
 	return r.db.Create(&bank).Error
 }
 
-func (r bankRepository) Update(bankID string, bank *model.Bank) error {
-	var foundBank model.Bank
+func (r bankRepository) Update(bankID string, bank *Bank) error {
+	var foundBank Bank
 
 	if err := r.FindByID(bankID, &foundBank); err != nil {
 		return err
@@ -73,5 +73,5 @@ func (r bankRepository) Update(bankID string, bank *model.Bank) error {
 }
 
 func (r bankRepository) Delete(bankID string) error {
-	return r.db.Delete(&model.Bank{}, bankID).Error
+	return r.db.Delete(&Bank{}, bankID).Error
 }

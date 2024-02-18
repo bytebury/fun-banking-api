@@ -1,22 +1,20 @@
 package handlers
 
 import (
-	"funbanking/internal/domain/model"
-	"funbanking/internal/domain/repository"
-	"funbanking/internal/domain/service"
+	"funbanking/internal/domain/banking"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 )
 
 type TransactionHandler struct {
-	transactionService service.TransactionService
+	transactionService banking.TransactionService
 }
 
 func NewTransactionHandler() TransactionHandler {
 	return TransactionHandler{
-		transactionService: service.NewTransactionService(
-			repository.NewTransactionRepository(),
+		transactionService: banking.NewTransactionService(
+			banking.NewTransactionRepository(),
 		),
 	}
 }
@@ -35,7 +33,7 @@ func (h TransactionHandler) FindByID(c *gin.Context) {
 }
 
 func (h TransactionHandler) Approve(c *gin.Context) {
-	var transaction model.Transaction
+	var transaction banking.Transaction
 	id := c.Param("id")
 
 	if err := c.ShouldBindJSON(&transaction); err != nil {
@@ -52,7 +50,7 @@ func (h TransactionHandler) Approve(c *gin.Context) {
 }
 
 func (h TransactionHandler) Decline(c *gin.Context) {
-	var transaction model.Transaction
+	var transaction banking.Transaction
 	id := c.Param("id")
 
 	if err := c.ShouldBindJSON(&transaction); err != nil {
@@ -69,7 +67,7 @@ func (h TransactionHandler) Decline(c *gin.Context) {
 }
 
 func (h TransactionHandler) Create(c *gin.Context) {
-	var transaction model.Transaction
+	var transaction banking.Transaction
 
 	if err := c.ShouldBindJSON(&transaction); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"message": "Malformed request"})

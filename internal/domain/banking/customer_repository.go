@@ -1,19 +1,18 @@
-package repository
+package banking
 
 import (
 	"errors"
-	"funbanking/internal/domain/model"
 	"funbanking/internal/infrastructure/persistence"
 
 	"gorm.io/gorm"
 )
 
 type CustomerRepository interface {
-	FindByID(customerID string, customer *model.Customer) error
-	FindAccounts(customerID string, accounts *[]model.Account) error
-	FindByBankAndPIN(bankID string, pin string, customer *model.Customer) error
-	Create(customer *model.Customer) error
-	Update(customerID string, customer *model.Customer) error
+	FindByID(customerID string, customer *Customer) error
+	FindAccounts(customerID string, accounts *[]Account) error
+	FindByBankAndPIN(bankID string, pin string, customer *Customer) error
+	Create(customer *Customer) error
+	Update(customerID string, customer *Customer) error
 	Delete(customerID string) error
 }
 
@@ -25,15 +24,15 @@ func NewCustomerRepository() CustomerRepository {
 	return customerRepository{db: persistence.DB}
 }
 
-func (r customerRepository) FindByID(customerID string, customer *model.Customer) error {
+func (r customerRepository) FindByID(customerID string, customer *Customer) error {
 	return r.db.Preload("Accounts").First(&customer, "id = ?", customerID).Error
 }
 
-func (r customerRepository) FindAccounts(customerID string, accounts *[]model.Account) error {
+func (r customerRepository) FindAccounts(customerID string, accounts *[]Account) error {
 	return r.db.Find(&accounts, "customer_id = ?", customerID).Error
 }
 
-func (r customerRepository) FindByBankAndPIN(bankID string, pin string, customer *model.Customer) error {
+func (r customerRepository) FindByBankAndPIN(bankID string, pin string, customer *Customer) error {
 	if bankID == "" || pin == "" {
 		return errors.New("missing required fields: BankID or PIN")
 	}
@@ -41,14 +40,14 @@ func (r customerRepository) FindByBankAndPIN(bankID string, pin string, customer
 	return r.db.Preload("Accounts").First(&customer, "bank_id = ? AND pin = ?", bankID, pin).Error
 }
 
-func (r customerRepository) Create(customer *model.Customer) error {
+func (r customerRepository) Create(customer *Customer) error {
 	// When you create a customer, you also create a checkings account
 	return r.db.Transaction(func(tx *gorm.DB) error {
 		if err := tx.Create(&customer).Error; err != nil {
 			return err
 		}
 
-		if err := tx.Create(&model.Account{Name: "Checkings", CustomerID: customer.ID}).Error; err != nil {
+		if err := tx.Create(&Account{Name: "Checkings", CustomerID: customer.ID}).Error; err != nil {
 			return err
 		}
 
@@ -56,8 +55,8 @@ func (r customerRepository) Create(customer *model.Customer) error {
 	})
 }
 
-func (r customerRepository) Update(customerID string, customer *model.Customer) error {
-	var foundCustomer model.Customer
+func (r customerRepository) Update(customerID string, customer *Customer) error {
+	var foundCustomer Customer
 
 	if err := r.FindByID(customerID, &foundCustomer); err != nil {
 		return err
@@ -79,5 +78,5 @@ func (r customerRepository) Update(customerID string, customer *model.Customer) 
 }
 
 func (r customerRepository) Delete(customerID string) error {
-	return r.db.Delete(&model.Customer{}, customerID).Error
+	return r.db.Delete(&Customer{}, customerID).Error
 }

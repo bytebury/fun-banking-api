@@ -1,6 +1,8 @@
 package main
 
 import (
+	"funbanking/internal/domain/announcements"
+	"funbanking/internal/domain/banking"
 	"funbanking/internal/infrastructure/persistence"
 	"funbanking/internal/interfaces/api"
 	"log"
@@ -16,6 +18,8 @@ func main() {
 
 	persistence.SetUpConnection()
 	persistence.RunMigrations()
+	banking.RunMigrations()
+	announcements.RunMigrations()
 
 	api.Run()
 }

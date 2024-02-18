@@ -18,7 +18,7 @@ type runner struct {
 }
 
 func (r runner) setup() {
-	r.setupHealthRoutes()
+	r.setupMetricsRoutes()
 	r.setupUserRoutes()
 	r.setupBankRoutes()
 	r.setupCustomerRoutes()
@@ -29,9 +29,9 @@ func (r runner) setup() {
 	r.setupSessionRoutes()
 }
 
-func (r runner) setupHealthRoutes() {
-	handler := handlers.NewHealthHandler()
-	r.router.Group("/health").GET("/", handler.GetHealthCheck)
+func (r runner) setupMetricsRoutes() {
+	handler := handlers.NewMetricsHandler()
+	r.router.Group("/metrics").GET("/", handler.GetApplicationInfo)
 }
 
 func (r runner) setupUserRoutes() {
@@ -40,7 +40,6 @@ func (r runner) setupUserRoutes() {
 	r.router.Group("users").
 		GET("", middleware.Admin(), handler.Search).
 		GET(":username", middleware.Audit(), handler.FindByUsername).
-		GET(":username/banks", middleware.Auth(), handler.FindBanks).
 		PUT("", handler.Create).
 		PATCH(":id", middleware.Auth(), handler.Update)
 }
@@ -103,6 +102,7 @@ func (r runner) setupTransactionRoutes() {
 func (r runner) setupAnnouncementRoutes() {
 	handler := handlers.NewAnnouncementHandler()
 	r.router.Group("/announcements").
+		// SEARCH ROUTE GET("/")
 		GET(":id", handler.FindByID).
 		PUT("", middleware.Admin(), handler.Create).
 		PATCH(":id", middleware.Admin(), handler.Update)

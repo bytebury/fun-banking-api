@@ -1,9 +1,7 @@
 package handlers
 
 import (
-	"funbanking/internal/domain/model"
-	"funbanking/internal/domain/repository"
-	"funbanking/internal/domain/service"
+	"funbanking/internal/domain/banking"
 	"funbanking/package/utils"
 	"net/http"
 
@@ -11,13 +9,13 @@ import (
 )
 
 type AccountHandler struct {
-	accountService service.AccountService
+	accountService banking.AccountService
 }
 
 func NewAccountHandler() AccountHandler {
 	return AccountHandler{
-		accountService: service.NewAccountService(
-			repository.NewAccountRepository(),
+		accountService: banking.NewAccountService(
+			banking.NewAccountRepository(),
 		),
 	}
 }
@@ -49,7 +47,7 @@ func (h AccountHandler) FindTransactions(c *gin.Context) {
 }
 
 func (h AccountHandler) Update(c *gin.Context) {
-	var account model.Account
+	var account banking.Account
 	id := c.Param("id")
 
 	if err := c.ShouldBindJSON(&account); err != nil {
