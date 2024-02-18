@@ -13,7 +13,8 @@ type BankService interface {
 	Create(bank *Bank) error
 	Update(id string, bank *Bank) error
 	Delete(id string) error
-	IsBankOwner(bankID, userID string) bool
+	IsOwner(bankID, userID string) bool
+	IsEmployee(bankID, userID string) bool
 }
 
 type bankService struct {
@@ -63,7 +64,7 @@ func (s bankService) Delete(id string) error {
 	return s.bankRepository.Delete(id)
 }
 
-func (s bankService) IsBankOwner(bankID string, userID string) bool {
+func (s bankService) IsOwner(bankID string, userID string) bool {
 	var bank Bank
 
 	if err := s.bankRepository.FindByID(bankID, &bank); err != nil {
@@ -73,7 +74,7 @@ func (s bankService) IsBankOwner(bankID string, userID string) bool {
 	return strconv.Itoa(int(bank.UserID)) == userID || utils.IsAdmin(userID)
 }
 
-func (s bankService) IsBankEmployee(bankID string, userID string) bool {
+func (s bankService) IsEmployee(bankID string, userID string) bool {
 	var bank Bank
 	var employees []Employee
 
@@ -81,7 +82,7 @@ func (s bankService) IsBankEmployee(bankID string, userID string) bool {
 		return false
 	}
 
-	if s.IsBankOwner(bankID, userID) {
+	if s.IsOwner(bankID, userID) {
 		return true
 	}
 

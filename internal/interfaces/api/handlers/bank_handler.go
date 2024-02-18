@@ -30,7 +30,7 @@ func (h BankHandler) FindByID(c *gin.Context) {
 		return
 	}
 
-	if !h.bankService.IsBankOwner(bankID, userID) {
+	if !h.bankService.IsOwner(bankID, userID) {
 		c.JSON(http.StatusForbidden, gin.H{"message": "You do not have access to this bank"})
 		return
 	}
@@ -70,7 +70,7 @@ func (h BankHandler) FindAllCustomers(c *gin.Context) {
 		return
 	}
 
-	if !h.bankService.IsBankOwner(bankID, userID) {
+	if !h.bankService.IsOwner(bankID, userID) {
 		c.JSON(http.StatusForbidden, gin.H{"message": "You do not have access to this bank"})
 		return
 	}
@@ -99,7 +99,7 @@ func (h BankHandler) Update(c *gin.Context) {
 	bankID := c.Param("id")
 	userID := c.MustGet("user_id").(string)
 
-	if !h.bankService.IsBankOwner(bankID, userID) {
+	if !h.bankService.IsOwner(bankID, userID) {
 		c.JSON(http.StatusForbidden, gin.H{"message": "You do not have access to update this bank"})
 		return
 	}
@@ -121,7 +121,7 @@ func (h BankHandler) Delete(c *gin.Context) {
 	bankID := c.Param("id")
 	userID := c.MustGet("user_id").(string)
 
-	if !h.bankService.IsBankOwner(bankID, userID) {
+	if !h.bankService.IsOwner(bankID, userID) {
 		c.JSON(http.StatusForbidden, gin.H{"message": "You do not have access to delete this bank"})
 		return
 	}
