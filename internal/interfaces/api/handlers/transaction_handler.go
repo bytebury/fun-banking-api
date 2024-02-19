@@ -19,19 +19,12 @@ func NewTransactionHandler() TransactionHandler {
 	}
 }
 
-func (h TransactionHandler) FindByID(c *gin.Context) {
-	id := c.Param("id")
-
-	transaction, err := h.transactionService.FindByID(id)
-
-	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"message": "Unable to find transaction"})
-		return
-	}
-
-	c.JSON(http.StatusOK, transaction)
+// TODO: Similar to how notifications work today
+func (h TransactionHandler) FindAllPendingTransactions(c *gin.Context) {
+	c.JSON(http.StatusOK, nil)
 }
 
+// only employees can approve
 func (h TransactionHandler) Approve(c *gin.Context) {
 	var transaction banking.Transaction
 	id := c.Param("id")
@@ -49,6 +42,7 @@ func (h TransactionHandler) Approve(c *gin.Context) {
 	c.JSON(http.StatusCreated, transaction)
 }
 
+// only employees can decline
 func (h TransactionHandler) Decline(c *gin.Context) {
 	var transaction banking.Transaction
 	id := c.Param("id")
@@ -66,6 +60,7 @@ func (h TransactionHandler) Decline(c *gin.Context) {
 	c.JSON(http.StatusCreated, transaction)
 }
 
+// only customers part of the bank or employees can create
 func (h TransactionHandler) Create(c *gin.Context) {
 	var transaction banking.Transaction
 
