@@ -51,6 +51,8 @@ func (h BankHandler) FindByUsernameAndSlug(c *gin.Context) {
 
 	bank, err := h.bankService.FindByUsernameAndSlug(request.username, request.slug)
 
+	bank.User.Email = ""
+
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"message": "Unable to find bank"})
 		return
