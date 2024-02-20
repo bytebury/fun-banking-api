@@ -6,7 +6,6 @@ import (
 	"funbanking/internal/infrastructure/auth"
 	"funbanking/internal/infrastructure/mailing"
 	"funbanking/package/constants"
-	"funbanking/package/utils"
 	"net/http"
 	"strconv"
 
@@ -72,14 +71,18 @@ func (h AccountHandler) FindTransactions(c *gin.Context) {
 		return
 	}
 
-	transactions, err := h.accountService.FindTransactions(accountID)
+	statuses := c.QueryArray("status")
+	itemsPerPage, _ := strconv.Atoi(c.Query("itemsPerPage"))
+	pageNumber, _ := strconv.Atoi(c.Query("pageNumber"))
+
+	transactions, err := h.accountService.FindTransactions(accountID, statuses, itemsPerPage, pageNumber)
 
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"message": "Unable to find that account"})
 		return
 	}
 
-	c.JSON(http.StatusOK, utils.Listify(transactions))
+	c.JSON(http.StatusOK, transactions)
 }
 
 func (h AccountHandler) Update(c *gin.Context) {

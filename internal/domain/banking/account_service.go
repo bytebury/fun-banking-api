@@ -1,12 +1,12 @@
 package banking
 
 import (
-	"funbanking/package/utils"
+	"funbanking/internal/infrastructure/pagination"
 )
 
 type AccountService interface {
 	FindByID(accountID string) (Account, error)
-	FindTransactions(accountID string) ([]Transaction, error)
+	FindTransactions(accountID string, statuses []string, itemsPerPage int, pageNumber int) (pagination.PaginatedResponse[Transaction], error)
 	Update(accountID string, account *Account) error
 }
 
@@ -25,10 +25,8 @@ func (s accountService) FindByID(accountID string) (Account, error) {
 }
 
 // TODO: THIS IS GOING TO BE PAGINATED
-func (s accountService) FindTransactions(accountID string) ([]Transaction, error) {
-	var transactions []Transaction
-	err := s.accountRepository.FindTransactions(accountID, &transactions)
-	return utils.Listify(transactions), err
+func (s accountService) FindTransactions(accountID string, statuses []string, itemsPerPage int, pageNumber int) (pagination.PaginatedResponse[Transaction], error) {
+	return s.accountRepository.FindTransactions(accountID, statuses, itemsPerPage, pageNumber)
 }
 
 func (s accountService) Update(accountID string, account *Account) error {

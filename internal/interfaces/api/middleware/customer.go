@@ -24,8 +24,7 @@ func Customer() gin.HandlerFunc {
 		})
 
 		if err != nil {
-			c.JSON(http.StatusUnauthorized, gin.H{"message": "You are not authorized to do this action"})
-			c.Abort()
+			Auth()(c)
 			return
 		}
 
@@ -35,9 +34,6 @@ func Customer() gin.HandlerFunc {
 				c.Next()
 				return
 			}
-
-			Auth()(c)
-			return
 		}
 
 		c.JSON(http.StatusUnauthorized, gin.H{"message": "You are not authorized to do this action"})
