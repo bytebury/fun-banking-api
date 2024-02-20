@@ -4,6 +4,7 @@ import (
 	"funbanking/internal/infrastructure/auth"
 	"net/http"
 	"os"
+	"strings"
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
@@ -12,6 +13,8 @@ import (
 func Customer() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		tokenString := c.GetHeader("Authorization")
+		tokenStrings := strings.Split(tokenString, " ")
+		tokenString = tokenStrings[len(tokenStrings)-1]
 
 		if tokenString == "" {
 			c.JSON(http.StatusUnauthorized, gin.H{"message": "Authorization header is missing"})
@@ -24,7 +27,8 @@ func Customer() gin.HandlerFunc {
 		})
 
 		if err != nil {
-			Auth()(c)
+			c.JSON(http.StatusUnauthorized, gin.H{"message": "You are not authorized to do this action"})
+			c.Abort()
 			return
 		}
 
@@ -34,6 +38,9 @@ func Customer() gin.HandlerFunc {
 				c.Next()
 				return
 			}
+
+			Auth()(c)
+			return
 		}
 
 		c.JSON(http.StatusUnauthorized, gin.H{"message": "You are not authorized to do this action"})
