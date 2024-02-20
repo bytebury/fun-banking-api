@@ -11,6 +11,7 @@ type BankRepository interface {
 	FindByID(id string, bank *Bank) error
 	FindByUsernameAndSlug(username, slug string, bank *Bank) error
 	FindAllCustomers(bankID string, customers *[]Customer) error
+	FindAllByUserID(userID string, banks *[]Bank) error
 	Create(bank *Bank) error
 	Update(bankID string, bank *Bank) error
 	Delete(bankID string) error

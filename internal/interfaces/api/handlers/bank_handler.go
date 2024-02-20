@@ -61,6 +61,19 @@ func (h BankHandler) FindByUsernameAndSlug(c *gin.Context) {
 	c.JSON(http.StatusOK, bank)
 }
 
+func (h BankHandler) FindAllByUserID(c *gin.Context) {
+	userID := c.MustGet("user_id").(string)
+
+	banks, err := h.bankService.FindAllByUserID(userID)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "Something went wrong"})
+		return
+	}
+
+	c.JSON(http.StatusOK, banks)
+}
+
 func (h BankHandler) FindAllCustomers(c *gin.Context) {
 	bankID := c.Param("id")
 	userID := c.MustGet("user_id").(string)

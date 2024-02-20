@@ -40,7 +40,6 @@ func (r runner) setupUserRoutes() {
 	r.router.Group("users").
 		GET("", middleware.Admin(), handler.Search).
 		GET(":username", middleware.Audit(), handler.FindByUsername).
-		// GET(":username/banks") to get a user's banks <-- only will display if you are them / admin
 		PUT("", handler.Create).
 		PATCH(":id", middleware.Auth(), handler.Update)
 }
@@ -55,6 +54,7 @@ func (r runner) setupSessionRoutes() {
 
 func (r runner) setupBankRoutes() {
 	handler := handlers.NewBankHandler()
+	r.router.GET("/my-banks", middleware.Auth(), handler.FindAllByUserID)
 	r.router.Group("/banks").
 		// TODO: Search for banks GET("/banks")
 		GET(":id", middleware.Auth(), handler.FindByID).
@@ -94,7 +94,6 @@ func (r runner) setupAccountRoutes() {
 func (r runner) setupTransactionRoutes() {
 	handler := handlers.NewTransactionHandler()
 	r.router.Group("/transactions").
-		GET(":id", middleware.Customer(), handler.FindByID).
 		PATCH(":id/approve", middleware.Auth(), handler.Approve).
 		PATCH(":id/decline", middleware.Auth(), handler.Decline).
 		PUT("", middleware.Customer(), handler.Create)

@@ -10,6 +10,7 @@ type BankService interface {
 	FindByID(id string) (Bank, error)
 	FindByUsernameAndSlug(username, slug string) (Bank, error)
 	FindAllCustomers(id string) ([]Customer, error)
+	FindAllByUserID(userID string) ([]Bank, error)
 	Create(bank *Bank) error
 	Update(id string, bank *Bank) error
 	Delete(id string) error
@@ -50,6 +51,30 @@ func (s bankService) FindAllCustomers(id string) ([]Customer, error) {
 	var customers []Customer
 	err := s.bankRepository.FindAllCustomers(id, &customers)
 	return utils.Listify(customers), err
+}
+
+func (s bankService) FindAllByUserID(userID string) ([]Bank, error) {
+	var banks []Bank
+	var employeeOf []Employee
+	var employeeAtBanks []Bank = make([]Bank, 0)
+
+	if err := s.bankRepository.FindAllByUserID(userID, &banks); err != nil {
+		return banks, err
+	}
+
+	if err := s.employeeRepository.FindAllByUserID(userID, &employeeOf); err != nil {
+		return banks, err
+	}
+
+	for _, employee := range employeeOf {
+		employeeAtBanks = append(employeeAtBanks, employee.Bank)
+	}
+
+	if banks == nil {
+		banks = make([]Bank, 0)
+	}
+
+	return append(banks, employeeAtBanks...), nil
 }
 
 func (s bankService) Create(bank *Bank) error {
