@@ -76,6 +76,8 @@ func (r userRepository) Create(user *User) error {
 func (r userRepository) normalize(user *User) error {
 	user.Username = strings.ToLower(user.Username)
 	user.Email = strings.ToLower(user.Email)
+	user.FirstName = strings.ToLower(user.FirstName)
+	user.LastName = strings.ToLower(user.LastName)
 
 	return nil
 }

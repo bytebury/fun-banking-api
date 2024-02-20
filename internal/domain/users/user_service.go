@@ -4,6 +4,10 @@ type UserAuth interface {
 	Login(request LoginRequest) (string, User, error)
 }
 
+type Mailer interface {
+	SendEmail(recipient string, user User) error
+}
+
 type LoginRequest struct {
 	UsernameOrEmail string `json:"username_or_email"`
 	Password        string `json:"password"`
@@ -14,18 +18,20 @@ type UserService interface {
 	FindByUsernameOrEmail(usernameOrEmail string) (User, error)
 	Update(id string, user *User) error
 	Login(usernameOrEmail, password string) (string, User, error)
-	Create(user *User) error
+	Create(request *NewUserRequest) (User, error)
 }
 
 type userService struct {
 	authService    UserAuth
 	userRepository UserRepository
+	mailer         Mailer
 }
 
-func NewUserService(userRepository UserRepository, authService UserAuth) UserService {
+func NewUserService(userRepository UserRepository, authService UserAuth, mailer Mailer) UserService {
 	return userService{
 		userRepository: userRepository,
 		authService:    authService,
+		mailer:         mailer,
 	}
 }
 
@@ -45,9 +51,25 @@ func (s userService) Update(id string, user *User) error {
 	return s.userRepository.Update(id, user)
 }
 
-func (s userService) Create(user *User) error {
-	// TODO this will need to map a user to a new user request
-	return s.userRepository.Create(user)
+func (s userService) Create(request *NewUserRequest) (User, error) {
+	user := User{
+		Username:  request.Username,
+		Email:     request.Email,
+		FirstName: request.FirstName,
+		LastName:  request.LastName,
+		Password:  request.Password,
+		Role:      0,
+		About:     "",
+		Avatar:    "https://www.gravatar.com/avatar/2533c61da0bd2b79b63fd599cd045a31?default=https%3A%2F%2Fcloud.digitalocean.com%2Favatars%2Fdefault30.png&secure=true",
+	}
+
+	if err := s.userRepository.Create(&user); err != nil {
+		return User{}, err
+	}
+
+	s.mailer.SendEmail(user.Email, user)
+
+	return user, nil
 }
 
 func (s userService) Login(usernameOrEmail, password string) (string, User, error) {

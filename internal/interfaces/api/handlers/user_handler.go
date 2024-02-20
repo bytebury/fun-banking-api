@@ -3,6 +3,7 @@ package handlers
 import (
 	"funbanking/internal/domain/users"
 	"funbanking/internal/infrastructure/auth"
+	"funbanking/internal/infrastructure/mailing"
 	"funbanking/package/utils"
 	"net/http"
 	"strconv"
@@ -20,6 +21,7 @@ func NewUserHandler() UserHandler {
 		userService: users.NewUserService(
 			userRepository,
 			auth.NewUserAuth(userRepository),
+			mailing.NewWelcomeMailer(),
 		),
 	}
 }
@@ -85,14 +87,16 @@ func (h UserHandler) Update(c *gin.Context) {
 }
 
 func (h UserHandler) Create(c *gin.Context) {
-	var user users.User
+	var request users.NewUserRequest
 
-	if err := c.ShouldBindJSON(&user); err != nil {
+	if err := c.ShouldBindJSON(&request); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"message": "Malformed request"})
 		return
 	}
 
-	if err := h.userService.Create(&user); err != nil {
+	user, err := h.userService.Create(&request)
+
+	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": "Something went wrong"})
 		return
 	}

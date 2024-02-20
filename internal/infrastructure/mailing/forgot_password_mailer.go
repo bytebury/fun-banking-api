@@ -16,7 +16,7 @@ func NewPasswordResetMailer() *ForgotPasswordMailer {
 }
 
 func (mailer ForgotPasswordMailer) SendEmail(recipient string) error {
-	token, err := mailer.jwtService.GeneratePasswordResetToken(recipient)
+	token, err := mailer.jwtService.GenerateForgotPasswordToken(recipient)
 
 	if err != nil {
 		return err

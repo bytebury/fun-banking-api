@@ -18,6 +18,10 @@ type runner struct {
 }
 
 func (r runner) setup() {
+	// Setup Middleware
+	r.router.Use(middleware.CorsMiddleware())
+
+	// Setup Routes
 	r.setupMetricsRoutes()
 	r.setupUserRoutes()
 	r.setupBankRoutes()

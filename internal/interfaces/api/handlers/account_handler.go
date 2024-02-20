@@ -4,6 +4,7 @@ import (
 	"funbanking/internal/domain/banking"
 	"funbanking/internal/domain/users"
 	"funbanking/internal/infrastructure/auth"
+	"funbanking/internal/infrastructure/mailing"
 	"funbanking/package/constants"
 	"funbanking/package/utils"
 	"net/http"
@@ -36,6 +37,7 @@ func NewAccountHandler() AccountHandler {
 			auth.NewUserAuth(
 				userRepository,
 			),
+			mailing.NewWelcomeMailer(),
 		),
 	}
 }
