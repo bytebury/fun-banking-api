@@ -101,7 +101,9 @@ func (h BankHandler) Create(c *gin.Context) {
 		return
 	}
 
-	if err := h.bankService.Create(&bank); err != nil {
+	userID := c.MustGet("user_id").(string)
+
+	if err := h.bankService.Create(userID, &bank); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": "Something went wrong"})
 		return
 	}

@@ -21,7 +21,7 @@ func NewAccountRepository() AccountRepository {
 }
 
 func (r accountRepository) FindByID(accountID string, account *Account) error {
-	return r.db.First(&account, "id = ?", accountID).Error
+	return r.db.Preload("Customer").First(&account, "id = ?", accountID).Error
 }
 
 func (r accountRepository) FindTransactions(accountID string, transactions *[]Transaction) error {

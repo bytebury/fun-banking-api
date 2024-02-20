@@ -11,7 +11,7 @@ type BankService interface {
 	FindByUsernameAndSlug(username, slug string) (Bank, error)
 	FindAllCustomers(id string) ([]Customer, error)
 	FindAllByUserID(userID string) ([]Bank, error)
-	Create(bank *Bank) error
+	Create(userID string, bank *Bank) error
 	Update(id string, bank *Bank) error
 	Delete(id string) error
 	IsOwner(bankID, userID string) bool
@@ -77,7 +77,14 @@ func (s bankService) FindAllByUserID(userID string) ([]Bank, error) {
 	return append(banks, employeeAtBanks...), nil
 }
 
-func (s bankService) Create(bank *Bank) error {
+func (s bankService) Create(userID string, bank *Bank) error {
+	userIDAsUInt, err := strconv.Atoi(userID)
+
+	if err != nil {
+		return err
+	}
+
+	bank.UserID = uint(userIDAsUInt)
 	return s.bankRepository.Create(bank)
 }
 
