@@ -24,16 +24,16 @@ func NewUserRepository() UserRepository {
 }
 
 func (r userRepository) GetCurrentUser(user *User) error {
-	return r.db.Find(&user, "username = ?", "marcello").Error
+	return r.db.First(&user, "username = ?", "marcello").Error
 }
 
 func (r userRepository) FindByID(userID string, user *User) error {
-	return r.db.Find(&user, "id = ?", userID).Error
+	return r.db.First(&user, "id = ?", userID).Error
 }
 
 func (r userRepository) FindByUsernameOrEmail(usernameOrEmail string, user *User) error {
 	usernameOrEmail = strings.TrimSpace(strings.ToLower(usernameOrEmail))
-	return r.db.Find(&user, "username = ? or email = ?", usernameOrEmail, usernameOrEmail).Error
+	return r.db.First(&user, "username = ? or email = ?", usernameOrEmail, usernameOrEmail).Error
 }
 
 func (r userRepository) Update(userID string, user *User) error {

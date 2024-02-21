@@ -47,6 +47,11 @@ type Employee struct {
 	Bank   Bank       `json:"bank" gorm:"foreignKey:BankID;constraint:OnDelete:CASCADE;"`
 }
 
+type NewEmployeeRequest struct {
+	BankID uint   `json:"bank_id"`
+	Email  string `json:"email"`
+}
+
 type Transaction struct {
 	domain.AuditModel
 	Description    string     `json:"description" gorm:"not null;size:255"`
