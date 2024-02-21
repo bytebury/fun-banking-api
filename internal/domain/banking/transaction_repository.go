@@ -33,5 +33,18 @@ func (r transactionRepository) Update(transactionID string, transaction *Transac
 	if err := r.db.First(&foundTransaction, "id = ?", transactionID).Error; err != nil {
 		return err
 	}
-	return r.db.Model(&foundTransaction).Select("Status", "User").Updates(&transaction).Error
+
+	if transaction.CurrentBalance == 0 {
+		transaction.CurrentBalance = foundTransaction.CurrentBalance
+	}
+
+	if transaction.UserID == nil {
+		transaction.UserID = foundTransaction.UserID
+	}
+
+	if transaction.Status == TransactionPending {
+		transaction.Status = foundTransaction.Status
+	}
+
+	return r.db.Model(&foundTransaction).Select("Status", "UserID", "CurrentBalance").Updates(&transaction).Error
 }

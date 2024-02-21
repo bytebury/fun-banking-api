@@ -11,6 +11,7 @@ type AccountRepository interface {
 	FindByID(accountID string, account *Account) error
 	FindTransactions(accountID string, statuses []string, itemsPerPage int, pageNumber int) (pagination.PaginatedResponse[Transaction], error)
 	Update(accountID string, account *Account) error
+	AddToBalance(accountID string, amount float64) (Account, error)
 }
 
 type accountRepository struct {
@@ -52,4 +53,17 @@ func (r accountRepository) Update(accountID string, account *Account) error {
 	}
 
 	return r.db.Model(&foundAccount).Select("Name").Updates(account).Error
+}
+
+func (r accountRepository) AddToBalance(accountID string, amount float64) (Account, error) {
+	var foundAccount Account
+
+	if err := r.db.First(&foundAccount, "id = ?", accountID).Error; err != nil {
+		return foundAccount, err
+	}
+
+	foundAccount.Balance += amount
+
+	err := r.db.Model(&foundAccount).Select("Balance").Updates(&foundAccount).Error
+	return foundAccount, err
 }

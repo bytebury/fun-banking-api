@@ -56,7 +56,7 @@ type Transaction struct {
 	AccountID      uint       `json:"account_id" gorm:"not null"`
 	Account        Account    `json:"account" gorm:"foreignKey:AccountID;constraint:OnDelete:CASCADE;"`
 	UserID         *uint      `json:"user_id"`
-	User           users.User `json:"updated_by"`
+	User           users.User `json:"user"`
 }
 
 func RunMigrations() {

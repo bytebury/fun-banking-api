@@ -8,6 +8,7 @@ type AccountService interface {
 	FindByID(accountID string) (Account, error)
 	FindTransactions(accountID string, statuses []string, itemsPerPage int, pageNumber int) (pagination.PaginatedResponse[Transaction], error)
 	Update(accountID string, account *Account) error
+	AddToBalance(accountID string, amount float64) (Account, error)
 }
 
 type accountService struct {
@@ -31,4 +32,8 @@ func (s accountService) FindTransactions(accountID string, statuses []string, it
 
 func (s accountService) Update(accountID string, account *Account) error {
 	return s.accountRepository.Update(accountID, account)
+}
+
+func (s accountService) AddToBalance(accountID string, amount float64) (Account, error) {
+	return s.accountRepository.AddToBalance(accountID, amount)
 }
