@@ -40,8 +40,8 @@ func (h BankHandler) FindByID(c *gin.Context) {
 
 func (h BankHandler) FindByUsernameAndSlug(c *gin.Context) {
 	var request struct {
-		username string
-		slug     string
+		Username string `json:"username"`
+		Slug     string `json:"slug"`
 	}
 
 	if err := c.ShouldBindJSON(&request); err != nil {
@@ -49,7 +49,7 @@ func (h BankHandler) FindByUsernameAndSlug(c *gin.Context) {
 		return
 	}
 
-	bank, err := h.bankService.FindByUsernameAndSlug(request.username, request.slug)
+	bank, err := h.bankService.FindByUsernameAndSlug(request.Username, request.Slug)
 
 	bank.User.Email = ""
 
