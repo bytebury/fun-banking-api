@@ -11,6 +11,7 @@ import (
 
 type TransactionService interface {
 	FindByID(transactionID string) (Transaction, error)
+	FindAllPendingTransactions(userID string) ([]Transaction, error)
 	Approve(userID string, transactionID string) (Transaction, error)
 	Decline(userID string, transactionID string) (Transaction, error)
 	Create(userID string, transaction *Transaction) error
@@ -38,6 +39,12 @@ func (s transactionService) FindByID(transactionID string) (Transaction, error) 
 	var transaction Transaction
 	err := s.transactionRepository.FindByID(transactionID, &transaction)
 	return transaction, err
+}
+
+func (s transactionService) FindAllPendingTransactions(userID string) ([]Transaction, error) {
+	var transactions []Transaction
+	err := s.transactionRepository.FindAllPendingTransactions(userID, &transactions)
+	return utils.Listify(transactions), err
 }
 
 func (s transactionService) Approve(userID string, transactionID string) (Transaction, error) {

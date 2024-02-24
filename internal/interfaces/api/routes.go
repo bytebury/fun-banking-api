@@ -31,6 +31,13 @@ func (r runner) setup() {
 	r.setupTransactionRoutes()
 	r.setupAnnouncementRoutes()
 	r.setupSessionRoutes()
+	r.setupNotificationRoutes()
+}
+
+func (r runner) setupNotificationRoutes() {
+	handler := handlers.NewTransactionHandler()
+
+	r.router.Group("/notifications", middleware.Auth()).GET("", handler.FindAllPendingTransactions)
 }
 
 func (r runner) setupMetricsRoutes() {

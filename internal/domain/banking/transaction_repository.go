@@ -10,6 +10,7 @@ type TransactionRepository interface {
 	FindByID(transactionID string, transaction *Transaction) error
 	Create(transaction *Transaction) error
 	Update(transactionID string, transaction *Transaction) error
+	FindAllPendingTransactions(userID string, transactions *[]Transaction) error
 }
 
 type transactionRepository struct {
@@ -22,6 +23,19 @@ func NewTransactionRepository() TransactionRepository {
 
 func (r transactionRepository) FindByID(transactionID string, transaction *Transaction) error {
 	return r.db.Preload("Account.Customer.Bank").First(&transaction, "id = ?", transactionID).Error
+}
+
+func (r transactionRepository) FindAllPendingTransactions(userID string, transactions *[]Transaction) error {
+	unionQuery := "(SELECT bank_id FROM employees WHERE user_id = ? UNION SELECT id FROM banks WHERE user_id = ?)"
+
+	return r.db.Model(&Transaction{}).
+		Joins("JOIN accounts ON transactions.account_id = accounts.id").
+		Joins("JOIN customers ON accounts.customer_id = customers.id").
+		Joins("JOIN banks ON customers.bank_id = banks.id").
+		Where("banks.id IN (?)", gorm.Expr(unionQuery, userID, userID)).
+		Where("transactions.status = ?", "pending").
+		Preload("Account.Customer").
+		Find(&transactions).Error
 }
 
 func (r transactionRepository) Create(transaction *Transaction) error {

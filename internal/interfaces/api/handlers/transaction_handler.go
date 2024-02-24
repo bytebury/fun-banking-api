@@ -20,9 +20,17 @@ func NewTransactionHandler() TransactionHandler {
 	}
 }
 
-// TODO: Similar to how notifications work today
 func (h TransactionHandler) FindAllPendingTransactions(c *gin.Context) {
-	c.JSON(http.StatusOK, nil)
+	userID := c.MustGet("user_id").(string)
+
+	transactions, err := h.transactionService.FindAllPendingTransactions(userID)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "Something went wrong"})
+		return
+	}
+
+	c.JSON(http.StatusOK, transactions)
 }
 
 // only employees can approve
