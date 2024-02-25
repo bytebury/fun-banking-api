@@ -3,6 +3,7 @@ package handlers
 import (
 	"funbanking/internal/domain/announcements"
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
@@ -30,6 +31,20 @@ func (h AnnouncementHandler) FindByID(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, announcement)
+}
+
+func (h AnnouncementHandler) FindAll(c *gin.Context) {
+	itemsPerPage, _ := strconv.Atoi(c.Query("itemsPerPage"))
+	pageNumber, _ := strconv.Atoi(c.Query("pageNumber"))
+
+	announcements, err := h.announcementService.FindAll(itemsPerPage, pageNumber)
+
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"message": "Unable to find announcements"})
+		return
+	}
+
+	c.JSON(http.StatusOK, announcements)
 }
 
 func (h AnnouncementHandler) Create(c *gin.Context) {

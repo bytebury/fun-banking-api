@@ -113,7 +113,7 @@ func (r runner) setupTransactionRoutes() {
 func (r runner) setupAnnouncementRoutes() {
 	handler := handlers.NewAnnouncementHandler()
 	r.router.Group("/announcements").
-		// SEARCH ROUTE GET("/")
+		GET("", handler.FindAll).
 		GET(":id", handler.FindByID).
 		PUT("", middleware.Admin(), handler.Create).
 		PATCH(":id", middleware.Admin(), handler.Update)

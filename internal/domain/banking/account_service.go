@@ -25,7 +25,6 @@ func (s accountService) FindByID(accountID string) (Account, error) {
 	return account, err
 }
 
-// TODO: THIS IS GOING TO BE PAGINATED
 func (s accountService) FindTransactions(accountID string, statuses []string, itemsPerPage int, pageNumber int) (pagination.PaginatedResponse[Transaction], error) {
 	return s.accountRepository.FindTransactions(accountID, statuses, itemsPerPage, pageNumber)
 }

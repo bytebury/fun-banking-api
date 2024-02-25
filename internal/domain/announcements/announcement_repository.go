@@ -1,6 +1,7 @@
 package announcements
 
 import (
+	"funbanking/internal/infrastructure/pagination"
 	"funbanking/internal/infrastructure/persistence"
 	"strings"
 
@@ -9,6 +10,7 @@ import (
 
 type AnnouncementRepository interface {
 	FindByID(id string, announcement *Announcement) error
+	FindAll(itemsPerPage, pageNumber int) (pagination.PaginatedResponse[Announcement], error)
 	Create(announcement *Announcement) error
 	Update(id string, announcement *Announcement) error
 }
@@ -23,6 +25,12 @@ func NewAnnouncementRepository() AnnouncementRepository {
 
 func (r announcementRepository) FindByID(id string, announcement *Announcement) error {
 	return r.db.First(&announcement, "id = ?", id).Error
+}
+
+func (r announcementRepository) FindAll(itemsPerPage, pageNumber int) (pagination.PaginatedResponse[Announcement], error) {
+	query := r.db.Select("ID", "Title", "Description", "CreatedAt")
+	query = query.Find(&Announcement{}).Order("created_at DESC")
+	return pagination.Find[Announcement](query, pageNumber, itemsPerPage)
 }
 
 func (r announcementRepository) Create(annoncement *Announcement) error {
