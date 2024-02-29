@@ -3,6 +3,8 @@ package banking
 import (
 	"funbanking/internal/domain/users"
 	"funbanking/internal/infrastructure/persistence"
+	"regexp"
+	"strings"
 
 	"gorm.io/gorm"
 )
@@ -48,6 +50,7 @@ func (r bankRepository) FindAllCustomers(bankID string, customers *[]Customer) e
 }
 
 func (r bankRepository) Create(bank *Bank) error {
+	r.normalize(bank)
 	return r.db.Create(&bank).Error
 }
 
@@ -62,17 +65,25 @@ func (r bankRepository) Update(bankID string, bank *Bank) error {
 		bank.Name = foundBank.Name
 	}
 
-	if bank.Slug == "" {
-		bank.Slug = foundBank.Slug
-	}
-
 	if bank.Description == "" {
 		bank.Description = foundBank.Description
 	}
+
+	r.normalize(bank)
 
 	return r.db.Model(&foundBank).Select("Name", "Slug", "Description").Updates(&bank).Error
 }
 
 func (r bankRepository) Delete(bankID string) error {
 	return r.db.Delete(&Bank{}, bankID).Error
+}
+
+func (r bankRepository) normalize(bank *Bank) {
+	bank.Name = strings.TrimSpace(bank.Name)
+	bank.Slug = r.getSlugFromName(strings.ToLower(bank.Name))
+}
+
+func (r bankRepository) getSlugFromName(name string) string {
+	re := regexp.MustCompile(`\s+`)
+	return re.ReplaceAllString(name, "-")
 }
