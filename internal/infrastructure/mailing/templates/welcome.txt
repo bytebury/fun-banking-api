@@ -1,0 +1,9 @@
+Hey {{.User.FirstName}}!
+
+Welcome to Fun Banking! We wanted to let you know that we
+are glad you're here. If you have any questions or feedback
+for the Fun Banking team, please feel free to reach out to us
+at bytebury@gmail.com
+
+Your online banking simulator,
+Fun Banking
