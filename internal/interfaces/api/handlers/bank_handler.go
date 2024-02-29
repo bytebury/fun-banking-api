@@ -3,6 +3,7 @@ package handlers
 import (
 	"funbanking/internal/domain/banking"
 	"net/http"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 )
@@ -104,6 +105,11 @@ func (h BankHandler) Create(c *gin.Context) {
 	userID := c.MustGet("user_id").(string)
 
 	if err := h.bankService.Create(userID, &bank); err != nil {
+		if strings.Contains(err.Error(), "idx_user_slug") {
+			c.JSON(http.StatusBadRequest, gin.H{"message": "You already have a bank by that name"})
+			return
+		}
+
 		c.JSON(http.StatusInternalServerError, gin.H{"message": "Something went wrong"})
 		return
 	}
@@ -127,6 +133,11 @@ func (h BankHandler) Update(c *gin.Context) {
 	}
 
 	if err := h.bankService.Update(bankID, &bank); err != nil {
+		if strings.Contains(err.Error(), "idx_user_slug") {
+			c.JSON(http.StatusBadRequest, gin.H{"message": "You already have a bank by that name"})
+			return
+		}
+
 		c.JSON(http.StatusInternalServerError, gin.H{"message": "Something went wrong"})
 		return
 	}

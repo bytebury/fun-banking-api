@@ -115,12 +115,12 @@ func (h UserHandler) Create(c *gin.Context) {
 
 	if err != nil {
 		if strings.Contains(err.Error(), "users_username_key") {
-			c.JSON(http.StatusInternalServerError, gin.H{"message": "That username is already in use"})
+			c.JSON(http.StatusBadRequest, gin.H{"message": "That username is already in use"})
 			return
 		}
 
 		if strings.Contains(err.Error(), "users_email_key") {
-			c.JSON(http.StatusInternalServerError, gin.H{"message": "That email is already in use"})
+			c.JSON(http.StatusBadRequest, gin.H{"message": "That email is already in use"})
 			return
 		}
 
