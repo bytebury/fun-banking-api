@@ -2,6 +2,7 @@ package banking
 
 import (
 	"funbanking/internal/domain/users"
+	"funbanking/internal/infrastructure/pagination"
 	"funbanking/internal/infrastructure/persistence"
 	"regexp"
 	"strings"
@@ -12,6 +13,7 @@ import (
 type BankRepository interface {
 	FindByID(id string, bank *Bank) error
 	FindByUsernameAndSlug(username, slug string, bank *Bank) error
+	FindAll(itemsPerPage, pageNumber int, params map[string]string) (pagination.PaginatedResponse[Bank], error)
 	FindAllCustomers(bankID string, customers *[]Customer) error
 	FindAllByUserID(userID string, banks *[]Bank) error
 	Create(bank *Bank) error
@@ -29,6 +31,28 @@ func NewBankRepository() BankRepository {
 
 func (r bankRepository) FindByID(bankID string, bank *Bank) error {
 	return r.db.Preload("User").First(&bank, bankID).Error
+}
+
+func (r bankRepository) FindAll(itemsPerPage, pageNumber int, params map[string]string) (pagination.PaginatedResponse[Bank], error) {
+	query := r.db.Find(&Bank{}).Order("created_at DESC")
+
+	if params["ID"] != "" {
+		query = query.Where("id = ?", params["ID"])
+	}
+
+	if params["UserID"] != "" {
+		query = query.Where("user_id = ?", params["UserID"])
+	}
+
+	if params["Name"] != "" {
+		query = query.Where("name ILIKE ?", "%"+params["Name"]+"%")
+	}
+
+	if params["Slug"] != "" {
+		query = query.Where("slug ILIKE ?", "%"+params["Slug"]+"%")
+	}
+
+	return pagination.Find[Bank](query, pageNumber, itemsPerPage)
 }
 
 func (r bankRepository) FindAllByUserID(userID string, banks *[]Bank) error {

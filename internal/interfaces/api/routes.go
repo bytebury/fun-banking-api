@@ -71,6 +71,7 @@ func (r runner) setupBankRoutes() {
 	handler := handlers.NewBankHandler()
 	r.router.GET("/my-banks", middleware.Auth(), handler.FindAllByUserID)
 	r.router.Group("/banks").
+		GET("", middleware.Admin(), handler.Search).
 		GET(":id", middleware.Auth(), handler.FindByID).
 		GET(":id/customers", middleware.Auth(), handler.FindAllCustomers).
 		POST("", handler.FindByUsernameAndSlug).

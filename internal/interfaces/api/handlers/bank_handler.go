@@ -3,6 +3,7 @@ package handlers
 import (
 	"funbanking/internal/domain/banking"
 	"net/http"
+	"strconv"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -73,6 +74,27 @@ func (h BankHandler) FindAllByUserID(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, banks)
+}
+
+func (h BankHandler) Search(c *gin.Context) {
+	itemsPerPage, _ := strconv.Atoi(c.Query("itemsPerPage"))
+	pageNumber, _ := strconv.Atoi(c.Query("pageNumber"))
+
+	params := map[string]string{
+		"ID":     c.Query("id"),
+		"UserID": c.Query("user_id"),
+		"Name":   c.Query("name"),
+		"Slug":   c.Query("slug"),
+	}
+
+	users, err := h.bankService.FindAll(itemsPerPage, pageNumber, params)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "Something went wrong"})
+		return
+	}
+
+	c.JSON(http.StatusOK, users)
 }
 
 func (h BankHandler) FindAllCustomers(c *gin.Context) {

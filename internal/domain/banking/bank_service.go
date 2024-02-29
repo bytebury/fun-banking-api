@@ -1,6 +1,7 @@
 package banking
 
 import (
+	"funbanking/internal/infrastructure/pagination"
 	"funbanking/package/utils"
 	"strconv"
 	"strings"
@@ -9,6 +10,7 @@ import (
 type BankService interface {
 	FindByID(id string) (Bank, error)
 	FindByUsernameAndSlug(username, slug string) (Bank, error)
+	FindAll(itemsPerPage, pageNumber int, params map[string]string) (pagination.PaginatedResponse[Bank], error)
 	FindAllCustomers(id string) ([]Customer, error)
 	FindAllByUserID(userID string) ([]Bank, error)
 	Create(userID string, bank *Bank) error
@@ -45,6 +47,10 @@ func (s bankService) FindByUsernameAndSlug(username, slug string) (Bank, error) 
 
 	err := s.bankRepository.FindByUsernameAndSlug(username, slug, &bank)
 	return bank, err
+}
+
+func (s bankService) FindAll(itemsPerPage, pageNumber int, params map[string]string) (pagination.PaginatedResponse[Bank], error) {
+	return s.bankRepository.FindAll(itemsPerPage, pageNumber, params)
 }
 
 func (s bankService) FindAllCustomers(id string) ([]Customer, error) {
