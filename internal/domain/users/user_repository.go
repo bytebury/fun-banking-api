@@ -1,6 +1,7 @@
 package users
 
 import (
+	"funbanking/internal/infrastructure/pagination"
 	"funbanking/internal/infrastructure/persistence"
 	"strings"
 
@@ -11,6 +12,7 @@ type UserRepository interface {
 	GetCurrentUser(user *User) error
 	FindByID(userID string, user *User) error
 	FindByUsernameOrEmail(usernameOrEmail string, user *User) error
+	FindAll(itemsPerPage, pageNumber int, params map[string]string) (pagination.PaginatedResponse[User], error)
 	Update(userID string, user *User) error
 	Create(user *User) error
 	AddVisitor(visitor *Visitor) error
@@ -35,6 +37,24 @@ func (r userRepository) FindByID(userID string, user *User) error {
 func (r userRepository) FindByUsernameOrEmail(usernameOrEmail string, user *User) error {
 	usernameOrEmail = strings.TrimSpace(strings.ToLower(usernameOrEmail))
 	return r.db.First(&user, "username = ? or email = ?", usernameOrEmail, usernameOrEmail).Error
+}
+
+func (r userRepository) FindAll(itemsPerPage, pageNumber int, params map[string]string) (pagination.PaginatedResponse[User], error) {
+	query := r.db.Find(&User{}).Order("created_at DESC")
+
+	if params["ID"] != "" {
+		query = query.Where("id = ?", params["ID"])
+	}
+
+	if params["Username"] != "" {
+		query = query.Where("username ILIKE ?", "%"+params["Username"]+"%")
+	}
+
+	if params["Email"] != "" {
+		query = query.Where("email ILIKE ?", "%"+params["Email"]+"%")
+	}
+
+	return pagination.Find[User](query, pageNumber, itemsPerPage)
 }
 
 func (r userRepository) Update(userID string, user *User) error {

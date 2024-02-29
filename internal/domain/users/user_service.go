@@ -1,5 +1,7 @@
 package users
 
+import "funbanking/internal/infrastructure/pagination"
+
 type UserAuth interface {
 	Login(request LoginRequest) (string, User, error)
 }
@@ -16,6 +18,7 @@ type LoginRequest struct {
 type UserService interface {
 	FindByID(id string) (User, error)
 	FindByUsernameOrEmail(usernameOrEmail string) (User, error)
+	FindAll(itemsPerPage, pageNumber int, params map[string]string) (pagination.PaginatedResponse[User], error)
 	Update(id string, user *User) error
 	Login(usernameOrEmail, password string) (string, User, error)
 	Create(request *NewUserRequest) (User, error)
@@ -46,6 +49,10 @@ func (s userService) FindByUsernameOrEmail(usernameOrEmail string) (User, error)
 	var user User
 	err := s.userRepository.FindByUsernameOrEmail(usernameOrEmail, &user)
 	return user, err
+}
+
+func (s userService) FindAll(itemsPerPage, pageNumber int, params map[string]string) (pagination.PaginatedResponse[User], error) {
+	return s.userRepository.FindAll(itemsPerPage, pageNumber, params)
 }
 
 func (s userService) Update(id string, user *User) error {

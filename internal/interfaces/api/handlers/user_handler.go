@@ -65,8 +65,23 @@ func (h UserHandler) FindByUsername(c *gin.Context) {
 }
 
 func (h UserHandler) Search(c *gin.Context) {
-	// TODO: This will be used by admins to search for users
-	// will be paginated
+	itemsPerPage, _ := strconv.Atoi(c.Query("itemsPerPage"))
+	pageNumber, _ := strconv.Atoi(c.Query("pageNumber"))
+
+	params := map[string]string{
+		"ID":       c.Query("id"),
+		"Username": c.Query("username"),
+		"Email":    c.Query("email"),
+	}
+
+	users, err := h.userService.FindAll(itemsPerPage, pageNumber, params)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "Something went wrong"})
+		return
+	}
+
+	c.JSON(http.StatusOK, users)
 }
 
 func (h UserHandler) Update(c *gin.Context) {
