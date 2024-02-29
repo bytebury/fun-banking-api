@@ -7,6 +7,7 @@ import (
 type AccountService interface {
 	FindByID(accountID string) (Account, error)
 	FindTransactions(accountID string, statuses []string, itemsPerPage int, pageNumber int) (pagination.PaginatedResponse[Transaction], error)
+	MonthlyTransactionInsights(accountID string) ([]AccountMonthlySummary, error)
 	Update(accountID string, account *Account) error
 	AddToBalance(accountID string, amount float64) (Account, error)
 }
@@ -27,6 +28,10 @@ func (s accountService) FindByID(accountID string) (Account, error) {
 
 func (s accountService) FindTransactions(accountID string, statuses []string, itemsPerPage int, pageNumber int) (pagination.PaginatedResponse[Transaction], error) {
 	return s.accountRepository.FindTransactions(accountID, statuses, itemsPerPage, pageNumber)
+}
+
+func (s accountService) MonthlyTransactionInsights(accountID string) ([]AccountMonthlySummary, error) {
+	return s.accountRepository.MonthlyTransactionInsights(accountID)
 }
 
 func (s accountService) Update(accountID string, account *Account) error {

@@ -4,12 +4,15 @@ import (
 	"funbanking/internal/domain/banking"
 	"funbanking/internal/domain/users"
 	"funbanking/internal/infrastructure/persistence"
+	"funbanking/package/utils"
+	"time"
 
 	"gorm.io/gorm"
 )
 
 type MetricRepository interface {
 	GetApplicationInfo(appInfo *ApplicationInfo) error
+	GetUsersInfo() ([]WeeklyInsights, error)
 }
 
 type metricRepository struct {
@@ -31,4 +34,18 @@ func (r metricRepository) GetApplicationInfo(appInfo *ApplicationInfo) error {
 	r.db.Model(&banking.Transaction{}).Count(&appInfo.NumberOfTransactions)
 
 	return nil
+}
+
+func (r metricRepository) GetUsersInfo() ([]WeeklyInsights, error) {
+	twelveWeeksAgo := time.Now().AddDate(0, 0, -12*7)
+	var insights []WeeklyInsights
+
+	err := r.db.Model(&users.User{}).
+		Select("EXTRACT(WEEK FROM created_at) as week, COUNT(*) as count").
+		Where("created_at >= ?", twelveWeeksAgo).
+		Group("week").
+		Order("week").
+		Scan(&insights).Error
+
+	return utils.Listify(insights), err
 }

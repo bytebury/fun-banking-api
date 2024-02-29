@@ -9,3 +9,8 @@ type ApplicationInfo struct {
 	NumberOfCustomers    int64  `json:"number_of_customers"`
 	NumberOfTransactions int64  `json:"number_of_transactions"`
 }
+
+type WeeklyInsights struct {
+	Week  int `json:"week"`
+	Count int `json:"count"`
+}

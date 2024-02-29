@@ -20,6 +20,12 @@ type Account struct {
 	Customer   Customer `json:"customer" gorm:"foreignKey:CustomerID;constraint:OnDelete:CASCADE;"`
 }
 
+type AccountMonthlySummary struct {
+	Month       string  `json:"month"`
+	Deposits    float64 `json:"deposits"`
+	Withdrawals float64 `json:"withdrawals"`
+}
+
 type Bank struct {
 	domain.AuditModel
 	Name        string     `json:"name" gorm:"not null;size:255"`

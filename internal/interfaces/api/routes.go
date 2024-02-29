@@ -43,7 +43,10 @@ func (r runner) setupNotificationRoutes() {
 
 func (r runner) setupMetricsRoutes() {
 	handler := handlers.NewMetricsHandler()
-	r.router.Group("/metrics").GET("/", handler.GetApplicationInfo)
+	r.router.Group("/metrics").
+		GET("", handler.GetApplicationInfo).
+		GET("visitors", middleware.Admin(), handler.GetVisitorsInfo).
+		GET("users", middleware.Admin(), handler.GetUsersInfo)
 }
 
 func (r runner) setupUserRoutes() {
@@ -100,6 +103,7 @@ func (r runner) setupAccountRoutes() {
 	r.router.Group("/accounts").
 		GET(":id", middleware.Customer(), handler.FindByID).
 		GET(":id/transactions", middleware.Customer(), handler.FindTransactions).
+		GET(":id/insights/transactions", middleware.Customer(), handler.MonthlyTransactionInsights).
 		PATCH(":id", middleware.Customer(), handler.Update)
 }
 

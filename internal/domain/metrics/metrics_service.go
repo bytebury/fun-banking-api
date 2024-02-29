@@ -2,6 +2,7 @@ package metrics
 
 type MetricService interface {
 	GetApplicationInfo() (ApplicationInfo, error)
+	GetUsersInfo() ([]WeeklyInsights, error)
 }
 
 type metricService struct {
@@ -18,4 +19,8 @@ func (s metricService) GetApplicationInfo() (ApplicationInfo, error) {
 	var appInfo ApplicationInfo
 	err := s.metricRepository.GetApplicationInfo(&appInfo)
 	return appInfo, err
+}
+
+func (s metricService) GetUsersInfo() ([]WeeklyInsights, error) {
+	return s.metricRepository.GetUsersInfo()
 }

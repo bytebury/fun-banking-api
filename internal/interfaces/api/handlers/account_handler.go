@@ -85,6 +85,33 @@ func (h AccountHandler) FindTransactions(c *gin.Context) {
 	c.JSON(http.StatusOK, transactions)
 }
 
+func (h AccountHandler) MonthlyTransactionInsights(c *gin.Context) {
+	accountID := c.Param("id")
+
+	summary, err := h.accountService.MonthlyTransactionInsights(accountID)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "Something happened while retrieving data"})
+		return
+	}
+
+	var labels []string
+	var deposits []float64
+	var withdrawals []float64
+
+	for _, agg := range summary {
+		labels = append(labels, agg.Month)
+		deposits = append(deposits, agg.Deposits)
+		withdrawals = append(withdrawals, agg.Withdrawals)
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"labels":      labels,
+		"deposits":    deposits,
+		"withdrawals": withdrawals,
+	})
+}
+
 func (h AccountHandler) Update(c *gin.Context) {
 	var account banking.Account
 
