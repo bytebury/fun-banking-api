@@ -11,7 +11,7 @@ COPY . .
 RUN go get -d -v ./...
 
 # Build the Go application
-RUN go build cmd/fun-banking -o app
+RUN go build -o main ./cmd/fun-banking
 
 EXPOSE 8080
 
