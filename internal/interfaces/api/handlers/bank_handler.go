@@ -31,7 +31,7 @@ func (h BankHandler) FindByID(c *gin.Context) {
 		return
 	}
 
-	if !h.bankService.IsOwner(bankID, userID) {
+	if !h.bankService.IsEmployee(bankID, userID) {
 		c.JSON(http.StatusForbidden, gin.H{"message": "You do not have access to this bank"})
 		return
 	}
@@ -86,7 +86,7 @@ func (h BankHandler) FindAllCustomers(c *gin.Context) {
 		return
 	}
 
-	if !h.bankService.IsOwner(bankID, userID) {
+	if !h.bankService.IsEmployee(bankID, userID) {
 		c.JSON(http.StatusForbidden, gin.H{"message": "You do not have access to this bank"})
 		return
 	}
