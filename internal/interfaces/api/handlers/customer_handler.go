@@ -4,6 +4,7 @@ import (
 	"funbanking/internal/domain/banking"
 	"funbanking/internal/infrastructure/auth"
 	"net/http"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 )
@@ -57,6 +58,11 @@ func (h CustomerHandler) Create(c *gin.Context) {
 	}
 
 	if err := h.customerService.Create(&customer); err != nil {
+		if strings.Contains(err.Error(), "idx_pin_bank") {
+			c.JSON(http.StatusBadRequest, gin.H{"message": "A customer already is using that PIN"})
+			return
+		}
+
 		c.JSON(http.StatusInternalServerError, gin.H{"message": "Something went wrong"})
 		return
 	}
@@ -74,6 +80,11 @@ func (h CustomerHandler) Update(c *gin.Context) {
 	}
 
 	if err := h.customerService.Update(id, &customer); err != nil {
+		if strings.Contains(err.Error(), "idx_pin_bank") {
+			c.JSON(http.StatusBadRequest, gin.H{"message": "A customer already is using that PIN"})
+			return
+		}
+
 		c.JSON(http.StatusInternalServerError, gin.H{"message": "Something went wrong"})
 		return
 	}

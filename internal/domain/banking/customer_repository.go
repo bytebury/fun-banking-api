@@ -41,7 +41,6 @@ func (r customerRepository) FindByBankAndPIN(bankID string, pin string, customer
 }
 
 func (r customerRepository) Create(customer *Customer) error {
-	// When you create a customer, you also create a checkings account
 	return r.db.Transaction(func(tx *gorm.DB) error {
 		if err := tx.Create(&customer).Error; err != nil {
 			return err
