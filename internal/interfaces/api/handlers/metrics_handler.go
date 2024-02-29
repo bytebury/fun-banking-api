@@ -23,8 +23,8 @@ func (h MetricHandler) GetApplicationInfo(c *gin.Context) {
 }
 
 func (h MetricHandler) GetVisitorsInfo(c *gin.Context) {
-	appInfo, _ := h.metricService.GetApplicationInfo()
-	c.JSON(http.StatusOK, appInfo)
+	visitorsInfo, _ := h.metricService.GetVisitorsInfo()
+	c.JSON(http.StatusOK, visitorsInfo)
 }
 
 func (h MetricHandler) GetUsersInfo(c *gin.Context) {

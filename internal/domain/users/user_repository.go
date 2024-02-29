@@ -13,6 +13,7 @@ type UserRepository interface {
 	FindByUsernameOrEmail(usernameOrEmail string, user *User) error
 	Update(userID string, user *User) error
 	Create(user *User) error
+	AddVisitor(visitor *Visitor) error
 }
 
 type userRepository struct {
@@ -79,6 +80,10 @@ func (r userRepository) Create(user *User) error {
 	user.Password = passwordHash
 
 	return r.db.Create(&user).Error
+}
+
+func (r userRepository) AddVisitor(visitor *Visitor) error {
+	return r.db.Create(&visitor).Error
 }
 
 func (r userRepository) normalize(user *User) error {

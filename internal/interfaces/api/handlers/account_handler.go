@@ -58,6 +58,14 @@ func (h AccountHandler) FindByID(c *gin.Context) {
 		return
 	}
 
+	if customerID != "" {
+		h.userService.AddVisitor(&users.Visitor{
+			UserID:     nil,
+			CustomerID: &account.CustomerID,
+			IPAddress:  c.ClientIP(),
+		})
+	}
+
 	c.JSON(http.StatusOK, account)
 }
 

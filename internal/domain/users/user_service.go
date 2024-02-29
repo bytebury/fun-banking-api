@@ -19,6 +19,7 @@ type UserService interface {
 	Update(id string, user *User) error
 	Login(usernameOrEmail, password string) (string, User, error)
 	Create(request *NewUserRequest) (User, error)
+	AddVisitor(visitor *Visitor) error
 }
 
 type userService struct {
@@ -79,4 +80,8 @@ func (s userService) Login(usernameOrEmail, password string) (string, User, erro
 	}
 
 	return s.authService.Login(request)
+}
+
+func (s userService) AddVisitor(visitor *Visitor) error {
+	return s.userRepository.AddVisitor(visitor)
 }

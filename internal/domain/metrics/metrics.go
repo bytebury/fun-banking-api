@@ -1,5 +1,7 @@
 package metrics
 
+import "time"
+
 type ApplicationInfo struct {
 	Name                 string `json:"name"`
 	Version              string `json:"version"`
@@ -13,4 +15,11 @@ type ApplicationInfo struct {
 type WeeklyInsights struct {
 	Week  int `json:"week"`
 	Count int `json:"count"`
+}
+
+type VisitorByDay []struct {
+	Date          time.Time `json:"date"`
+	UserCount     int       `json:"user_count"`
+	CustomerCount int       `json:"customer_count"`
+	TotalCount    int       `json:"total_count"`
 }

@@ -3,6 +3,7 @@ package metrics
 type MetricService interface {
 	GetApplicationInfo() (ApplicationInfo, error)
 	GetUsersInfo() ([]WeeklyInsights, error)
+	GetVisitorsInfo() (VisitorByDay, error)
 }
 
 type metricService struct {
@@ -23,4 +24,8 @@ func (s metricService) GetApplicationInfo() (ApplicationInfo, error) {
 
 func (s metricService) GetUsersInfo() ([]WeeklyInsights, error) {
 	return s.metricRepository.GetUsersInfo()
+}
+
+func (s metricService) GetVisitorsInfo() (VisitorByDay, error) {
+	return s.metricRepository.GetVisitorsByDay()
 }

@@ -36,6 +36,12 @@ func (h UserHandler) GetCurrentUser(c *gin.Context) {
 		return
 	}
 
+	h.userService.AddVisitor(&users.Visitor{
+		UserID:     &user.ID,
+		CustomerID: nil,
+		IPAddress:  c.ClientIP(),
+	})
+
 	c.JSON(http.StatusOK, user)
 }
 

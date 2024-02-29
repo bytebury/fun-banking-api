@@ -34,6 +34,14 @@ type UpdateUserRequest struct {
 	About     string `json:"about"`
 }
 
+type Visitor struct {
+	domain.AuditModel
+	UserID     *uint  `gorm:"user_id"`
+	CustomerID *uint  `gorm:"customer_id"`
+	IPAddress  string `gotm:"ip_address"`
+}
+
 func RunMigrations() {
 	persistence.DB.AutoMigrate(&User{})
+	persistence.DB.AutoMigrate(&Visitor{})
 }

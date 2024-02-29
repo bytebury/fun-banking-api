@@ -13,6 +13,7 @@ import (
 type MetricRepository interface {
 	GetApplicationInfo(appInfo *ApplicationInfo) error
 	GetUsersInfo() ([]WeeklyInsights, error)
+	GetVisitorsByDay() (VisitorByDay, error)
 }
 
 type metricRepository struct {
@@ -48,4 +49,19 @@ func (r metricRepository) GetUsersInfo() ([]WeeklyInsights, error) {
 		Scan(&insights).Error
 
 	return utils.Listify(insights), err
+}
+
+func (r metricRepository) GetVisitorsByDay() (VisitorByDay, error) {
+	startDate := time.Now().AddDate(0, 0, -14)
+
+	var result VisitorByDay
+
+	err := r.db.Model(&users.Visitor{}).
+		Select("DATE(created_at) as date, COUNT(DISTINCT CASE WHEN user_id IS NOT NULL THEN ip_address END) as user_count, COUNT(DISTINCT CASE WHEN customer_id IS NOT NULL THEN ip_address END) as customer_count, COUNT(DISTINCT ip_address) as total_count").
+		Group("DATE(created_at)").
+		Where("created_at >= ?", startDate).
+		Order("date").
+		Scan(&result).Error
+
+	return result, err
 }
