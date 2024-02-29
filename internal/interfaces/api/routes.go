@@ -31,6 +31,7 @@ func (r runner) setup() {
 	r.setupTransactionRoutes()
 	r.setupAnnouncementRoutes()
 	r.setupSessionRoutes()
+	r.setupPasswordRoutes()
 	r.setupNotificationRoutes()
 }
 
@@ -117,4 +118,11 @@ func (r runner) setupAnnouncementRoutes() {
 		GET(":id", handler.FindByID).
 		PUT("", middleware.Admin(), handler.Create).
 		PATCH(":id", middleware.Admin(), handler.Update)
+}
+
+func (r runner) setupPasswordRoutes() {
+	handler := handlers.NewPasswordHandler()
+	r.router.Group("passwords").
+		POST("forgot", handler.ForgotPassword).
+		POST("reset", middleware.PasswordReset(), handler.ResetPassword)
 }

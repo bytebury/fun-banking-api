@@ -70,6 +70,14 @@ func (r userRepository) Update(userID string, user *User) error {
 func (r userRepository) Create(user *User) error {
 	r.normalize(user)
 
+	passwordHash, err := HashString(user.Password)
+
+	if err != nil {
+		return err
+	}
+
+	user.Password = passwordHash
+
 	return r.db.Create(&user).Error
 }
 

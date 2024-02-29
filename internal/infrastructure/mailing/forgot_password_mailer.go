@@ -9,7 +9,7 @@ type ForgotPasswordMailer struct {
 	jwtService auth.JWTService
 }
 
-func NewPasswordResetMailer() *ForgotPasswordMailer {
+func NewForgotPasswordMailer() *ForgotPasswordMailer {
 	return &ForgotPasswordMailer{
 		jwtService: auth.NewJWTService(),
 	}

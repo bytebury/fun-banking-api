@@ -1,6 +1,8 @@
 package utils
 
-import "strconv"
+import (
+	"strconv"
+)
 
 func StringToUIntPointer(value string) (*uint, error) {
 	userIDAsInt, err := strconv.Atoi(value)

@@ -4,7 +4,7 @@ type UserAuth interface {
 	Login(request LoginRequest) (string, User, error)
 }
 
-type Mailer interface {
+type WelcomeMailer interface {
 	SendEmail(recipient string, user User) error
 }
 
@@ -24,14 +24,14 @@ type UserService interface {
 type userService struct {
 	authService    UserAuth
 	userRepository UserRepository
-	mailer         Mailer
+	welcomeMailer  WelcomeMailer
 }
 
-func NewUserService(userRepository UserRepository, authService UserAuth, mailer Mailer) UserService {
+func NewUserService(userRepository UserRepository, authService UserAuth, welcomeMailer WelcomeMailer) UserService {
 	return userService{
 		userRepository: userRepository,
 		authService:    authService,
-		mailer:         mailer,
+		welcomeMailer:  welcomeMailer,
 	}
 }
 
@@ -67,7 +67,7 @@ func (s userService) Create(request *NewUserRequest) (User, error) {
 		return User{}, err
 	}
 
-	s.mailer.SendEmail(user.Email, user)
+	s.welcomeMailer.SendEmail(user.Email, user)
 
 	return user, nil
 }
