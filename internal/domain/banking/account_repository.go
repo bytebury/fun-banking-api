@@ -54,7 +54,7 @@ func (r accountRepository) MonthlyTransactionInsights(accountID string) ([]Accou
 	var monthlyAggregations []AccountMonthlySummary
 	err := r.db.Model(&Transaction{}).
 		Select("TO_CHAR(updated_at, 'Month') as month, SUM(CASE WHEN amount >= 0 THEN amount ELSE 0 END) as deposits, SUM(CASE WHEN amount < 0 THEN amount ELSE 0 END) as withdrawals").
-		Where("updated_at >= ? AND account_id = ?", startOfMonth, accountID).
+		Where("updated_at >= ? AND account_id = ? AND status = ?", startOfMonth, accountID, TransactionApproved).
 		Group("month").
 		Order("month").
 		Find(&monthlyAggregations).Error
