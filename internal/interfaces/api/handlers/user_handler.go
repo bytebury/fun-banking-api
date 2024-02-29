@@ -7,6 +7,7 @@ import (
 	"funbanking/package/utils"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 )
@@ -85,6 +86,16 @@ func (h UserHandler) Update(c *gin.Context) {
 	}
 
 	if err := h.userService.Update(userID, &user); err != nil {
+		if strings.Contains(err.Error(), "users_username_key") {
+			c.JSON(http.StatusInternalServerError, gin.H{"message": "That username is already in use"})
+			return
+		}
+
+		if strings.Contains(err.Error(), "users_email_key") {
+			c.JSON(http.StatusInternalServerError, gin.H{"message": "That email is already in use"})
+			return
+		}
+
 		c.JSON(http.StatusInternalServerError, gin.H{"message": "Something went wrong"})
 		return
 	}
@@ -103,6 +114,16 @@ func (h UserHandler) Create(c *gin.Context) {
 	user, err := h.userService.Create(&request)
 
 	if err != nil {
+		if strings.Contains(err.Error(), "users_username_key") {
+			c.JSON(http.StatusInternalServerError, gin.H{"message": "That username is already in use"})
+			return
+		}
+
+		if strings.Contains(err.Error(), "users_email_key") {
+			c.JSON(http.StatusInternalServerError, gin.H{"message": "That email is already in use"})
+			return
+		}
+
 		c.JSON(http.StatusInternalServerError, gin.H{"message": "Something went wrong"})
 		return
 	}
