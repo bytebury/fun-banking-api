@@ -34,7 +34,7 @@ func (r bankRepository) FindByID(bankID string, bank *Bank) error {
 }
 
 func (r bankRepository) FindAll(itemsPerPage, pageNumber int, params map[string]string) (pagination.PaginatedResponse[Bank], error) {
-	query := r.db.Find(&Bank{}).Order("created_at DESC")
+	query := r.db.Find(&Bank{}).Preload("User").Order("created_at DESC")
 
 	if params["ID"] != "" {
 		query = query.Where("id = ?", params["ID"])
