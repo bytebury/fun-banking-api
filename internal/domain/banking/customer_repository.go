@@ -25,7 +25,7 @@ func NewCustomerRepository() CustomerRepository {
 }
 
 func (r customerRepository) FindByID(customerID string, customer *Customer) error {
-	return r.db.Preload("Accounts").First(&customer, "id = ?", customerID).Error
+	return r.db.Preload("Accounts").Preload("Bank").First(&customer, "id = ?", customerID).Error
 }
 
 func (r customerRepository) FindAccounts(customerID string, accounts *[]Account) error {

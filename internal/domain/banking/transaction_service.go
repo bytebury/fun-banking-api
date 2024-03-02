@@ -31,6 +31,7 @@ func NewTransactionService(transactionRepository TransactionRepository) Transact
 		),
 		accountService: NewAccountService(
 			NewAccountRepository(),
+			NewCustomerRepository(),
 		),
 	}
 }

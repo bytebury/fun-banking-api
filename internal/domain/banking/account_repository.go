@@ -1,6 +1,7 @@
 package banking
 
 import (
+	"errors"
 	"funbanking/internal/infrastructure/pagination"
 	"funbanking/internal/infrastructure/persistence"
 	"time"
@@ -14,6 +15,7 @@ type AccountRepository interface {
 	MonthlyTransactionInsights(accountID string) ([]AccountMonthlySummary, error)
 	Update(accountID string, account *Account) error
 	AddToBalance(accountID string, amount float64) (Account, error)
+	Create(account *Account) error
 }
 
 type accountRepository struct {
@@ -88,4 +90,20 @@ func (r accountRepository) AddToBalance(accountID string, amount float64) (Accou
 
 	err := r.db.Model(&foundAccount).Select("Balance").Updates(&foundAccount).Error
 	return foundAccount, err
+}
+
+func (r accountRepository) Create(account *Account) error {
+	if account.Name == "" {
+		return errors.New("name is required")
+	}
+
+	if account.CustomerID == 0 {
+		return errors.New("customer is required")
+	}
+
+	if account.Balance != 0 {
+		return errors.New("cannot use default balances")
+	}
+
+	return r.db.Create(&account).Error
 }

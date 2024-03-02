@@ -8,6 +8,7 @@ import (
 	"funbanking/package/constants"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 )
@@ -24,6 +25,7 @@ func NewAccountHandler() AccountHandler {
 	return AccountHandler{
 		accountService: banking.NewAccountService(
 			banking.NewAccountRepository(),
+			banking.NewCustomerRepository(),
 		),
 		bankService: banking.NewBankService(
 			banking.NewBankRepository(),
@@ -142,6 +144,36 @@ func (h AccountHandler) Update(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusAccepted, account)
+}
+
+func (h AccountHandler) Create(c *gin.Context) {
+	userID := c.MustGet("user_id").(string)
+
+	var account banking.Account
+
+	if err := c.ShouldBindJSON(&account); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "Malformed request"})
+		return
+	}
+
+	if err := h.accountService.Create(userID, &account); err != nil {
+		if strings.Contains(err.Error(), "required") {
+			c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+			return
+		}
+
+		if strings.Contains(err.Error(), "balances") {
+			c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+			return
+		}
+
+		if strings.Contains(err.Error(), "not allowed") {
+			c.JSON(http.StatusForbidden, gin.H{"message": "You don't have access to do that"})
+			return
+		}
+	}
+
+	c.JSON(http.StatusOK, account)
 }
 
 func (h AccountHandler) isOwner(accountID string, customerID string) bool {

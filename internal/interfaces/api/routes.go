@@ -104,7 +104,8 @@ func (r runner) setupAccountRoutes() {
 		GET(":id", middleware.Customer(), handler.FindByID).
 		GET(":id/transactions", middleware.Customer(), handler.FindTransactions).
 		GET(":id/insights/transactions", middleware.Customer(), handler.MonthlyTransactionInsights).
-		PATCH(":id", middleware.Customer(), handler.Update)
+		PATCH(":id", middleware.Customer(), handler.Update).
+		PUT("", middleware.Auth(), handler.Create)
 }
 
 func (r runner) setupTransactionRoutes() {
