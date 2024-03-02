@@ -76,7 +76,7 @@ func (r accountRepository) Update(accountID string, account *Account) error {
 		account.Name = foundAccount.Name
 	}
 
-	return r.db.Model(&foundAccount).Select("Name").Updates(account).Error
+	return r.db.Model(&foundAccount).Where("id = ?", foundAccount.ID).Select("Name").Updates(account).Error
 }
 
 func (r accountRepository) AddToBalance(accountID string, amount float64) (Account, error) {
