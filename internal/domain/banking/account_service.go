@@ -58,10 +58,14 @@ func (s accountService) Create(userID string, account *Account) error {
 		return errors.New("not allowed")
 	}
 
+	if len(customer.Accounts) > 1 {
+		return errors.New("maximum number of accounts reached")
+	}
+
 	return s.accountRepository.Create(account)
 }
 
 func (s accountService) userHasAccessToCustomer(userID string, customer Customer) bool {
-	// Need to account for employees and admins, too
+	// TODO Need to account for employees and admins, too
 	return userID == strconv.Itoa(int(customer.Bank.UserID))
 }

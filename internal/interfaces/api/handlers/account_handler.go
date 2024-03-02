@@ -171,6 +171,11 @@ func (h AccountHandler) Create(c *gin.Context) {
 			c.JSON(http.StatusForbidden, gin.H{"message": "You don't have access to do that"})
 			return
 		}
+
+		if strings.Contains(err.Error(), "maximum") {
+			c.JSON(http.StatusBadRequest, gin.H{"message": "Maximum number of accounts already reached"})
+			return
+		}
 	}
 
 	c.JSON(http.StatusOK, account)
