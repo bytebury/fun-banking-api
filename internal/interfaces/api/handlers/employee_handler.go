@@ -89,7 +89,7 @@ func (h EmployeeHandler) Create(c *gin.Context) {
 	}
 
 	if userID == strconv.Itoa(int(employee.UserID)) {
-		c.JSON(http.StatusBadRequest, gin.H{"message": cases.Title(language.AmericanEnglish).String(user.FirstName) + " is already an employee at this bank"})
+		c.JSON(http.StatusBadRequest, gin.H{"message": "You are already a part of this bank"})
 		return
 	}
 
