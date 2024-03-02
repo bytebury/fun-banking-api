@@ -2,6 +2,7 @@ package banking
 
 import (
 	"errors"
+	"fmt"
 	"funbanking/internal/infrastructure/pagination"
 	"funbanking/internal/infrastructure/persistence"
 	"time"
@@ -68,15 +69,18 @@ func (r accountRepository) MonthlyTransactionInsights(accountID string) ([]Accou
 func (r accountRepository) Update(accountID string, account *Account) error {
 	var foundAccount Account
 
-	if err := r.db.First(&account, "id = ?", accountID).Error; err != nil {
+	if err := r.db.First(&foundAccount, "id = ?", accountID).Error; err != nil {
 		return err
 	}
+
+	fmt.Println(account)
+	fmt.Println(foundAccount)
 
 	if account.Name == "" {
 		account.Name = foundAccount.Name
 	}
 
-	return r.db.Model(&foundAccount).Where("id = ?", foundAccount.ID).Select("Name").Updates(account).Error
+	return r.db.Model(&Account{}).Where("id = ?", foundAccount.ID).Select("Name").Updates(account).Error
 }
 
 func (r accountRepository) AddToBalance(accountID string, amount float64) (Account, error) {
