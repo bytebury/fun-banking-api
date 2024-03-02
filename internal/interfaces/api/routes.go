@@ -93,9 +93,9 @@ func (r runner) setupCustomerRoutes() {
 func (r runner) setupEmployeeRoutes() {
 	handler := handlers.NewEmployeeHandler()
 	r.router.Group("/employees", middleware.Auth()).
-		GET("banks/:id", handler.FindAllByBankID).
-		GET("users/:id", handler.FindAllByUserID).
-		PUT("", handler.Create)
+		GET("banks/:id", middleware.Auth(), handler.FindAllByBankID).
+		GET("users/:id", middleware.Auth(), handler.FindAllByUserID).
+		PUT("", middleware.Auth(), handler.Create)
 }
 
 func (r runner) setupAccountRoutes() {

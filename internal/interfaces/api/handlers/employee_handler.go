@@ -4,6 +4,7 @@ import (
 	"funbanking/internal/domain/banking"
 	"funbanking/internal/domain/users"
 	"net/http"
+	"strconv"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -14,6 +15,7 @@ import (
 type EmployeeHandler struct {
 	employeeService banking.EmployeeService
 	userService     users.UserService
+	bankService     banking.BankService
 }
 
 func NewEmployeeHandler() EmployeeHandler {
@@ -25,6 +27,9 @@ func NewEmployeeHandler() EmployeeHandler {
 			users.NewUserRepository(),
 			nil,
 			nil,
+		),
+		bankService: banking.NewBankService(
+			banking.NewBankRepository(),
 		),
 	}
 }
@@ -56,6 +61,8 @@ func (h EmployeeHandler) FindAllByBankID(c *gin.Context) {
 }
 
 func (h EmployeeHandler) Create(c *gin.Context) {
+	userID := c.MustGet("user_id").(string)
+
 	var employee banking.Employee
 	var request banking.NewEmployeeRequest
 
@@ -74,6 +81,16 @@ func (h EmployeeHandler) Create(c *gin.Context) {
 	employee = banking.Employee{
 		UserID: user.ID,
 		BankID: request.BankID,
+	}
+
+	if !h.bankService.IsEmployee(strconv.Itoa(int(request.BankID)), userID) {
+		c.JSON(http.StatusForbidden, gin.H{"message": "You don't have access to do that"})
+		return
+	}
+
+	if userID == strconv.Itoa(int(employee.UserID)) {
+		c.JSON(http.StatusBadRequest, gin.H{"message": cases.Title(language.AmericanEnglish).String(user.FirstName) + " is already an employee at this bank"})
+		return
 	}
 
 	if err := h.employeeService.Create(&employee); err != nil {
