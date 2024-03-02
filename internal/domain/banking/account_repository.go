@@ -2,7 +2,6 @@ package banking
 
 import (
 	"errors"
-	"fmt"
 	"funbanking/internal/infrastructure/pagination"
 	"funbanking/internal/infrastructure/persistence"
 	"time"
@@ -72,9 +71,6 @@ func (r accountRepository) Update(accountID string, account *Account) error {
 	if err := r.db.First(&foundAccount, "id = ?", accountID).Error; err != nil {
 		return err
 	}
-
-	fmt.Println(account)
-	fmt.Println(foundAccount)
 
 	if account.Name == "" {
 		account.Name = foundAccount.Name
