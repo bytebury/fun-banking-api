@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/gin-gonic/gin"
 )
@@ -43,6 +44,12 @@ func (h UserHandler) GetCurrentUser(c *gin.Context) {
 		IPAddress:  c.ClientIP(),
 	})
 
+	user.LastSeen = time.Now()
+	if err := h.userService.Update(userID, &user); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "Something went wrong trying to get user information"})
+		return
+	}
+
 	c.JSON(http.StatusOK, user)
 }
 
@@ -72,6 +79,7 @@ func (h UserHandler) Search(c *gin.Context) {
 		"ID":       c.Query("id"),
 		"Username": c.Query("username"),
 		"Email":    c.Query("email"),
+		"LastSeen": c.Query("last_seen"),
 	}
 
 	users, err := h.userService.FindAll(itemsPerPage, pageNumber, params)

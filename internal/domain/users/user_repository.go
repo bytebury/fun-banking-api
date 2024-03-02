@@ -54,6 +54,10 @@ func (r userRepository) FindAll(itemsPerPage, pageNumber int, params map[string]
 		query = query.Where("email ILIKE ?", "%"+params["Email"]+"%")
 	}
 
+	if params["LastSeen"] != "" {
+		query = query.Where("last_seen > ?", params["LastSeen"])
+	}
+
 	return pagination.Find[User](query, pageNumber, itemsPerPage)
 }
 
@@ -83,9 +87,13 @@ func (r userRepository) Update(userID string, user *User) error {
 		user.About = foundUser.About
 	}
 
+	if user.LastSeen.IsZero() {
+		user.LastName = foundUser.LastName
+	}
+
 	r.normalize(user)
 
-	return r.db.Model(&foundUser).Select("Username", "FirstName", "LastName", "Avatar", "About").Updates(&user).Error
+	return r.db.Model(&foundUser).Select("Username", "FirstName", "LastName", "Avatar", "About", "LastSeen").Updates(&user).Error
 }
 
 func (r userRepository) Create(user *User) error {
