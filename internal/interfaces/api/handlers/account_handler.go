@@ -139,6 +139,10 @@ func (h AccountHandler) Update(c *gin.Context) {
 	}
 
 	if err := h.accountService.Update(accountID, &account); err != nil {
+		if strings.Contains(err.Error(), "name is too long") {
+			c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+			return
+		}
 		c.JSON(http.StatusInternalServerError, gin.H{"message": "Something went wrong"})
 		return
 	}

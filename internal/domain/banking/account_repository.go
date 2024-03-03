@@ -76,6 +76,10 @@ func (r accountRepository) Update(accountID string, account *Account) error {
 		account.Name = foundAccount.Name
 	}
 
+	if err := r.validate(account); err != nil {
+		return err
+	}
+
 	return r.db.Model(&Account{}).Where("id = ?", foundAccount.ID).Select("Name").Updates(account).Error
 }
 
@@ -106,4 +110,13 @@ func (r accountRepository) Create(account *Account) error {
 	}
 
 	return r.db.Create(&account).Error
+}
+
+func (r accountRepository) validate(account *Account) error {
+	const maxNameLength = 12
+
+	if len(account.Name) > maxNameLength {
+		return errors.New("name is too long, maximum is 12 characters")
+	}
+	return nil
 }
