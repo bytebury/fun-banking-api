@@ -113,10 +113,10 @@ func (r accountRepository) Create(account *Account) error {
 }
 
 func (r accountRepository) validate(account *Account) error {
-	const maxNameLength = 12
+	const maxNameLength = 15
 
 	if len(account.Name) > maxNameLength {
-		return errors.New("name is too long, maximum is 12 characters")
+		return errors.New("name is too long, maximum is 15 characters")
 	}
 	return nil
 }
