@@ -6,6 +6,8 @@ import (
 	"funbanking/internal/infrastructure/persistence"
 	"time"
 
+	"golang.org/x/text/cases"
+	"golang.org/x/text/language"
 	"gorm.io/gorm"
 )
 
@@ -118,5 +120,8 @@ func (r accountRepository) validate(account *Account) error {
 	if len(account.Name) > maxNameLength {
 		return errors.New("name is too long, maximum is 15 characters")
 	}
+
+	account.Name = cases.Title(language.AmericanEnglish).String(account.Name)
+
 	return nil
 }

@@ -70,7 +70,9 @@ func (r bankRepository) FindByUsernameAndSlug(username, slug string, bank *Bank)
 }
 
 func (r bankRepository) FindAllCustomers(bankID string, customers *[]Customer) error {
-	return r.db.Preload("Accounts").Order("last_name ASC, first_name ASC").Find(&customers, "bank_id = ?", bankID).Error
+	return r.db.Preload("Accounts", func(db *gorm.DB) *gorm.DB {
+		return db.Order("name ASC")
+	}).Order("last_name ASC, first_name ASC").Find(&customers, "bank_id = ?", bankID).Error
 }
 
 func (r bankRepository) Create(bank *Bank) error {
