@@ -85,7 +85,12 @@ func (h AccountHandler) FindTransactions(c *gin.Context) {
 	itemsPerPage, _ := strconv.Atoi(c.Query("itemsPerPage"))
 	pageNumber, _ := strconv.Atoi(c.Query("pageNumber"))
 
-	transactions, err := h.accountService.FindTransactions(accountID, statuses, itemsPerPage, pageNumber)
+	params := map[string]string{
+		"StartDate": c.Query("startDate"),
+		"EndDate":   c.Query("endDate"),
+	}
+
+	transactions, err := h.accountService.FindTransactions(accountID, statuses, itemsPerPage, pageNumber, params)
 
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"message": "Unable to find that account"})

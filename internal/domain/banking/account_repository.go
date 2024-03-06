@@ -13,7 +13,7 @@ import (
 
 type AccountRepository interface {
 	FindByID(accountID string, account *Account) error
-	FindTransactions(accountID string, statuses []string, itemsPerPage int, pageNumber int) (pagination.PaginatedResponse[Transaction], error)
+	FindTransactions(accountID string, statuses []string, itemsPerPage int, pageNumber int, params map[string]string) (pagination.PaginatedResponse[Transaction], error)
 	MonthlyTransactionInsights(accountID string) ([]AccountMonthlySummary, error)
 	Update(accountID string, account *Account) error
 	AddToBalance(accountID string, amount float64) (Account, error)
@@ -32,7 +32,7 @@ func (r accountRepository) FindByID(accountID string, account *Account) error {
 	return r.db.Preload("Customer").First(&account, "id = ?", accountID).Error
 }
 
-func (r accountRepository) FindTransactions(accountID string, statuses []string, itemsPerPage int, pageNumber int) (pagination.PaginatedResponse[Transaction], error) {
+func (r accountRepository) FindTransactions(accountID string, statuses []string, itemsPerPage int, pageNumber int, params map[string]string) (pagination.PaginatedResponse[Transaction], error) {
 	query := r.db.Preload("User", func(db *gorm.DB) *gorm.DB {
 		return db.Select("id", "first_name", "last_name", "username")
 	})
@@ -40,6 +40,18 @@ func (r accountRepository) FindTransactions(accountID string, statuses []string,
 
 	if len(statuses) > 0 {
 		query = query.Where("status IN ?", statuses)
+	}
+
+	if params["StartDate"] != "" && params["EndDate"] == "" {
+		query = query.Where("updated_at >= ?", params["StartDate"])
+	}
+
+	if params["EndDate"] != "" && params["StartDate"] == "" {
+		query = query.Where("updated_at < ?", params["EndDate"])
+	}
+
+	if params["EndDate"] != "" && params["StartDate"] != "" {
+		query = query.Where("updated_at >= ? AND updated_at < ?", params["StartDate"], params["EndDate"])
 	}
 
 	query = query.Order("updated_at DESC")
