@@ -54,7 +54,11 @@ func (r accountRepository) FindTransactions(accountID string, statuses []string,
 		query = query.Where("updated_at >= ? AND updated_at < ?", params["StartDate"], params["EndDate"])
 	}
 
-	query = query.Order("updated_at DESC")
+	if params["Direction"] == "ASC" {
+		query = query.Order("updated_at ASC")
+	} else {
+		query = query.Order("updated_at DESC")
+	}
 
 	return pagination.Find[Transaction](query, pageNumber, itemsPerPage)
 }

@@ -88,6 +88,7 @@ func (h AccountHandler) FindTransactions(c *gin.Context) {
 	params := map[string]string{
 		"StartDate": c.Query("startDate"),
 		"EndDate":   c.Query("endDate"),
+		"Direction": c.Query("direction"),
 	}
 
 	transactions, err := h.accountService.FindTransactions(accountID, statuses, itemsPerPage, pageNumber, params)
