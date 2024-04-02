@@ -33,6 +33,7 @@ func (r runner) setup() {
 	r.setupSessionRoutes()
 	r.setupPasswordRoutes()
 	r.setupNotificationRoutes()
+	r.setupBankBuddyRoutes()
 }
 
 func (r runner) setupNotificationRoutes() {
@@ -114,6 +115,13 @@ func (r runner) setupTransactionRoutes() {
 		PATCH(":id/approve", middleware.Auth(), handler.Approve).
 		PATCH(":id/decline", middleware.Auth(), handler.Decline).
 		PUT("", middleware.Customer(), handler.Create)
+}
+
+func (r runner) setupBankBuddyRoutes() {
+	handler := handlers.NewBankBuddyHandler()
+	r.router.Group(("/bankbuddy")).
+		PUT("transfer", middleware.Customer(), handler.Transfer).
+		GET("banks/:id/customers", middleware.Customer(), handler.FindRecipients)
 }
 
 func (r runner) setupAnnouncementRoutes() {

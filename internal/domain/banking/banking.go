@@ -18,6 +18,7 @@ type Account struct {
 	Balance    float64  `json:"balance" gorm:"type:decimal(50,2);not null;default:0.00"`
 	CustomerID uint     `json:"customer_id" gorm:"not null"`
 	Customer   Customer `json:"customer" gorm:"foreignKey:CustomerID;constraint:OnDelete:CASCADE;"`
+	Type       string   `json:"type" gorm:"not null;default:checking"`
 }
 
 type AccountMonthlySummary struct {
@@ -68,6 +69,14 @@ type Transaction struct {
 	Account        Account    `json:"account" gorm:"foreignKey:AccountID;constraint:OnDelete:CASCADE;"`
 	UserID         *uint      `json:"user_id"`
 	User           users.User `json:"user"`
+	Type           string     `json:"type" gorm:"not null;default:manual"`
+}
+
+type BankBuddyTransfer struct {
+	FromAccountID uint    `json:"from_account_id"`
+	ToAccountID   uint    `json:"to_account_id"`
+	Amount        float64 `json:"amount"`
+	Description   string  `json:"description"`
 }
 
 func RunMigrations() {

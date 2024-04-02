@@ -82,6 +82,8 @@ func (h TransactionHandler) Create(c *gin.Context) {
 		return
 	}
 
+	transaction.Status = "pending"
+
 	if err := h.transactionService.Create(userID, &transaction); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": "Something went wrong"})
 		return
