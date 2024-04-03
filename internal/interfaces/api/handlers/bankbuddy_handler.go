@@ -3,6 +3,7 @@ package handlers
 import (
 	"funbanking/internal/domain/banking"
 	"net/http"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 )
@@ -34,7 +35,12 @@ func (h BankBuddyHandler) Transfer(c *gin.Context) {
 	}
 
 	if err := h.bankBuddyService.Transfer(&transferRequest); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"message": "Something went wrong"})
+		if strings.Contains(err.Error(), "insufficient funds") {
+			c.JSON(http.StatusBadRequest, gin.H{"message": "You do not have sufficient funds to do that"})
+			return
+		}
+
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "Something went wrong sending money to that customer"})
 		return
 	}
 

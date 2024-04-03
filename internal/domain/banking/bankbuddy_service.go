@@ -1,6 +1,7 @@
 package banking
 
 import (
+	"errors"
 	"fmt"
 	"funbanking/internal/infrastructure/persistence"
 	"math"
@@ -41,6 +42,10 @@ func (s bankBuddyService) Transfer(transfer *BankBuddyTransfer) error {
 
 		if noAccFound2 != nil {
 			return noAccFound2
+		}
+
+		if fromAccount.Balance < transfer.Amount {
+			return errors.New("insufficient funds")
 		}
 
 		transaction := Transaction{
