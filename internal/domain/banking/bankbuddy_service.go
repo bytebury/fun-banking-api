@@ -1,10 +1,13 @@
 package banking
 
 import (
+	"fmt"
 	"funbanking/internal/infrastructure/persistence"
 	"math"
 	"strconv"
 
+	"golang.org/x/text/cases"
+	"golang.org/x/text/language"
 	"gorm.io/gorm"
 )
 
@@ -15,11 +18,13 @@ type BankBuddyService interface {
 
 type bankBuddyService struct {
 	transactionService TransactionService
+	accountService     AccountService
 }
 
-func NewBankBuddyService(transactionService TransactionService) BankBuddyService {
+func NewBankBuddyService(transactionService TransactionService, accountService AccountService) BankBuddyService {
 	return bankBuddyService{
 		transactionService,
+		accountService,
 	}
 }
 
@@ -27,11 +32,28 @@ func (s bankBuddyService) Transfer(transfer *BankBuddyTransfer) error {
 	transfer.Amount = math.Abs(transfer.Amount)
 
 	return persistence.DB.Transaction(func(tx *gorm.DB) error {
+		fromAccount, noAccFound1 := s.accountService.FindByID(strconv.Itoa(int(transfer.FromAccountID)))
+		toAccount, noAccFound2 := s.accountService.FindByID(strconv.Itoa(int(transfer.ToAccountID)))
+
+		if noAccFound1 != nil {
+			return noAccFound1
+		}
+
+		if noAccFound2 != nil {
+			return noAccFound2
+		}
+
 		transaction := Transaction{
-			AccountID:   transfer.FromAccountID,
-			Amount:      transfer.Amount * -1,
-			Description: transfer.Description,
-			Type:        "bankbuddy",
+			AccountID: transfer.FromAccountID,
+			Amount:    transfer.Amount * -1,
+			Description: fmt.Sprintf(
+				"%s. Sent to %s %s",
+				transfer.Description,
+				cases.Title(language.AmericanEnglish).String(toAccount.Customer.FirstName),
+				cases.Title(language.AmericanEnglish).String(toAccount.Customer.LastName),
+			),
+			BankBuddySenderID: &fromAccount.CustomerID,
+			Type:              "bank_buddy",
 		}
 
 		if err := s.transactionService.Create("", &transaction); err != nil {
@@ -43,10 +65,11 @@ func (s bankBuddyService) Transfer(transfer *BankBuddyTransfer) error {
 		}
 
 		transaction = Transaction{
-			AccountID:   transfer.ToAccountID,
-			Amount:      transfer.Amount,
-			Description: transfer.Description,
-			Type:        "bankbuddy",
+			AccountID:         transfer.ToAccountID,
+			Amount:            transfer.Amount,
+			Description:       transfer.Description,
+			Type:              "bank_buddy",
+			BankBuddySenderID: &fromAccount.CustomerID,
 		}
 
 		if err := s.transactionService.Create("", &transaction); err != nil {

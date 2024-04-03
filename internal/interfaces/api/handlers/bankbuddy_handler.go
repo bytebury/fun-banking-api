@@ -17,6 +17,10 @@ func NewBankBuddyHandler() BankBuddyHandler {
 			banking.NewTransactionService(
 				banking.NewTransactionRepository(),
 			),
+			banking.NewAccountService(
+				banking.NewAccountRepository(),
+				banking.NewCustomerRepository(),
+			),
 		),
 	}
 }
