@@ -36,6 +36,9 @@ func (r accountRepository) FindTransactions(accountID string, statuses []string,
 	query := r.db.Preload("User", func(db *gorm.DB) *gorm.DB {
 		return db.Select("id", "first_name", "last_name", "username")
 	})
+	query = query.Preload("BankBuddySender", func(db *gorm.DB) *gorm.DB {
+		return db.Select("id", "first_name", "last_name")
+	})
 	query = query.Where("account_id = ?", accountID)
 
 	if len(statuses) > 0 {

@@ -18,6 +18,7 @@ type Account struct {
 	Balance    float64  `json:"balance" gorm:"type:decimal(50,2);not null;default:0.00"`
 	CustomerID uint     `json:"customer_id" gorm:"not null"`
 	Customer   Customer `json:"customer" gorm:"foreignKey:CustomerID;constraint:OnDelete:CASCADE;"`
+	Type       string   `json:"type" gorm:"not null;default:checking"`
 }
 
 type AccountMonthlySummary struct {
@@ -60,14 +61,24 @@ type NewEmployeeRequest struct {
 
 type Transaction struct {
 	domain.AuditModel
-	Description    string     `json:"description" gorm:"not null;size:255"`
-	CurrentBalance float64    `json:"current_balance" gorm:"not null;type:decimal(50,2)"`
-	Amount         float64    `json:"amount" gorm:"not null;type:decimal(50,2)"`
-	Status         string     `json:"status" gorm:"not null;size:20;default:pending"`
-	AccountID      uint       `json:"account_id" gorm:"not null"`
-	Account        Account    `json:"account" gorm:"foreignKey:AccountID;constraint:OnDelete:CASCADE;"`
-	UserID         *uint      `json:"user_id"`
-	User           users.User `json:"user"`
+	Description       string     `json:"description" gorm:"not null;size:255"`
+	CurrentBalance    float64    `json:"current_balance" gorm:"not null;type:decimal(50,2)"`
+	Amount            float64    `json:"amount" gorm:"not null;type:decimal(50,2)"`
+	Status            string     `json:"status" gorm:"not null;size:20;default:pending"`
+	AccountID         uint       `json:"account_id" gorm:"not null"`
+	Account           Account    `json:"account" gorm:"foreignKey:AccountID;constraint:OnDelete:CASCADE;"`
+	UserID            *uint      `json:"user_id"`
+	User              users.User `json:"user"`
+	BankBuddySender   Customer   `json:"bank_buddy_sender"`
+	BankBuddySenderID *uint      `json:"bank_buddy_sender_id"`
+	Type              string     `json:"type" gorm:"not null;default:manual"`
+}
+
+type BankBuddyTransfer struct {
+	FromAccountID uint    `json:"from_account_id"`
+	ToAccountID   uint    `json:"to_account_id"`
+	Amount        float64 `json:"amount"`
+	Description   string  `json:"description"`
 }
 
 func RunMigrations() {
