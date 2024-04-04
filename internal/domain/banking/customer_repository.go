@@ -77,5 +77,19 @@ func (r customerRepository) Update(customerID string, customer *Customer) error 
 }
 
 func (r customerRepository) Delete(customerID string) error {
-	return r.db.Delete(&Customer{}, customerID).Error
+	return r.db.Transaction(func(tx *gorm.DB) error {
+		var bankBuddyTransfers []Transaction
+
+		if err := r.db.Find(&bankBuddyTransfers, "bank_buddy_sender_id = ?", customerID).Error; err != nil {
+			return err
+		}
+
+		for _, transfer := range bankBuddyTransfers {
+			if err := r.db.Model(&transfer).Update("bank_buddy_sender_id", nil).Error; err != nil {
+				return err
+			}
+		}
+
+		return r.db.Delete(&Customer{}, customerID).Error
+	})
 }

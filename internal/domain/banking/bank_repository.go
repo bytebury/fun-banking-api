@@ -5,6 +5,7 @@ import (
 	"funbanking/internal/infrastructure/pagination"
 	"funbanking/internal/infrastructure/persistence"
 	"regexp"
+	"strconv"
 	"strings"
 
 	"gorm.io/gorm"
@@ -22,11 +23,15 @@ type BankRepository interface {
 }
 
 type bankRepository struct {
-	db *gorm.DB
+	db                 *gorm.DB
+	customerRepository CustomerRepository
 }
 
 func NewBankRepository() BankRepository {
-	return bankRepository{db: persistence.DB}
+	return bankRepository{
+		db:                 persistence.DB,
+		customerRepository: NewCustomerRepository(),
+	}
 }
 
 func (r bankRepository) FindByID(bankID string, bank *Bank) error {
@@ -101,7 +106,22 @@ func (r bankRepository) Update(bankID string, bank *Bank) error {
 }
 
 func (r bankRepository) Delete(bankID string) error {
-	return r.db.Delete(&Bank{}, bankID).Error
+	return r.db.Transaction(func(tx *gorm.DB) error {
+		var customers []Customer
+
+		if err := r.db.Find(&customers, "bank_id = ?", bankID).Error; err != nil {
+			return err
+		}
+
+		for _, customer := range customers {
+			if err := r.customerRepository.Delete(strconv.Itoa(int(customer.ID))); err != nil {
+				return err
+			}
+		}
+
+		return r.db.Delete(&Bank{}, bankID).Error
+	})
+
 }
 
 func (r bankRepository) normalize(bank *Bank) {
