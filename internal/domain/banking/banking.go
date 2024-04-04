@@ -19,7 +19,7 @@ type Account struct {
 	CustomerID uint     `json:"customer_id" gorm:"not null"`
 	Customer   Customer `json:"customer" gorm:"foreignKey:CustomerID;constraint:OnDelete:CASCADE;"`
 	Type       string   `json:"type" gorm:"not null;default:checking"`
-	IsPrimary  bool     `json:"is_primary" gorm:"not null;default:true"`
+	IsPrimary  bool     `json:"is_primary" gorm:"not null;default:false"`
 }
 
 type AccountMonthlySummary struct {
