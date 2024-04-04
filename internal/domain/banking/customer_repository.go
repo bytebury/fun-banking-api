@@ -46,7 +46,7 @@ func (r customerRepository) Create(customer *Customer) error {
 			return err
 		}
 
-		if err := tx.Create(&Account{Name: "Checkings", CustomerID: customer.ID}).Error; err != nil {
+		if err := tx.Create(&Account{Name: "Checkings", CustomerID: customer.ID, IsPrimary: true}).Error; err != nil {
 			return err
 		}
 
