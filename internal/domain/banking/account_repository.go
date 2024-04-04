@@ -18,6 +18,7 @@ type AccountRepository interface {
 	Update(accountID string, account *Account) error
 	AddToBalance(accountID string, amount float64) (Account, error)
 	Create(account *Account) error
+	Transfer(transferRequest TransferRequest) error
 }
 
 type accountRepository struct {
@@ -131,6 +132,12 @@ func (r accountRepository) Create(account *Account) error {
 	}
 
 	return r.db.Create(&account).Error
+}
+
+func (r accountRepository) Transfer(transferRequest TransferRequest) error {
+	return r.db.Transaction(func(tx *gorm.DB) error {
+		return nil
+	})
 }
 
 func (r accountRepository) validate(account *Account) error {

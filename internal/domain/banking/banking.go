@@ -82,6 +82,12 @@ type BankBuddyTransfer struct {
 	Description   string  `json:"description"`
 }
 
+type TransferRequest struct {
+	FromAccountID int     `json:"from_account_id"`
+	ToAccountID   int     `json:"to_account_id"`
+	Amount        float64 `json:"amount"`
+}
+
 func RunMigrations() {
 	persistence.DB.AutoMigrate(&Employee{})
 	persistence.DB.AutoMigrate(&Bank{})

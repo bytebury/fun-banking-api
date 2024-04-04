@@ -105,6 +105,7 @@ func (r runner) setupAccountRoutes() {
 		GET(":id", middleware.Customer(), handler.FindByID).
 		GET(":id/transactions", middleware.Customer(), handler.FindTransactions).
 		GET(":id/insights/transactions", middleware.Customer(), handler.MonthlyTransactionInsights).
+		POST("transfer", middleware.Customer(), handler.TransferBetweenAccounts).
 		PATCH(":id", middleware.Customer(), handler.Update).
 		PUT("", middleware.Auth(), handler.Create)
 }

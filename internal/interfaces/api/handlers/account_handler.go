@@ -191,6 +191,30 @@ func (h AccountHandler) Create(c *gin.Context) {
 	c.JSON(http.StatusOK, account)
 }
 
+func (h AccountHandler) TransferBetweenAccounts(c *gin.Context) {
+	customerID := c.GetString("customer_id")
+
+	var transferRequest banking.TransferRequest
+
+	// TODO: Maybe look into owners/employees to transfer between accounts.
+	if customerID == "" {
+		c.JSON(http.StatusForbidden, gin.H{"message": "Only customers can transfer between accounts"})
+		return
+	}
+
+	if err := c.ShouldBindJSON(&transferRequest); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "Malformed request"})
+		return
+	}
+
+	if err := h.accountService.Transfer(customerID, transferRequest); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "Failed transfering funds between accounts"})
+		return
+	}
+
+	c.JSON(http.StatusAccepted, nil)
+}
+
 func (h AccountHandler) isOwner(accountID string, customerID string) bool {
 	if customerID == "" {
 		return false
