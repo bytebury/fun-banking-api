@@ -179,25 +179,8 @@ func (h AccountHandler) Create(c *gin.Context) {
 	}
 
 	if err := h.accountService.Create(userID, &account); err != nil {
-		if strings.Contains(err.Error(), "required") {
-			c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
-			return
-		}
-
-		if strings.Contains(err.Error(), "balances") {
-			c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
-			return
-		}
-
-		if strings.Contains(err.Error(), "not allowed") {
-			c.JSON(http.StatusForbidden, gin.H{"message": "You don't have access to do that"})
-			return
-		}
-
-		if strings.Contains(err.Error(), "maximum") {
-			c.JSON(http.StatusBadRequest, gin.H{"message": "Maximum number of accounts already reached"})
-			return
-		}
+		h.handleCreateErrors(c, err)
+		return
 	}
 
 	c.JSON(http.StatusOK, account)
@@ -215,14 +198,8 @@ func (h AccountHandler) TransferBetweenAccounts(c *gin.Context) {
 	}
 
 	fromAccountId := strconv.Itoa(int(transferRequest.FromAccountID))
-
 	if h.isEmployee(fromAccountId, userID) {
-		if account, err := h.accountService.FindByID(fromAccountId); err != nil {
-			c.JSON(http.StatusNotFound, gin.H{"message": "One or both accounts do not exist"})
-			return
-		} else {
-			customerID = strconv.Itoa(int(account.CustomerID))
-		}
+		customerID = h.getCustomerIdByAccountId(fromAccountId)
 	}
 
 	if customerID == "" {
@@ -231,19 +208,7 @@ func (h AccountHandler) TransferBetweenAccounts(c *gin.Context) {
 	}
 
 	if err := h.transferService.Transfer(customerID, transferRequest); err != nil {
-		if strings.Contains(err.Error(), "account does not exist") {
-			c.JSON(http.StatusNotFound, gin.H{"message": "One or both accounts do not exist"})
-			return
-		}
-		if strings.Contains(err.Error(), "between accounts you own") {
-			c.JSON(http.StatusBadRequest, gin.H{"message": "You can only transfer between accounts you own"})
-			return
-		}
-		if strings.Contains(err.Error(), "insufficient funds") {
-			c.JSON(http.StatusBadRequest, gin.H{"message": "You do not have enough funds to transfer that much"})
-			return
-		}
-		c.JSON(http.StatusBadRequest, gin.H{"message": "Failed transfering funds between accounts"})
+		h.handleTransferErrors(c, err)
 		return
 	}
 
@@ -308,4 +273,54 @@ func (h AccountHandler) isEmployee(accountID string, userID string) bool {
 	}
 
 	return false
+}
+
+func (h AccountHandler) getCustomerIdByAccountId(accountID string) string {
+	account, err := h.accountService.FindByID(accountID)
+
+	if err != nil {
+		return ""
+	}
+	return strconv.Itoa(int(account.CustomerID))
+}
+
+func (h AccountHandler) handleTransferErrors(c *gin.Context, err error) {
+	if strings.Contains(err.Error(), "account does not exist") {
+		c.JSON(http.StatusNotFound, gin.H{"message": "One or both accounts do not exist"})
+		return
+	}
+	if strings.Contains(err.Error(), "between accounts you own") {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "You can only transfer between accounts you own"})
+		return
+	}
+	if strings.Contains(err.Error(), "insufficient funds") {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "You do not have enough funds to transfer that much"})
+		return
+	}
+
+	c.JSON(http.StatusBadRequest, gin.H{"message": "Failed transfering funds between accounts"})
+}
+
+func (h AccountHandler) handleCreateErrors(c *gin.Context, err error) {
+	if strings.Contains(err.Error(), "required") {
+		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+		return
+	}
+
+	if strings.Contains(err.Error(), "balances") {
+		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+		return
+	}
+
+	if strings.Contains(err.Error(), "not allowed") {
+		c.JSON(http.StatusForbidden, gin.H{"message": "You don't have access to do that"})
+		return
+	}
+
+	if strings.Contains(err.Error(), "maximum") {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "Maximum number of accounts already reached"})
+		return
+	}
+
+	c.JSON(http.StatusInternalServerError, gin.H{"message": "Something went wrong"})
 }
