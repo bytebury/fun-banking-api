@@ -12,7 +12,6 @@ type AccountService interface {
 	MonthlyTransactionInsights(accountID string) ([]AccountMonthlySummary, error)
 	Update(accountID string, account *Account) error
 	AddToBalance(accountID string, amount float64) (Account, error)
-	Transfer(customerID string, transferRequest TransferRequest) error
 	Create(userID string, account *Account) error
 }
 
@@ -64,11 +63,6 @@ func (s accountService) Create(userID string, account *Account) error {
 	}
 
 	return s.accountRepository.Create(account)
-}
-
-func (s accountService) Transfer(customerID string, transferRequest TransferRequest) error {
-	// Check to make sure that the customer owns both accounts
-	return s.accountRepository.Transfer(transferRequest)
 }
 
 func (s accountService) userHasAccessToCustomer(userID string, customer Customer) bool {

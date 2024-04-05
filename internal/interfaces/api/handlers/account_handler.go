@@ -18,15 +18,23 @@ type AccountHandler struct {
 	bankService     banking.BankService
 	employeeService banking.EmployeeService
 	userService     users.UserService
+	transferService banking.TransferService
 }
 
 func NewAccountHandler() AccountHandler {
 	userRepository := users.NewUserRepository()
+
+	accountService := banking.NewAccountService(
+		banking.NewAccountRepository(),
+		banking.NewCustomerRepository(),
+	)
+
+	transactionService := banking.NewTransactionService(
+		banking.NewTransactionRepository(),
+	)
+
 	return AccountHandler{
-		accountService: banking.NewAccountService(
-			banking.NewAccountRepository(),
-			banking.NewCustomerRepository(),
-		),
+		accountService: accountService,
 		bankService: banking.NewBankService(
 			banking.NewBankRepository(),
 		),
@@ -39,6 +47,10 @@ func NewAccountHandler() AccountHandler {
 				userRepository,
 			),
 			mailing.NewWelcomeMailer(),
+		),
+		transferService: banking.NewTransferService(
+			accountService,
+			transactionService,
 		),
 	}
 }
@@ -207,7 +219,19 @@ func (h AccountHandler) TransferBetweenAccounts(c *gin.Context) {
 		return
 	}
 
-	if err := h.accountService.Transfer(customerID, transferRequest); err != nil {
+	if err := h.transferService.Transfer(customerID, transferRequest); err != nil {
+		if strings.Contains(err.Error(), "account does not exist") {
+			c.JSON(http.StatusNotFound, gin.H{"message": "One or both accounts do not exist"})
+			return
+		}
+		if strings.Contains(err.Error(), "between accounts you own") {
+			c.JSON(http.StatusBadRequest, gin.H{"message": "You can only transfer between accounts you own"})
+			return
+		}
+		if strings.Contains(err.Error(), "insufficient funds") {
+			c.JSON(http.StatusBadRequest, gin.H{"message": "You do not have enough funds to transfer that much"})
+			return
+		}
 		c.JSON(http.StatusBadRequest, gin.H{"message": "Failed transfering funds between accounts"})
 		return
 	}
