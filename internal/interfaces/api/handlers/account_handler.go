@@ -204,18 +204,29 @@ func (h AccountHandler) Create(c *gin.Context) {
 }
 
 func (h AccountHandler) TransferBetweenAccounts(c *gin.Context) {
+	userID := c.GetString("user_id")
 	customerID := c.GetString("customer_id")
 
 	var transferRequest banking.TransferRequest
 
-	// TODO: Maybe look into owners/employees to transfer between accounts.
-	if customerID == "" {
-		c.JSON(http.StatusForbidden, gin.H{"message": "Only customers can transfer between accounts"})
+	if err := c.ShouldBindJSON(&transferRequest); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "Malformed request"})
 		return
 	}
 
-	if err := c.ShouldBindJSON(&transferRequest); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"message": "Malformed request"})
+	fromAccountId := strconv.Itoa(int(transferRequest.FromAccountID))
+
+	if h.isEmployee(fromAccountId, userID) {
+		if account, err := h.accountService.FindByID(fromAccountId); err != nil {
+			c.JSON(http.StatusNotFound, gin.H{"message": "One or both accounts do not exist"})
+			return
+		} else {
+			customerID = strconv.Itoa(int(account.CustomerID))
+		}
+	}
+
+	if customerID == "" {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "Could not find you or your customer"})
 		return
 	}
 
