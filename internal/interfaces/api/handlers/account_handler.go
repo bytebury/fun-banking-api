@@ -18,15 +18,23 @@ type AccountHandler struct {
 	bankService     banking.BankService
 	employeeService banking.EmployeeService
 	userService     users.UserService
+	transferService banking.TransferService
 }
 
 func NewAccountHandler() AccountHandler {
 	userRepository := users.NewUserRepository()
+
+	accountService := banking.NewAccountService(
+		banking.NewAccountRepository(),
+		banking.NewCustomerRepository(),
+	)
+
+	transactionService := banking.NewTransactionService(
+		banking.NewTransactionRepository(),
+	)
+
 	return AccountHandler{
-		accountService: banking.NewAccountService(
-			banking.NewAccountRepository(),
-			banking.NewCustomerRepository(),
-		),
+		accountService: accountService,
 		bankService: banking.NewBankService(
 			banking.NewBankRepository(),
 		),
@@ -39,6 +47,10 @@ func NewAccountHandler() AccountHandler {
 				userRepository,
 			),
 			mailing.NewWelcomeMailer(),
+		),
+		transferService: banking.NewTransferService(
+			accountService,
+			transactionService,
 		),
 	}
 }
@@ -167,28 +179,40 @@ func (h AccountHandler) Create(c *gin.Context) {
 	}
 
 	if err := h.accountService.Create(userID, &account); err != nil {
-		if strings.Contains(err.Error(), "required") {
-			c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
-			return
-		}
-
-		if strings.Contains(err.Error(), "balances") {
-			c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
-			return
-		}
-
-		if strings.Contains(err.Error(), "not allowed") {
-			c.JSON(http.StatusForbidden, gin.H{"message": "You don't have access to do that"})
-			return
-		}
-
-		if strings.Contains(err.Error(), "maximum") {
-			c.JSON(http.StatusBadRequest, gin.H{"message": "Maximum number of accounts already reached"})
-			return
-		}
+		h.handleCreateErrors(c, err)
+		return
 	}
 
 	c.JSON(http.StatusOK, account)
+}
+
+func (h AccountHandler) TransferBetweenAccounts(c *gin.Context) {
+	userID := c.GetString("user_id")
+	customerID := c.GetString("customer_id")
+
+	var transferRequest banking.TransferRequest
+
+	if err := c.ShouldBindJSON(&transferRequest); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "Malformed request"})
+		return
+	}
+
+	fromAccountId := strconv.Itoa(int(transferRequest.FromAccountID))
+	if h.isEmployee(fromAccountId, userID) {
+		customerID = h.getCustomerIdByAccountId(fromAccountId)
+	}
+
+	if customerID == "" {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "Could not find you or your customer"})
+		return
+	}
+
+	if err := h.transferService.Transfer(customerID, transferRequest); err != nil {
+		h.handleTransferErrors(c, err)
+		return
+	}
+
+	c.JSON(http.StatusAccepted, nil)
 }
 
 func (h AccountHandler) isOwner(accountID string, customerID string) bool {
@@ -249,4 +273,54 @@ func (h AccountHandler) isEmployee(accountID string, userID string) bool {
 	}
 
 	return false
+}
+
+func (h AccountHandler) getCustomerIdByAccountId(accountID string) string {
+	account, err := h.accountService.FindByID(accountID)
+
+	if err != nil {
+		return ""
+	}
+	return strconv.Itoa(int(account.CustomerID))
+}
+
+func (h AccountHandler) handleTransferErrors(c *gin.Context, err error) {
+	if strings.Contains(err.Error(), "account does not exist") {
+		c.JSON(http.StatusNotFound, gin.H{"message": "One or both accounts do not exist"})
+		return
+	}
+	if strings.Contains(err.Error(), "between accounts you own") {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "You can only transfer between accounts you own"})
+		return
+	}
+	if strings.Contains(err.Error(), "insufficient funds") {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "You do not have enough funds to transfer that much"})
+		return
+	}
+
+	c.JSON(http.StatusBadRequest, gin.H{"message": "Failed transfering funds between accounts"})
+}
+
+func (h AccountHandler) handleCreateErrors(c *gin.Context, err error) {
+	if strings.Contains(err.Error(), "required") {
+		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+		return
+	}
+
+	if strings.Contains(err.Error(), "balances") {
+		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+		return
+	}
+
+	if strings.Contains(err.Error(), "not allowed") {
+		c.JSON(http.StatusForbidden, gin.H{"message": "You don't have access to do that"})
+		return
+	}
+
+	if strings.Contains(err.Error(), "maximum") {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "Maximum number of accounts already reached"})
+		return
+	}
+
+	c.JSON(http.StatusInternalServerError, gin.H{"message": "Something went wrong"})
 }
