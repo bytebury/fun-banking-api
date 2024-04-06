@@ -34,6 +34,7 @@ func (r runner) setup() {
 	r.setupPasswordRoutes()
 	r.setupNotificationRoutes()
 	r.setupBankBuddyRoutes()
+	r.setupConfigRoutes()
 }
 
 func (r runner) setupNotificationRoutes() {
@@ -139,4 +140,9 @@ func (r runner) setupPasswordRoutes() {
 	r.router.Group("passwords").
 		POST("forgot", handler.ForgotPassword).
 		POST("reset", middleware.PasswordReset(), handler.ResetPassword)
+}
+
+func (r runner) setupConfigRoutes() {
+	handler := handlers.NewConfigHandler()
+	r.router.GET("config", handler.GetConfig)
 }

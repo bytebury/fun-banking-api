@@ -22,22 +22,22 @@ const (
 )
 
 type bankConfigLimits struct {
-	Banks       int
-	Employees   int
-	Customers   int
-	Accounts    int
-	StoreFronts int
+	Banks       int `json:"banks"`
+	Employees   int `json:"employees"`
+	Customers   int `json:"customers"`
+	Accounts    int `json:"accounts"`
+	StoreFronts int `json:"store_fronts"`
 }
 
 type bankSubscriptionTiers struct {
-	Free         bankConfigLimits
-	Premium      bankConfigLimits
-	Family       bankConfigLimits
-	Organization bankConfigLimits
+	Free         bankConfigLimits `json:"0"`
+	Premium      bankConfigLimits `json:"1"`
+	Family       bankConfigLimits `json:"2"`
+	Organization bankConfigLimits `json:"3"`
 }
 
 type bankConfig struct {
-	Limits bankSubscriptionTiers
+	Limits bankSubscriptionTiers `json:"limits"`
 }
 
 var BankConfig = bankConfig{
