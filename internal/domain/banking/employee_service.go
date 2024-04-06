@@ -1,7 +1,9 @@
 package banking
 
 import (
+	"errors"
 	"funbanking/package/utils"
+	"strconv"
 )
 
 type EmployeeService interface {
@@ -32,6 +34,12 @@ func (s employeeService) FindAllByUserID(userID string) ([]Employee, error) {
 }
 
 func (s employeeService) Create(employee *Employee) error {
+	if employees, err := s.FindAllByBankID(strconv.Itoa(int(employee.BankID))); err != nil {
+		return err
+	} else if EnablePremium && len(employees) >= BankConfig.Limits.Free.Employees {
+		return errors.New("limit reached")
+	}
+
 	return s.employeeRepository.Create(employee)
 }
 

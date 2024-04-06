@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"fmt"
 	"funbanking/internal/domain/banking"
 	"funbanking/internal/infrastructure/auth"
 	"net/http"
@@ -19,6 +20,9 @@ func NewCustomerHandler() CustomerHandler {
 		customerService: banking.NewCustomerService(
 			customerRepository,
 			auth.NewCustomerAuth(customerRepository),
+			banking.NewBankService(
+				banking.NewBankRepository(),
+			),
 		),
 	}
 }
@@ -60,6 +64,11 @@ func (h CustomerHandler) Create(c *gin.Context) {
 	if err := h.customerService.Create(&customer); err != nil {
 		if strings.Contains(err.Error(), "idx_pin_bank") {
 			c.JSON(http.StatusBadRequest, gin.H{"message": "A customer already is using that PIN"})
+			return
+		}
+
+		if strings.Contains(err.Error(), "limit reached") {
+			c.JSON(http.StatusBadRequest, gin.H{"message": fmt.Sprintf("You already reached your customer limit for this bank (%d)", banking.BankConfig.Limits.Free.Customers)})
 			return
 		}
 

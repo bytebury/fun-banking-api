@@ -1,6 +1,7 @@
 package banking
 
 import (
+	"errors"
 	"funbanking/internal/infrastructure/pagination"
 	"funbanking/package/utils"
 	"strconv"
@@ -88,6 +89,13 @@ func (s bankService) Create(userID string, bank *Bank) error {
 
 	if err != nil {
 		return err
+	}
+
+	// TODO: You'll actually need to find it by user so you can get the limits
+	if banks, err := s.FindAllByUserID(userID); err != nil {
+		return err
+	} else if EnablePremium && len(banks) >= BankConfig.Limits.Free.Banks {
+		return errors.New("limit reached")
 	}
 
 	bank.UserID = uint(userIDAsUInt)

@@ -1,7 +1,9 @@
 package banking
 
 import (
+	"errors"
 	"funbanking/package/utils"
+	"strconv"
 )
 
 type LoginRequest struct {
@@ -25,12 +27,14 @@ type CustomerService interface {
 type customerService struct {
 	authService        CustomerAuth
 	customerRepository CustomerRepository
+	bankService        BankService
 }
 
-func NewCustomerService(customerRepository CustomerRepository, authService CustomerAuth) CustomerService {
+func NewCustomerService(customerRepository CustomerRepository, authService CustomerAuth, bankService BankService) CustomerService {
 	return customerService{
 		customerRepository: customerRepository,
 		authService:        authService,
+		bankService:        bankService,
 	}
 }
 
@@ -55,6 +59,12 @@ func (s customerService) Login(bankID string, pin string) (string, Customer, err
 }
 
 func (s customerService) Create(customer *Customer) error {
+	if customers, err := s.bankService.FindAllCustomers(strconv.Itoa(int(customer.BankID))); err != nil {
+		return err
+	} else if EnablePremium && len(customers) >= BankConfig.Limits.Free.Customers {
+		return errors.New("limit reached")
+	}
+
 	return s.customerRepository.Create(customer)
 }
 

@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"fmt"
 	"funbanking/internal/domain/banking"
 	"net/http"
 	"strconv"
@@ -129,6 +130,11 @@ func (h BankHandler) Create(c *gin.Context) {
 	if err := h.bankService.Create(userID, &bank); err != nil {
 		if strings.Contains(err.Error(), "idx_user_slug") {
 			c.JSON(http.StatusBadRequest, gin.H{"message": "You already have a bank by that name"})
+			return
+		}
+
+		if strings.Contains(err.Error(), "limit reached") {
+			c.JSON(http.StatusBadRequest, gin.H{"message": fmt.Sprintf("You already hit your limit of banks (%d)", banking.BankConfig.Limits.Free.Banks)})
 			return
 		}
 

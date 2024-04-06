@@ -58,7 +58,7 @@ func (s accountService) Create(userID string, account *Account) error {
 		return errors.New("not allowed")
 	}
 
-	if len(customer.Accounts) > 1 {
+	if EnablePremium && len(customer.Accounts) >= BankConfig.Limits.Free.Accounts {
 		return errors.New("maximum number of accounts reached")
 	}
 

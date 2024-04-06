@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"fmt"
 	"funbanking/internal/domain/banking"
 	"funbanking/internal/domain/users"
 	"net/http"
@@ -96,6 +97,10 @@ func (h EmployeeHandler) Create(c *gin.Context) {
 	if err := h.employeeService.Create(&employee); err != nil {
 		if strings.Contains(err.Error(), "duplicate") {
 			c.JSON(http.StatusBadRequest, gin.H{"message": cases.Title(language.AmericanEnglish).String(user.FirstName) + " is already an employee at this bank"})
+			return
+		}
+		if strings.Contains(err.Error(), "limit reached") {
+			c.JSON(http.StatusBadRequest, gin.H{"message": fmt.Sprintf("You reached your employee limit for this bank (%d)", banking.BankConfig.Limits.Free.Employees)})
 			return
 		}
 		c.JSON(http.StatusInternalServerError, gin.H{"message": "Something went wrong"})

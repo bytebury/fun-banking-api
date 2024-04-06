@@ -12,6 +12,67 @@ const (
 	TransactionDeclined = "declined"
 )
 
+const EnablePremium = false
+
+const (
+	Free         int = iota // 0
+	Premium                 // 1
+	Family                  // 2
+	Organization            // 3
+)
+
+type bankConfigLimits struct {
+	Banks       int
+	Employees   int
+	Customers   int
+	Accounts    int
+	StoreFronts int
+}
+
+type bankSubscriptionTiers struct {
+	Free         bankConfigLimits
+	Premium      bankConfigLimits
+	Family       bankConfigLimits
+	Organization bankConfigLimits
+}
+
+type bankConfig struct {
+	Limits bankSubscriptionTiers
+}
+
+var BankConfig = bankConfig{
+	Limits: bankSubscriptionTiers{
+		Free: bankConfigLimits{
+			Banks:       2,
+			Employees:   2,
+			Customers:   25,
+			Accounts:    2,
+			StoreFronts: 0,
+		},
+		Premium: bankConfigLimits{
+			Banks:       2,
+			Employees:   2,
+			Customers:   250,
+			Accounts:    3,
+			StoreFronts: 1,
+		},
+		Family: bankConfigLimits{
+			Banks:       10,
+			Employees:   10,
+			Customers:   1_000,
+			Accounts:    3,
+			StoreFronts: 3,
+		},
+		Organization: bankConfigLimits{
+			Banks:       100,
+			Employees:   50,
+			Customers:   10_000,
+			Accounts:    3,
+			StoreFronts: 5,
+		},
+	},
+}
+
 type Account struct {
 	domain.AuditModel
 	Name       string   `json:"name" gorm:"not null;size:100"`
