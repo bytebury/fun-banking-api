@@ -43,12 +43,12 @@ func (s transferService) Transfer(customerID string, transfer TransferRequest) e
 		return errors.New("you can only transfer between accounts you own")
 	}
 
-	transfer.Amount = math.Abs(transfer.Amount)
-
 	return s.transfer(fromAccount, toAccount, transfer)
 }
 
 func (s transferService) transfer(fromAccount, toAccount Account, transfer TransferRequest) error {
+	transfer.Amount = math.Abs(transfer.Amount)
+
 	return persistence.DB.Transaction(func(tx *gorm.DB) error {
 		if fromAccount.Balance < transfer.Amount {
 			return errors.New("insufficient funds")
@@ -58,7 +58,7 @@ func (s transferService) transfer(fromAccount, toAccount Account, transfer Trans
 
 		withdrawTransaction := Transaction{
 			AccountID:   fromAccount.ID,
-			Amount:      transfer.Amount,
+			Amount:      transfer.Amount * -1,
 			Description: description,
 			Type:        "transfer",
 		}
