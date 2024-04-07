@@ -5,5 +5,10 @@ are glad you're here. If you have any questions or feedback
 for the Fun Banking team, please feel free to reach out to us
 at bytebury@gmail.com
 
+To start using the features within Fun Banking, you will need to verify your account. You can do
+so by visiting the link below:
+
+{{.AppBaseURL}}/emails/verify?token={{.Token}}
+
 Your online banking simulator,
 Fun Banking

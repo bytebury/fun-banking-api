@@ -28,6 +28,8 @@ func NewEmployeeHandler() EmployeeHandler {
 			users.NewUserRepository(),
 			nil,
 			nil,
+			nil,
+			nil,
 		),
 		bankService: banking.NewBankService(
 			banking.NewBankRepository(),

@@ -1,0 +1,9 @@
+Hey {{.User.FirstName}}!
+
+It looks like you need to verify your account. Click on the "Verify Your E-mail" link below to
+verify your e-mail with Fun Banking.
+
+{{.AppBaseURL}}/emails/verify?token={{.Token}}
+
+Your online banking simulator,
+Fun Banking

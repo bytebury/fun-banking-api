@@ -17,6 +17,7 @@ type User struct {
 	Avatar           string    `json:"avatar" gorm:"not null;type:text;default:https://www.gravatar.com/avatar/2533c61da0bd2b79b63fd599cd045a31?default=https%3A%2F%2Fcloud.digitalocean.com%2Favatars%2Fdefault30.png&secure=true"`
 	LastSeen         time.Time `json:"last_seen"`
 	SubscriptionTier int16     `json:"subscription_tier" gorm:"not null;default:0"`
+	Verified         bool      `json:"verified" gorm:"not null;default:true"`
 	Password         string    `json:"-"`
 }
 

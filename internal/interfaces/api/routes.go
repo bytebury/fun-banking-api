@@ -58,6 +58,9 @@ func (r runner) setupUserRoutes() {
 		GET("", middleware.Admin(), handler.Search).
 		GET(":username", middleware.Audit(), handler.FindByUsername).
 		PUT("", handler.Create).
+		PATCH("email", middleware.Auth(), handler.UpdateEmail).
+		PATCH("email/resend", middleware.Auth(), handler.ResendVerificationEmail).
+		POST("verify", middleware.VerifyUser(), handler.Verify).
 		PATCH(":id", middleware.Auth(), handler.Update)
 }
 

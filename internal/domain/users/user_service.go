@@ -1,12 +1,21 @@
 package users
 
-import "funbanking/internal/infrastructure/pagination"
+import (
+	"funbanking/internal/infrastructure/pagination"
+	"funbanking/internal/infrastructure/persistence"
+
+	"gorm.io/gorm"
+)
 
 type UserAuth interface {
 	Login(request LoginRequest) (string, User, error)
 }
 
 type WelcomeMailer interface {
+	SendEmail(recipient string, user User) error
+}
+
+type VerificationMailer interface {
 	SendEmail(recipient string, user User) error
 }
 
@@ -23,19 +32,26 @@ type UserService interface {
 	Login(usernameOrEmail, password string) (string, User, error)
 	Create(request *NewUserRequest) (User, error)
 	AddVisitor(visitor *Visitor) error
+	ChangeEmail(userID, email string) error
+	Verify(email string) error
+	ResendVerificationEmail(userID, email string) error
 }
 
 type userService struct {
-	authService    UserAuth
-	userRepository UserRepository
-	welcomeMailer  WelcomeMailer
+	authService                   UserAuth
+	userRepository                UserRepository
+	welcomeMailer                 WelcomeMailer
+	changeEmailVerificationMailer VerificationMailer
+	accountVerificationMailer     VerificationMailer
 }
 
-func NewUserService(userRepository UserRepository, authService UserAuth, welcomeMailer WelcomeMailer) UserService {
+func NewUserService(userRepository UserRepository, authService UserAuth, welcomeMailer WelcomeMailer, changeEmailVerificationMailer VerificationMailer, accountVerificationMailer VerificationMailer) UserService {
 	return userService{
-		userRepository: userRepository,
-		authService:    authService,
-		welcomeMailer:  welcomeMailer,
+		userRepository:                userRepository,
+		authService:                   authService,
+		welcomeMailer:                 welcomeMailer,
+		changeEmailVerificationMailer: changeEmailVerificationMailer,
+		accountVerificationMailer:     accountVerificationMailer,
 	}
 }
 
@@ -91,4 +107,42 @@ func (s userService) Login(usernameOrEmail, password string) (string, User, erro
 
 func (s userService) AddVisitor(visitor *Visitor) error {
 	return s.userRepository.AddVisitor(visitor)
+}
+
+func (s userService) ChangeEmail(userID, email string) error {
+	return persistence.DB.Transaction(func(tx *gorm.DB) error {
+		user, err := s.FindByID(userID)
+
+		if err != nil {
+			return err
+		}
+
+		user.Email = email
+
+		if err := s.userRepository.UpdateEmail(&user); err != nil {
+			return err
+		}
+
+		return s.changeEmailVerificationMailer.SendEmail(email, user)
+	})
+}
+
+func (s userService) Verify(email string) error {
+	user, err := s.FindByUsernameOrEmail(email)
+
+	if err != nil {
+		return err
+	}
+
+	user.Verified = true
+
+	return s.userRepository.Verify(&user)
+}
+
+func (s userService) ResendVerificationEmail(userID, email string) error {
+	if user, err := s.FindByID(userID); err != nil {
+		return err
+	} else {
+		return s.accountVerificationMailer.SendEmail(email, user)
+	}
 }

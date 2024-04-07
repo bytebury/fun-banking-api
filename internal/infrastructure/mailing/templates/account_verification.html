@@ -1,0 +1,26 @@
+Hey {{.User.FirstName}}!
+
+<p>
+  It looks like you need to verify your account. Click on the "Verify Your E-mail" link below to
+  verify your e-mail with Fun Banking.
+</p>
+
+<br />
+<a
+  href="{{.AppBaseURL}}/emails/verify?token={{.Token}}"
+  style="
+    padding: 8px;
+    border-radius: 20px;
+    background-color: #1d692f;
+    color: white;
+    font-weight: 700;
+    text-decoration: none;
+  "
+  >&nbsp;Verify Your E-mail&nbsp;</a
+>
+<br />
+<br />
+<p>
+  Your online banking simulator,<br />
+  Fun Banking
+</p>

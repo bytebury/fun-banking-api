@@ -9,17 +9,17 @@ import (
 	"golang.org/x/text/language"
 )
 
-type WelcomeMailer struct {
+type ChangeEmailVerificationMailer struct {
 	jwtService auth.JWTService
 }
 
-func NewWelcomeMailer() *WelcomeMailer {
-	return &WelcomeMailer{
+func NewChangeEmailVerificationMailer() *ChangeEmailVerificationMailer {
+	return &ChangeEmailVerificationMailer{
 		jwtService: auth.NewJWTService(),
 	}
 }
 
-func (mailer WelcomeMailer) SendEmail(recipient string, user users.User) error {
+func (mailer ChangeEmailVerificationMailer) SendEmail(recipient string, user users.User) error {
 	token, err := mailer.jwtService.GenerateVerificationToken(recipient)
 
 	if err != nil {
@@ -40,7 +40,7 @@ func (mailer WelcomeMailer) SendEmail(recipient string, user users.User) error {
 		Token:      token,
 	}
 
-	subject := fmt.Sprintf("%s - Welcome to Fun Banking 🎉", "Fun Banking")
+	subject := fmt.Sprintf("%s - E-mail Change Verification", "Fun Banking")
 
-	return sendEmail(recipient, subject, "welcome", data)
+	return sendEmail(recipient, subject, "change_email_verification", data)
 }

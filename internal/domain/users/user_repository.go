@@ -16,6 +16,8 @@ type UserRepository interface {
 	Update(userID string, user *User) error
 	Create(user *User) error
 	AddVisitor(visitor *Visitor) error
+	UpdateEmail(user *User) error
+	Verify(user *User) error
 }
 
 type userRepository struct {
@@ -94,6 +96,15 @@ func (r userRepository) Update(userID string, user *User) error {
 	r.normalize(user)
 
 	return r.db.Model(&foundUser).Select("Username", "FirstName", "LastName", "Avatar", "About", "LastSeen").Updates(&user).Error
+}
+
+func (r userRepository) UpdateEmail(user *User) error {
+	user.Verified = false
+	return r.db.Save(user).Error
+}
+
+func (r userRepository) Verify(user *User) error {
+	return r.db.Save(user).Error
 }
 
 func (r userRepository) Create(user *User) error {

@@ -47,6 +47,8 @@ func NewAccountHandler() AccountHandler {
 				userRepository,
 			),
 			mailing.NewWelcomeMailer(),
+			mailing.NewChangeEmailVerificationMailer(),
+			mailing.NewAccountVerificationMailer(),
 		),
 		transferService: banking.NewTransferService(
 			accountService,

@@ -1,0 +1,9 @@
+Hey {{.User.FirstName}}!
+
+It looks like you submitted a request to change your e-mail. In order to use your account again,
+you will need to confirm your e-mail. Use the link below to confirm this e-mail address.
+
+{{.AppBaseURL}}/emails/verify?token={{.Token}}
+
+Your online banking simulator,
+Fun Banking

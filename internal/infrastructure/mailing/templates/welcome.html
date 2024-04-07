@@ -7,6 +7,27 @@ Hey {{.User.FirstName}}!
 </p>
 
 <p>
+  To start using the features within Fun Banking, you will need to verify your account. You can do
+  so by clicking "Verify Your E-mail" below.
+</p>
+
+<br />
+<a
+  href="{{.AppBaseURL}}/emails/verify?token={{.Token}}"
+  style="
+    padding: 8px;
+    border-radius: 20px;
+    background-color: #1d692f;
+    color: white;
+    font-weight: 700;
+    text-decoration: none;
+  "
+  >&nbsp;Verify Your E-mail&nbsp;</a
+>
+<br />
+<br />
+
+<p>
   Your online banking simulator,<br />
   Fun Banking
 </p>

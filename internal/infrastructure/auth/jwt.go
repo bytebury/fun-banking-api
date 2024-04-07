@@ -22,6 +22,11 @@ type ForgotPasswordClaims struct {
 	jwt.StandardClaims
 }
 
+type VerificationClaims struct {
+	Recipient string `json:"recipient"`
+	jwt.StandardClaims
+}
+
 type JWTService struct{}
 
 func NewJWTService() JWTService {
@@ -55,6 +60,17 @@ func (j JWTService) GenerateForgotPasswordToken(recipient string) (string, error
 		Recipient: recipient,
 		StandardClaims: jwt.StandardClaims{
 			ExpiresAt: time.Now().Add(15 * time.Minute).Unix(),
+			IssuedAt:  time.Now().Unix(),
+		},
+	}
+	return generateToken(claims)
+}
+
+func (j JWTService) GenerateVerificationToken(recipient string) (string, error) {
+	claims := VerificationClaims{
+		Recipient: recipient,
+		StandardClaims: jwt.StandardClaims{
+			ExpiresAt: time.Now().Add(24 * time.Hour).Unix(),
 			IssuedAt:  time.Now().Unix(),
 		},
 	}

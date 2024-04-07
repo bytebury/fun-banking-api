@@ -24,6 +24,8 @@ func NewUserHandler() UserHandler {
 			userRepository,
 			auth.NewUserAuth(userRepository),
 			mailing.NewWelcomeMailer(),
+			mailing.NewChangeEmailVerificationMailer(),
+			mailing.NewAccountVerificationMailer(),
 		),
 	}
 }
@@ -69,6 +71,66 @@ func (h UserHandler) FindByUsername(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, user)
+}
+
+func (h UserHandler) UpdateEmail(c *gin.Context) {
+	userID := c.MustGet("user_id").(string)
+
+	var request struct {
+		Email string `json:"email"`
+	}
+
+	if err := c.ShouldBindJSON(&request); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "Malformed request"})
+		return
+	}
+
+	if err := h.userService.ChangeEmail(userID, request.Email); err != nil {
+		if strings.Contains(err.Error(), "users_email_key") {
+			c.JSON(http.StatusBadRequest, gin.H{"message": "That e-mail is already in use"})
+			return
+		}
+		c.JSON(http.StatusBadRequest, gin.H{"message": "Unable to update e-mail"})
+		return
+	}
+
+	c.JSON(http.StatusAccepted, nil)
+}
+
+func (h UserHandler) ResendVerificationEmail(c *gin.Context) {
+	userID := c.MustGet("user_id").(string)
+
+	var request struct {
+		Email string `json:"email"`
+	}
+
+	if err := c.ShouldBindJSON(&request); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "Malformed request"})
+		return
+	}
+
+	if err := h.userService.ResendVerificationEmail(userID, request.Email); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "Unable to resend verification e-mail"})
+		return
+	}
+
+	c.JSON(http.StatusAccepted, nil)
+}
+
+func (h UserHandler) Verify(c *gin.Context) {
+	email := c.MustGet("verify_email").(string)
+
+	if email == "" {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "Something went wrong"})
+		return
+	}
+
+	if err := h.userService.Verify(email); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "Something went wrong"})
+		return
+	}
+
+	c.JSON(http.StatusAccepted, nil)
 }
 
 func (h UserHandler) Search(c *gin.Context) {
