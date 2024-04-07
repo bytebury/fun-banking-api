@@ -55,13 +55,13 @@ func (r runner) setupUserRoutes() {
 	handler := handlers.NewUserHandler()
 	r.router.GET("/current-user", middleware.Auth(), handler.GetCurrentUser)
 	r.router.Group("users").
-		GET("", middleware.Admin(), handler.Search).
+		GET("", middleware.Admin(), middleware.Verified(), handler.Search).
 		GET(":username", middleware.Audit(), handler.FindByUsername).
 		PUT("", handler.Create).
 		PATCH("email", middleware.Auth(), handler.UpdateEmail).
 		PATCH("email/resend", middleware.Auth(), handler.ResendVerificationEmail).
 		POST("verify", middleware.VerifyUser(), handler.Verify).
-		PATCH(":id", middleware.Auth(), handler.Update)
+		PATCH(":id", middleware.Auth(), middleware.Verified(), handler.Update)
 }
 
 func (r runner) setupSessionRoutes() {
@@ -80,9 +80,9 @@ func (r runner) setupBankRoutes() {
 		GET(":id", middleware.Auth(), handler.FindByID).
 		GET(":id/customers", middleware.Auth(), handler.FindAllCustomers).
 		POST("", handler.FindByUsernameAndSlug).
-		PUT("", middleware.Auth(), handler.Create).
-		PATCH(":id", middleware.Auth(), handler.Update).
-		DELETE(":id", middleware.Auth(), handler.Delete)
+		PUT("", middleware.Auth(), middleware.Verified(), handler.Create).
+		PATCH(":id", middleware.Auth(), middleware.Verified(), handler.Update).
+		DELETE(":id", middleware.Auth(), middleware.Verified(), handler.Delete)
 }
 
 func (r runner) setupCustomerRoutes() {
@@ -111,15 +111,15 @@ func (r runner) setupAccountRoutes() {
 		GET(":id/insights/transactions", middleware.Customer(), handler.MonthlyTransactionInsights).
 		POST("transfer", middleware.Customer(), handler.TransferBetweenAccounts).
 		PATCH(":id", middleware.Customer(), handler.Update).
-		PUT("", middleware.Auth(), handler.Create)
+		PUT("", middleware.Auth(), middleware.Verified(), handler.Create)
 }
 
 func (r runner) setupTransactionRoutes() {
 	handler := handlers.NewTransactionHandler()
 	r.router.Group("/transactions").
-		PATCH(":id/approve", middleware.Auth(), handler.Approve).
-		PATCH(":id/decline", middleware.Auth(), handler.Decline).
-		PUT("", middleware.Customer(), handler.Create)
+		PATCH(":id/approve", middleware.Auth(), middleware.Verified(), handler.Approve).
+		PATCH(":id/decline", middleware.Auth(), middleware.Verified(), handler.Decline).
+		PUT("", middleware.Customer(), middleware.Verified(), handler.Create)
 }
 
 func (r runner) setupBankBuddyRoutes() {
