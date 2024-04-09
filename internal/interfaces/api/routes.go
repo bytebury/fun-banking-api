@@ -119,7 +119,7 @@ func (r runner) setupTransactionRoutes() {
 	r.router.Group("/transactions").
 		PATCH(":id/approve", middleware.Auth(), middleware.Verified(), handler.Approve).
 		PATCH(":id/decline", middleware.Auth(), middleware.Verified(), handler.Decline).
-		PUT("", middleware.Customer(), middleware.Verified(), handler.Create)
+		PUT("", middleware.Customer(), handler.Create)
 }
 
 func (r runner) setupBankBuddyRoutes() {
