@@ -22,11 +22,11 @@ const (
 )
 
 type bankConfigLimits struct {
-	Banks       int `json:"banks"`
-	Employees   int `json:"employees"`
-	Customers   int `json:"customers"`
-	Accounts    int `json:"accounts"`
-	StoreFronts int `json:"store_fronts"`
+	Banks     int `json:"banks"`
+	Employees int `json:"employees"`
+	Customers int `json:"customers"`
+	Accounts  int `json:"accounts"`
+	Stores    int `json:"stores"`
 }
 
 type bankSubscriptionTiers struct {
@@ -55,32 +55,32 @@ var BankConfig = bankConfig{
 	},
 	Limits: bankSubscriptionTiers{
 		Free: bankConfigLimits{
-			Banks:       2,
-			Employees:   2,
-			Customers:   25,
-			Accounts:    2,
-			StoreFronts: 0,
+			Banks:     2,
+			Employees: 2,
+			Customers: 25,
+			Accounts:  2,
+			Stores:    0,
 		},
 		Premium: bankConfigLimits{
-			Banks:       2,
-			Employees:   2,
-			Customers:   250,
-			Accounts:    3,
-			StoreFronts: 1,
+			Banks:     2,
+			Employees: 2,
+			Customers: 250,
+			Accounts:  3,
+			Stores:    1,
 		},
 		Family: bankConfigLimits{
-			Banks:       10,
-			Employees:   10,
-			Customers:   1_000,
-			Accounts:    3,
-			StoreFronts: 3,
+			Banks:     10,
+			Employees: 10,
+			Customers: 1_000,
+			Accounts:  3,
+			Stores:    3,
 		},
 		Organization: bankConfigLimits{
-			Banks:       100,
-			Employees:   50,
-			Customers:   10_000,
-			Accounts:    3,
-			StoreFronts: 5,
+			Banks:     100,
+			Employees: 50,
+			Customers: 10_000,
+			Accounts:  3,
+			Stores:    5,
 		},
 	},
 }
