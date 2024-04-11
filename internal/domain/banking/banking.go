@@ -39,6 +39,7 @@ type bankSubscriptionTiers struct {
 type featureFlags struct {
 	Ads              bool `json:"ads"`
 	AccountTransfers bool `json:"account_transfers"`
+	Stores           bool `json:"stores"`
 }
 
 type bankConfig struct {
@@ -50,6 +51,7 @@ var BankConfig = bankConfig{
 	Flags: featureFlags{
 		Ads:              false,
 		AccountTransfers: false,
+		Stores:           false,
 	},
 	Limits: bankSubscriptionTiers{
 		Free: bankConfigLimits{
