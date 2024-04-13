@@ -25,11 +25,18 @@ type ShoppingHandler interface {
 }
 
 type shoppingHandler struct {
-	shopService shopping.ShopService
+	shopService     shopping.ShopService
+	purchaseService shopping.PurchaseService
 }
 
-func NewShoppingHandler(shopService shopping.ShopService) ShoppingHandler {
-	return shoppingHandler{shopService}
+func NewShoppingHandler(
+	shopService shopping.ShopService,
+	purchaseService shopping.PurchaseService,
+) ShoppingHandler {
+	return shoppingHandler{
+		shopService,
+		purchaseService,
+	}
 }
 
 func (handler shoppingHandler) FindShopByID(ctx *gin.Context) {

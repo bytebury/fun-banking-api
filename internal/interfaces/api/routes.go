@@ -152,6 +152,7 @@ func (r runner) setupShoppingRoutes() {
 		shopping.NewShopService(
 			shopping.NewShopRepository(),
 		),
+		shopping.NewPurchaseService(),
 	)
 
 	// TODO middleware -> premium users

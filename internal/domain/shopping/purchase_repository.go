@@ -58,13 +58,12 @@ func (repo purchaseRepository) BuyItems(items []Item, cartPrice float64, account
 		transaction := banking.Transaction{
 			Description:    fmt.Sprintf("Bought %d items at %s", len(items), shop.Name),
 			Amount:         cartPrice * -1,
-			Status:         "approved",
 			AccountID:      account.ID,
-			Account:        account,
 			CurrentBalance: account.Balance,
 			Type:           "shopping",
 			Origin:         banking.TransactionShopping,
 		}
+
 		if err := repo.transactionService.Create("", &transaction); err != nil {
 			return err
 		}
