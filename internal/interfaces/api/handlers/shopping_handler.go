@@ -125,5 +125,15 @@ func (handler shoppingHandler) handleError(err error, ctx *gin.Context) {
 		return
 	}
 
+	if strings.Contains(err.Error(), "insufficient funds") {
+		ctx.JSON(http.StatusNotFound, gin.H{"message": "You do not have enough money to do that"})
+		return
+	}
+
+	if strings.Contains(err.Error(), "empty cart") {
+		ctx.JSON(http.StatusNotFound, gin.H{"message": "You need to add items to your cart first"})
+		return
+	}
+
 	ctx.JSON(http.StatusInternalServerError, gin.H{"message": "Something went wrong"})
 }

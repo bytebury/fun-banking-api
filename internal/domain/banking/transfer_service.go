@@ -61,6 +61,7 @@ func (s transferService) transfer(fromAccount, toAccount Account, transfer Trans
 			Amount:      transfer.Amount * -1,
 			Description: description,
 			Type:        "transfer",
+			Origin:      TransactionTransfer,
 		}
 
 		if err := s.transactionService.Create("", &withdrawTransaction); err != nil {
@@ -76,6 +77,7 @@ func (s transferService) transfer(fromAccount, toAccount Account, transfer Trans
 			Amount:      transfer.Amount,
 			Description: description,
 			Type:        "transfer",
+			Origin:      TransactionTransfer,
 		}
 
 		if err := s.transactionService.Create("", &depositTransaction); err != nil {
