@@ -10,10 +10,18 @@ import (
 )
 
 type ShoppingHandler interface {
+	// Shops
 	FindShopByID(ctx *gin.Context)
 	FindShopsByUser(ctx *gin.Context)
 	SaveShop(ctx *gin.Context)
 	DeleteShop(ctx *gin.Context)
+	// Items
+	FindItemByID(ctx *gin.Context)
+	FindItemsByStoreID(ctx *gin.Context)
+	SaveItem(ctx *gin.Context)
+	DeleteItem(ctx *gin.Context)
+	// Purchasing
+	BuyItems(ctx *gin.Context)
 }
 
 type shoppingHandler struct {
@@ -29,7 +37,7 @@ func (handler shoppingHandler) FindShopByID(ctx *gin.Context) {
 	shop, err := handler.shopService.FindByID(shopID)
 
 	if err != nil {
-		ctx.JSON(http.StatusNotFound, gin.H{"message": "Unable to find that shop"})
+		handler.handleError(err, ctx)
 		return
 	}
 
@@ -40,7 +48,7 @@ func (handler shoppingHandler) FindShopsByUser(ctx *gin.Context) {
 	shop, err := handler.shopService.FindAllByUser(ctx.MustGet("user").(users.User))
 
 	if err != nil {
-		ctx.JSON(http.StatusNotFound, gin.H{"message": "Unable to find that shop"})
+		handler.handleError(err, ctx)
 		return
 	}
 
@@ -58,19 +66,7 @@ func (handler shoppingHandler) SaveShop(ctx *gin.Context) {
 	shop, err := handler.shopService.Save(request, ctx.MustGet("user").(users.User))
 
 	if err != nil {
-		if strings.Contains(err.Error(), "fk_shops_user") {
-			ctx.JSON(http.StatusBadRequest, gin.H{"message": "The user you provided is either missing or invalid"})
-			return
-		}
-		if strings.Contains(err.Error(), "forbidden") {
-			ctx.JSON(http.StatusForbidden, gin.H{"message": "You do not have permission to do that"})
-			return
-		}
-		if strings.Contains(err.Error(), "idx_user_name") {
-			ctx.JSON(http.StatusBadRequest, gin.H{"message": "Looks like you have a shop with that name already"})
-			return
-		}
-		ctx.JSON(http.StatusInternalServerError, gin.H{"message": "Something went wrong"})
+		handler.handleError(err, ctx)
 		return
 	}
 
@@ -81,13 +77,53 @@ func (handler shoppingHandler) DeleteShop(ctx *gin.Context) {
 	shopID := ctx.Param("id")
 
 	if err := handler.shopService.Delete(shopID, ctx.MustGet("user").(users.User)); err != nil {
-		if strings.Contains(err.Error(), "forbidden") {
-			ctx.JSON(http.StatusForbidden, gin.H{"message": "You do not have permissions to do that"})
-			return
-		}
-		ctx.JSON(http.StatusInternalServerError, gin.H{"message": "Something went wrong"})
+		handler.handleError(err, ctx)
 		return
 	}
 
 	ctx.JSON(http.StatusNoContent, gin.H{"message": "Successfully deleted that shop"})
+}
+
+func (handler shoppingHandler) FindItemByID(ctx *gin.Context) {
+	ctx.JSON(http.StatusOK, nil)
+}
+
+func (handler shoppingHandler) FindItemsByStoreID(ctx *gin.Context) {
+	ctx.JSON(http.StatusOK, nil)
+}
+
+func (handler shoppingHandler) SaveItem(ctx *gin.Context) {
+	ctx.JSON(http.StatusOK, nil)
+}
+
+func (handler shoppingHandler) DeleteItem(ctx *gin.Context) {
+	ctx.JSON(http.StatusOK, nil)
+}
+
+func (handler shoppingHandler) BuyItems(ctx *gin.Context) {
+	ctx.JSON(http.StatusOK, nil)
+}
+
+func (handler shoppingHandler) handleError(err error, ctx *gin.Context) {
+	if strings.Contains(err.Error(), "forbidden") {
+		ctx.JSON(http.StatusForbidden, gin.H{"message": "You do not have permissions to do that"})
+		return
+	}
+
+	if strings.Contains(err.Error(), "idx_user_name") {
+		ctx.JSON(http.StatusBadRequest, gin.H{"message": "Looks like you have a shop with that name already"})
+		return
+	}
+
+	if strings.Contains(err.Error(), "fk_shops_user") {
+		ctx.JSON(http.StatusBadRequest, gin.H{"message": "The user you provided is either missing or invalid"})
+		return
+	}
+
+	if strings.Contains(err.Error(), "record not found") {
+		ctx.JSON(http.StatusNotFound, gin.H{"message": "Unable to find that resource"})
+		return
+	}
+
+	ctx.JSON(http.StatusInternalServerError, gin.H{"message": "Something went wrong"})
 }
