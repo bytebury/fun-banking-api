@@ -4,6 +4,7 @@ import (
 	"funbanking/internal/domain/shopping"
 	"funbanking/internal/domain/users"
 	"net/http"
+	"strconv"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -26,15 +27,18 @@ type ShoppingHandler interface {
 
 type shoppingHandler struct {
 	shopService     shopping.ShopService
+	itemService     shopping.ItemService
 	purchaseService shopping.PurchaseService
 }
 
 func NewShoppingHandler(
 	shopService shopping.ShopService,
+	itemService shopping.ItemService,
 	purchaseService shopping.PurchaseService,
 ) ShoppingHandler {
 	return shoppingHandler{
 		shopService,
+		itemService,
 		purchaseService,
 	}
 }
@@ -92,7 +96,14 @@ func (handler shoppingHandler) DeleteShop(ctx *gin.Context) {
 }
 
 func (handler shoppingHandler) FindItemByID(ctx *gin.Context) {
-	ctx.JSON(http.StatusOK, nil)
+	itemID := ctx.Param("id")
+
+	if item, err := handler.itemService.FindByID(itemID); err != nil {
+		handler.handleError(err, ctx)
+		return
+	} else {
+		ctx.JSON(http.StatusOK, item)
+	}
 }
 
 func (handler shoppingHandler) FindItemsByStoreID(ctx *gin.Context) {
@@ -100,7 +111,18 @@ func (handler shoppingHandler) FindItemsByStoreID(ctx *gin.Context) {
 }
 
 func (handler shoppingHandler) SaveItem(ctx *gin.Context) {
-	ctx.JSON(http.StatusOK, nil)
+	var request shopping.Item
+	if err := ctx.ShouldBindJSON(&request); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"message": "Malformed request"})
+		return
+	}
+
+	if item, err := handler.itemService.Save(request, ctx.MustGet("user").(users.User)); err != nil {
+		handler.handleError(err, ctx)
+		return
+	} else {
+		ctx.JSON(http.StatusAccepted, item)
+	}
 }
 
 func (handler shoppingHandler) DeleteItem(ctx *gin.Context) {
@@ -108,7 +130,28 @@ func (handler shoppingHandler) DeleteItem(ctx *gin.Context) {
 }
 
 func (handler shoppingHandler) BuyItems(ctx *gin.Context) {
-	ctx.JSON(http.StatusOK, nil)
+	var request struct {
+		ItemIDs   []uint `json:"item_ids"`
+		AccountID string `json:"account_id"`
+	}
+
+	if err := ctx.ShouldBindJSON(&request); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"message": "Malformed request"})
+		return
+	}
+
+	items := make([]shopping.Item, 0)
+	for _, itemID := range request.ItemIDs {
+		item, _ := handler.itemService.FindByID(strconv.Itoa(int(itemID)))
+		items = append(items, item)
+	}
+
+	if purchases, err := handler.purchaseService.BuyItems(items, request.AccountID); err != nil {
+		handler.handleError(err, ctx)
+		return
+	} else {
+		ctx.JSON(http.StatusOK, purchases)
+	}
 }
 
 func (handler shoppingHandler) handleError(err error, ctx *gin.Context) {
@@ -139,6 +182,16 @@ func (handler shoppingHandler) handleError(err error, ctx *gin.Context) {
 
 	if strings.Contains(err.Error(), "empty cart") {
 		ctx.JSON(http.StatusNotFound, gin.H{"message": "You need to add items to your cart first"})
+		return
+	}
+
+	if strings.Contains(err.Error(), "missing required fields") {
+		ctx.JSON(http.StatusBadRequest, gin.H{"message": "You are missing required fields"})
+		return
+	}
+
+	if strings.Contains(err.Error(), "out of stock") {
+		ctx.JSON(http.StatusBadRequest, gin.H{"message": "One or more of the items are out of stock"})
 		return
 	}
 

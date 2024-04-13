@@ -1,6 +1,7 @@
 package api
 
 import (
+	"funbanking/internal/domain/banking"
 	"funbanking/internal/domain/shopping"
 	"funbanking/internal/interfaces/api/handlers"
 	"funbanking/internal/interfaces/api/middleware"
@@ -35,8 +36,11 @@ func (r runner) setup() {
 	r.setupPasswordRoutes()
 	r.setupNotificationRoutes()
 	r.setupBankBuddyRoutes()
-	r.setupShoppingRoutes()
 	r.setupConfigRoutes()
+
+	if banking.EnablePremium {
+		r.setupShoppingRoutes()
+	}
 }
 
 func (r runner) setupNotificationRoutes() {
@@ -148,10 +152,13 @@ func (r runner) setupPasswordRoutes() {
 }
 
 func (r runner) setupShoppingRoutes() {
+	shopService := shopping.NewShopService(
+		shopping.NewShopRepository(),
+	)
+
 	handler := handlers.NewShoppingHandler(
-		shopping.NewShopService(
-			shopping.NewShopRepository(),
-		),
+		shopService,
+		shopping.NewItemService(shopService),
 		shopping.NewPurchaseService(),
 	)
 
@@ -161,7 +168,13 @@ func (r runner) setupShoppingRoutes() {
 		GET(":id", handler.FindShopByID).
 		PUT("", middleware.Auth(), handler.SaveShop).
 		PATCH("", middleware.Auth(), handler.SaveShop).
-		DELETE(":id", middleware.Auth(), handler.DeleteShop)
+		DELETE(":id", middleware.Auth(), handler.DeleteShop).
+		POST("checkout", middleware.Customer(), handler.BuyItems)
+
+	r.router.Group("items").
+		GET(":id", handler.FindItemByID).
+		PUT("", middleware.Auth(), handler.SaveItem).
+		PATCH("", middleware.Auth(), handler.SaveItem)
 }
 
 func (r runner) setupConfigRoutes() {

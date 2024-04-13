@@ -1,6 +1,7 @@
 package shopping
 
 import (
+	"errors"
 	"fmt"
 	"funbanking/internal/domain/banking"
 	"funbanking/internal/infrastructure/persistence"
@@ -18,6 +19,7 @@ type PurchaseRepository interface {
 type purchaseRepository struct {
 	db                 *gorm.DB
 	transactionService banking.TransactionService
+	itemRepository     ItemRepository
 }
 
 func NewPurchaseRepository() PurchaseRepository {
@@ -26,6 +28,7 @@ func NewPurchaseRepository() PurchaseRepository {
 		transactionService: banking.NewTransactionService(
 			banking.NewTransactionRepository(),
 		),
+		itemRepository: NewItemRepository(),
 	}
 }
 
@@ -41,13 +44,29 @@ func (repo purchaseRepository) BuyItems(items []Item, cartPrice float64, account
 			return err
 		}
 
+		totalTax := shop.TaxRate * cartPrice
+		totalPrice := cartPrice + totalTax
+
 		for _, item := range items {
+			if item.NumberInStock == 0 {
+				return errors.New("out of stock")
+			}
+
+			item.NumberInStock -= 1
+
+			if err := repo.itemRepository.Save(&item); err != nil {
+				return err
+			}
+
 			purchase := Purchase{
-				CartID:    cartID,
-				Item:      item,
-				ItemID:    item.ID,
-				Price:     item.Price,
-				CartPrice: cartPrice,
+				CartID:     cartID,
+				Item:       item,
+				ItemID:     item.ID,
+				Price:      item.Price,
+				CartPrice:  cartPrice,
+				TaxRate:    shop.TaxRate,
+				TotalTax:   totalTax,
+				TotalPrice: totalPrice,
 			}
 			if err := repo.db.Save(&purchase).Error; err != nil {
 				return err
@@ -56,8 +75,8 @@ func (repo purchaseRepository) BuyItems(items []Item, cartPrice float64, account
 
 		// Take out the required funds from the customer via transactions
 		transaction := banking.Transaction{
-			Description:    fmt.Sprintf("Bought %d items at %s", len(items), shop.Name),
-			Amount:         cartPrice * -1,
+			Description:    fmt.Sprintf("Bought %d item(s) at %s", len(items), shop.Name),
+			Amount:         totalPrice * -1,
 			AccountID:      account.ID,
 			CurrentBalance: account.Balance,
 			Type:           "shopping",

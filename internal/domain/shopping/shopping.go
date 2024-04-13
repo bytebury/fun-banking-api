@@ -27,11 +27,14 @@ type Item struct {
 
 type Purchase struct {
 	domain.AuditModel
-	CartID    string  `json:"cart_id" gorm:"not null;type:char(36)"`
-	Item      Item    `json:"item" gorm:"foreignKey:ItemID;constraint:OnDelete:CASCADE"`
-	ItemID    uint    `json:"item_id" gorm:"not null"`
-	Price     float64 `json:"price" gorm:"not null;type:decimal(50,2)"`
-	CartPrice float64 `json:"cart_price" gorm:"not null;type:decimal(50,2)"`
+	CartID     string  `json:"cart_id" gorm:"not null;type:char(36)"`
+	Item       Item    `json:"item" gorm:"foreignKey:ItemID;constraint:OnDelete:CASCADE"`
+	ItemID     uint    `json:"item_id" gorm:"not null"`
+	Price      float64 `json:"price" gorm:"not null;type:decimal(50,2)"`
+	CartPrice  float64 `json:"cart_price" gorm:"not null;type:decimal(50,2)"`
+	TotalTax   float64 `json:"total_tax" gorm:"not null;type:decimal(50,2)"`
+	TotalPrice float64 `json:"total_price" gorm:"not null;type:decimal(50,2)"`
+	TaxRate    float64 `json:"tax_rate" gorm:"not null; type:decimal(50,2)"`
 }
 
 func RunMigrations() {
