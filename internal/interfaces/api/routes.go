@@ -1,6 +1,7 @@
 package api
 
 import (
+	"funbanking/internal/domain/shopping"
 	"funbanking/internal/interfaces/api/handlers"
 	"funbanking/internal/interfaces/api/middleware"
 
@@ -34,6 +35,7 @@ func (r runner) setup() {
 	r.setupPasswordRoutes()
 	r.setupNotificationRoutes()
 	r.setupBankBuddyRoutes()
+	r.setupShoppingRoutes()
 	r.setupConfigRoutes()
 }
 
@@ -143,6 +145,22 @@ func (r runner) setupPasswordRoutes() {
 	r.router.Group("passwords").
 		POST("forgot", handler.ForgotPassword).
 		POST("reset", middleware.PasswordReset(), handler.ResetPassword)
+}
+
+func (r runner) setupShoppingRoutes() {
+	handler := handlers.NewShoppingHandler(
+		shopping.NewShopService(
+			shopping.NewShopRepository(),
+		),
+	)
+
+	// TODO middleware -> premium users
+	r.router.Group("shops").
+		GET("", middleware.Auth(), handler.FindShopsByUser).
+		GET(":id", handler.FindShopByID).
+		PUT("", middleware.Auth(), handler.SaveShop).
+		PATCH("", middleware.Auth(), handler.SaveShop).
+		DELETE(":id", middleware.Auth(), handler.DeleteShop)
 }
 
 func (r runner) setupConfigRoutes() {

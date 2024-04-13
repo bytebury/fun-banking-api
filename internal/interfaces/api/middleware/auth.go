@@ -1,7 +1,9 @@
 package middleware
 
 import (
+	"funbanking/internal/domain/users"
 	"funbanking/internal/infrastructure/auth"
+	"funbanking/internal/infrastructure/persistence"
 	"net/http"
 	"os"
 	"strings"
@@ -33,7 +35,16 @@ func Auth() gin.HandlerFunc {
 		}
 
 		if claims, ok := token.Claims.(*auth.UserClaims); ok && token.Valid {
+			var user users.User
+			if err := persistence.DB.First(&user, "id = ?", claims.UserID).Error; err != nil {
+				c.JSON(http.StatusNotFound, gin.H{"message": "That user does not exist"})
+				c.Abort()
+				return
+			}
+
 			c.Set("user_id", claims.UserID)
+			c.Set("user", user)
+
 			c.Next()
 		} else {
 			c.JSON(http.StatusUnauthorized, gin.H{"message": "You are not authorized to do this action"})

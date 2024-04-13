@@ -17,8 +17,7 @@ const EnablePremium = false
 const (
 	Free         int = iota // 0
 	Premium                 // 1
-	Family                  // 2
-	Organization            // 3
+	Organization            // 2
 )
 
 type bankConfigLimits struct {
@@ -26,7 +25,7 @@ type bankConfigLimits struct {
 	Employees int `json:"employees"`
 	Customers int `json:"customers"`
 	Accounts  int `json:"accounts"`
-	Stores    int `json:"stores"`
+	Shops     int `json:"shops"`
 }
 
 type bankSubscriptionTiers struct {
@@ -39,7 +38,7 @@ type bankSubscriptionTiers struct {
 type featureFlags struct {
 	Ads              bool `json:"ads"`
 	AccountTransfers bool `json:"account_transfers"`
-	Stores           bool `json:"stores"`
+	Shops            bool `json:"shops"`
 }
 
 type bankConfig struct {
@@ -51,7 +50,7 @@ var BankConfig = bankConfig{
 	Flags: featureFlags{
 		Ads:              false,
 		AccountTransfers: false,
-		Stores:           false,
+		Shops:            false,
 	},
 	Limits: bankSubscriptionTiers{
 		Free: bankConfigLimits{
@@ -59,28 +58,21 @@ var BankConfig = bankConfig{
 			Employees: 2,
 			Customers: 25,
 			Accounts:  2,
-			Stores:    0,
+			Shops:     0,
 		},
 		Premium: bankConfigLimits{
 			Banks:     2,
 			Employees: 2,
 			Customers: 250,
 			Accounts:  3,
-			Stores:    1,
-		},
-		Family: bankConfigLimits{
-			Banks:     10,
-			Employees: 10,
-			Customers: 1_000,
-			Accounts:  3,
-			Stores:    3,
+			Shops:     1,
 		},
 		Organization: bankConfigLimits{
 			Banks:     100,
 			Employees: 50,
 			Customers: 10_000,
 			Accounts:  3,
-			Stores:    5,
+			Shops:     5,
 		},
 	},
 }

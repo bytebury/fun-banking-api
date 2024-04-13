@@ -3,6 +3,7 @@ package main
 import (
 	"funbanking/internal/domain/announcements"
 	"funbanking/internal/domain/banking"
+	"funbanking/internal/domain/shopping"
 	"funbanking/internal/domain/users"
 	"funbanking/internal/infrastructure/persistence"
 	"funbanking/internal/interfaces/api"
@@ -21,6 +22,7 @@ func main() {
 	users.RunMigrations()
 	banking.RunMigrations()
 	announcements.RunMigrations()
+	shopping.RunMigrations()
 
 	api.Run()
 }
