@@ -166,6 +166,7 @@ func (r runner) setupShoppingRoutes() {
 	r.router.Group("shops").
 		GET("", middleware.Auth(), handler.FindShopsByUser).
 		GET(":id", handler.FindShopByID).
+		GET(":id/items", handler.FindItemsByShopID).
 		PUT("", middleware.Auth(), handler.SaveShop).
 		PATCH("", middleware.Auth(), handler.SaveShop).
 		DELETE(":id", middleware.Auth(), handler.DeleteShop).
@@ -174,7 +175,8 @@ func (r runner) setupShoppingRoutes() {
 	r.router.Group("items").
 		GET(":id", handler.FindItemByID).
 		PUT("", middleware.Auth(), handler.SaveItem).
-		PATCH("", middleware.Auth(), handler.SaveItem)
+		PATCH("", middleware.Auth(), handler.SaveItem).
+		DELETE(":id", middleware.Auth(), handler.DeleteItem)
 }
 
 func (r runner) setupConfigRoutes() {

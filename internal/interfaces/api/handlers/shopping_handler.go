@@ -18,7 +18,7 @@ type ShoppingHandler interface {
 	DeleteShop(ctx *gin.Context)
 	// Items
 	FindItemByID(ctx *gin.Context)
-	FindItemsByStoreID(ctx *gin.Context)
+	FindItemsByShopID(ctx *gin.Context)
 	SaveItem(ctx *gin.Context)
 	DeleteItem(ctx *gin.Context)
 	// Purchasing
@@ -106,8 +106,15 @@ func (handler shoppingHandler) FindItemByID(ctx *gin.Context) {
 	}
 }
 
-func (handler shoppingHandler) FindItemsByStoreID(ctx *gin.Context) {
-	ctx.JSON(http.StatusOK, nil)
+func (handler shoppingHandler) FindItemsByShopID(ctx *gin.Context) {
+	shopID := ctx.Param("id")
+
+	if items, err := handler.itemService.FindAllByShopID(shopID); err != nil {
+		handler.handleError(err, ctx)
+		return
+	} else {
+		ctx.JSON(http.StatusOK, items)
+	}
 }
 
 func (handler shoppingHandler) SaveItem(ctx *gin.Context) {
@@ -126,7 +133,14 @@ func (handler shoppingHandler) SaveItem(ctx *gin.Context) {
 }
 
 func (handler shoppingHandler) DeleteItem(ctx *gin.Context) {
-	ctx.JSON(http.StatusOK, nil)
+	itemID := ctx.Param("id")
+
+	if err := handler.itemService.Delete(itemID, ctx.MustGet("user").(users.User)); err != nil {
+		handler.handleError(err, ctx)
+		return
+	}
+
+	ctx.JSON(http.StatusAccepted, nil)
 }
 
 func (handler shoppingHandler) BuyItems(ctx *gin.Context) {
