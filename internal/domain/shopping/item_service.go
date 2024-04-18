@@ -75,7 +75,13 @@ func (service itemService) Delete(itemID string, user users.User) error {
 		return err
 	}
 
-	if item.Shop.UserID != user.ID {
+	shop, err := service.shopService.FindByID(strconv.Itoa(int(item.ShopID)))
+
+	if err != nil {
+		return err
+	}
+
+	if shop.UserID != user.ID {
 		return errors.New("forbidden")
 	}
 
