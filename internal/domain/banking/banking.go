@@ -50,7 +50,7 @@ type bankConfig struct {
 var BankConfig = bankConfig{
 	Flags: featureFlags{
 		Ads:              false,
-		AccountTransfers: false,
+		AccountTransfers: true,
 		Stores:           false,
 	},
 	Limits: bankSubscriptionTiers{
