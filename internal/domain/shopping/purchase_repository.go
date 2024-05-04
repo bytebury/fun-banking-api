@@ -79,8 +79,7 @@ func (repo purchaseRepository) BuyItems(items []Item, cartPrice float64, account
 			Amount:         totalPrice * -1,
 			AccountID:      account.ID,
 			CurrentBalance: account.Balance,
-			Type:           "shopping",
-			Origin:         banking.TransactionShopping,
+			Type:           banking.TransactionShopping,
 		}
 
 		if err := repo.transactionService.Create("", &transaction); err != nil {

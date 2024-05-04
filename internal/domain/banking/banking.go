@@ -12,12 +12,19 @@ const (
 	TransactionDeclined = "declined"
 )
 
-const EnablePremium = false
+const EnablePremium = true
 
 const (
 	Free         int = iota // 0
 	Premium                 // 1
 	Organization            // 2
+)
+
+const (
+	TransactionManual    = "manual"
+	TransactionBankBuddy = "bank_buddy"
+	TransactionTransfer  = "transfer"
+	TransactionShopping  = "shopping"
 )
 
 type bankConfigLimits struct {
@@ -31,8 +38,7 @@ type bankConfigLimits struct {
 type bankSubscriptionTiers struct {
 	Free         bankConfigLimits `json:"0"`
 	Premium      bankConfigLimits `json:"1"`
-	Family       bankConfigLimits `json:"2"`
-	Organization bankConfigLimits `json:"3"`
+	Organization bankConfigLimits `json:"2"`
 }
 
 type featureFlags struct {
@@ -50,7 +56,7 @@ var BankConfig = bankConfig{
 	Flags: featureFlags{
 		Ads:              false,
 		AccountTransfers: false,
-		Shops:            false,
+		Shops:            true,
 	},
 	Limits: bankSubscriptionTiers{
 		Free: bankConfigLimits{
@@ -61,18 +67,18 @@ var BankConfig = bankConfig{
 			Shops:     0,
 		},
 		Premium: bankConfigLimits{
-			Banks:     2,
-			Employees: 2,
+			Banks:     10,
+			Employees: 10,
 			Customers: 250,
 			Accounts:  3,
-			Shops:     1,
+			Shops:     5,
 		},
 		Organization: bankConfigLimits{
 			Banks:     100,
 			Employees: 50,
 			Customers: 10_000,
 			Accounts:  3,
-			Shops:     5,
+			Shops:     15,
 		},
 	},
 }
@@ -125,6 +131,7 @@ type NewEmployeeRequest struct {
 	Email  string `json:"email"`
 }
 
+// types -> manual, bank_buddy, transfer, shopping
 type Transaction struct {
 	domain.AuditModel
 	Description       string     `json:"description" gorm:"not null;size:255"`

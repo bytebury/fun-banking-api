@@ -59,7 +59,6 @@ func (s bankBuddyService) Transfer(transfer *BankBuddyTransfer) error {
 			),
 			BankBuddySenderID: &fromAccount.CustomerID,
 			Type:              "bank_buddy",
-			Origin:            TransactionBankBuddy,
 		}
 
 		if err := s.transactionService.Create("", &transaction); err != nil {
@@ -74,8 +73,7 @@ func (s bankBuddyService) Transfer(transfer *BankBuddyTransfer) error {
 			AccountID:         transfer.ToAccountID,
 			Amount:            transfer.Amount,
 			Description:       transfer.Description,
-			Type:              "bank_buddy",
-			Origin:            TransactionBankBuddy,
+			Type:              TransactionBankBuddy,
 			BankBuddySenderID: &fromAccount.CustomerID,
 		}
 
